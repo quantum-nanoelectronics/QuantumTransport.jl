@@ -1,6 +1,6 @@
 name = "QuantumTransport"
 [deps]
-Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
+# Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
 # BlockDiagonals = "0a1fb500-61f7-11e9-3c65-f5ef3456f9f0"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
