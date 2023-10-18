@@ -1,5 +1,5 @@
 name = "QuantumTransport"
-test = ["tests/sampleTest.jl"]
+test = ["test/sampleTest.jl"]
 [deps]
 # Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
 # BlockDiagonals = "0a1fb500-61f7-11e9-3c65-f5ef3456f9f0"
