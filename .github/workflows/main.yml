@@ -24,4 +24,5 @@ jobs:
         run: |
           julia --project=docs/ -e 'using Pkg; Pkg.instantiate()'
       - name: Test
-        run: julia --project=docs/ -e 'using Pkg; Pkg.test()'
+        #run: julia --project=docs/ -e 'using Pkg; Pkg.test()'
+        run: julia --project=docs/ -e 'using Pkg; Pkg.test("test")'
