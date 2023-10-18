@@ -24,4 +24,4 @@ jobs:
         run: |
           julia --project=docs/ -e 'using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()'
       - name: Test
-        run: julia --project -e 'using Pkg; Pkg.test()'
+        run: julia --project=docs/ -e 'using Pkg; Pkg.test()'
