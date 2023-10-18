@@ -46,6 +46,11 @@ function generate_plot()
 end
 
 function generate_plot_makie(margin)
+    # Check for invalid margin values
+    if margin <= 0
+        throw(ArgumentError("Margin must be greater than 0"))
+    end
+    
     x, y, z, d = get_data()
 
 
