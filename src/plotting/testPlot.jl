@@ -4,6 +4,7 @@ using Pkg
 # Pkg.add("DataFrames")
 # Pkg.add("Plots")
 # Pkg.add("CairoMakie")
+# 
 
 using CSV
 using DataFrames
@@ -50,7 +51,7 @@ function generate_plot_makie(margin)
     if margin <= 0
         throw(ArgumentError("Margin must be greater than 0"))
     end
-    
+
     x, y, z, d = get_data()
 
 
