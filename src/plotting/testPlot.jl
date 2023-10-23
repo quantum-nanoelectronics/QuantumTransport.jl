@@ -102,7 +102,7 @@ end
 
 #generate_plot()
 
-generate_plot_makie(.1)
+generate_plot_makie(5)
 
 
 
