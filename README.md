@@ -12,6 +12,13 @@ QuantumTransport.jl is a Julia package designed for simulating quantum transport
 - [Citations](#citations)
 - [Status](#status)
 
+## Status
+
+The current build status of the master branch is:
+
+[![Build Status](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml?query=branch%3Amaster)
+```
+
 ## Installation
 
 To install QuantumTransport, open Julia's interactive session (REPL) and run the following commands:
@@ -70,11 +77,4 @@ QuantumTransport.jl is released under the MIT License. See the LICENSE file for 
 If you use QuantumTransport.jl in your research, please cite it as follows:
 ```
 # Citation details here
-```
-
-## Status
-
-The current build status of the master branch is:
-
-[![Build Status](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml?query=branch%3Amaster)
 ```
