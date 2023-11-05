@@ -1,4 +1,3 @@
-```markdown
 # QuantumTransport.jl
 
 QuantumTransport.jl is a Julia package designed for simulating quantum transport in nano-electronic devices.
