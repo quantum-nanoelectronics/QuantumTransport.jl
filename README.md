@@ -1,5 +1,3 @@
-Certainly! Here's an enhanced README.md with additional headers, a table of contents, and corrected formatting:
-
 ```markdown
 # QuantumTransport.jl
 
