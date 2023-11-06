@@ -15,7 +15,19 @@ using Test
     end
 
     @testset "Column Major Test" begin
-        include("TEST_column_major.jl")
+        include("column_major.jl")
+    end
+
+    @testset "Matrix Inversion Test" begin
+        include("matrix.jl")
+    end
+
+    @testset "Input Output Test" begin
+        include("io.jl")
+    end
+
+    @testset "Data Visualization Test" begin
+        include("visualization.jl")
     end
 
     # If you have other testsets, you can include them similarly:
