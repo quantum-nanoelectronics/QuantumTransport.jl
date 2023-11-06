@@ -1,8 +1,20 @@
 using CSV
 using DataFrames
-using GLMakie
 
-#include("../io/read-positions.jl")
+# we want to use CairoMakie for GitHub actions and GLMakie locally
+# GLMakie wont precompile on GitHub actions because there is no graphics card
+# Set a default backend if the environment variable is not defined
+backend = get(ENV, "PLOTTING_BACKEND", "local")
+
+# for github testing
+if backend == "github"
+    using CairoMakie
+# for local testing
+else
+    using GLMakie
+    include("../io/read-positions.jl")
+end
+
 include("constants.jl")
 
 
@@ -30,7 +42,7 @@ function generate_plot_makie(margin::Float64 = 0.0)
         )
     Colorbar(fig[1, 2], colormap = :viridis, flipaxis = false) 
     
-    GLMakie.scatter!(
+    scatter!(
         ax, 
         x, 
         y, 

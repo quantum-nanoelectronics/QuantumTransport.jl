@@ -1,4 +1,3 @@
-using GLMakie
 using LinearAlgebra
 
 include("constants.jl")
