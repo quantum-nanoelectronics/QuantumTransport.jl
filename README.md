@@ -50,7 +50,7 @@ If you are interested in contributing to QuantumTransport, follow these steps to
 
 ### Running Tests
 
-To ensure QuantumTransport works as expected, you can run tests using the following steps:
+To ensure QuantumTransport works as expected, you can run tests using the following steps in the cloned directory:
 
 1. Open Julia's REPL.
 2. Enter the Package Manager by typing `]`.
