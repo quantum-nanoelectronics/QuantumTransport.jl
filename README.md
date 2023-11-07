@@ -14,9 +14,9 @@ QuantumTransport.jl is a Julia package designed for simulating quantum transport
 
 ## Status
 
-The current build status of the master branch is:
+The current build status of the main branch is:
 
-[![Build Status](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml?query=branch%3Amaster)
+[![Build Status](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 ## Installation
 
