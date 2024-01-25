@@ -12,7 +12,7 @@ export calculate_time, row_major, column_major
 include("column-major.jl")
 
 export block_inv_main
-include("matrices/woodbury-inverse-1.jl")
+include("block-matrix/block-inv.jl")
 
 export generate_csv, get_data
 include("io/read-positions.jl")
