@@ -219,17 +219,24 @@ function getInvRGF(matrixObject::BlockMatrix)
     return diag, computeTopBlocks(matrixObject, forwardGen, diag[1]), computeBottomBlocks(matrixObject, backwardGen, diag[end])
 end
 
+
 # Main function to drive the block matrix operations
 function main()
     matrixObject = BlockMatrix(10, 1)  # Create a block matrix of size 1000 with block size 1
     dense = getDense(matrixObject)  # Convert the block matrix to a dense matrix
 
     # Time the computation of the inverse of the block matrix using RGF method
+    print("RGF Inversion")
     @time diag, top, bottom = getInvRGF(matrixObject)
     
     # Time the computation of the inverse of the dense matrix using built-in inversion
+    print("Built-In Inversion")
     @time matrix = inv(dense)
+
+    return
+
     rows, _ = size(matrix)
+
 
     # Print out comparisons between the computed blocks and the corresponding blocks in the dense inverse matrix
     # Comparing Diagonals
@@ -237,7 +244,7 @@ function main()
     for i in 1:rows
         print(matrix[i, i])
         print("   ")
-        print(diag[i])
+        print(diag[i][1])
         println()
     end
     println()
@@ -249,7 +256,7 @@ function main()
     for i in 1:rows
         print(matrix[1, i])
         print("   ")
-        print(top[i])
+        print(top[i][1])
         println()
     end
     println()
@@ -261,7 +268,7 @@ function main()
     for i in 1:rows
         print(matrix[rows, i])
         print("   ")
-        print(bottom[i])
+        print(bottom[i][1])
         println()
     end
     println()
