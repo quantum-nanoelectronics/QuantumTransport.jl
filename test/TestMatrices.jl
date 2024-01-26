@@ -22,7 +22,7 @@ function verifyCorrectness(approximatedGʳ::Function, fullGʳ::Function, N::Int,
         sumdiff = 0
         Evals = LinRange(Emin,Emax, nE)
         for E ∈ Evals
-               sumdiff += sum(abs.(abs.(approximatedGr(E)).*(approximatedGr(E) - fullGr(E))))/(n)^2 
+               sumdiff += sum(abs.(abs.(approximatedGr(E)).*(approximatedGr(E) - fullGr(E))))/(N)^2 
         end
         sumdiff = sumdiff/nE
         if(sumdiff < cutoff)
