@@ -12,7 +12,7 @@ mutable struct BlockMatrix
 end
 
 # Constructor for a symmetric, block tridiagonal matrix
-function BlockMatrix(n::Int, blockSize::Int)
+function BlockMatrix(n::Int, blockSize::Int, phi::Float64)
     # Ensure the matrix size is a multiple of the block size
     if n % blockSize != 0
         error("Matrix size n must be a multiple of block size.")
@@ -33,7 +33,7 @@ function BlockMatrix(n::Int, blockSize::Int)
 
         # Fill the diagonal block with a constant value
         for i in startIdx:endIdx
-            push!(vals, -2.0)  # Diagonal value
+            push!(vals, 2.0 + i)  # Diagonal value
             push!(rows, i)     # Row index
             push!(cols, i)     # Column index
         end
@@ -42,13 +42,15 @@ function BlockMatrix(n::Int, blockSize::Int)
         if blockIndex < numBlocks
             for i in startIdx:endIdx
                 j = startIdx + blockSize + (endIdx - i)
+                push!(vals, exp(-1im * phi))  # Upper diagonal
                 # push!(vals, 1im)  # Positive imaginary unit above the diagonal
-                push!(vals, 1)   # Off-diagonal value above the main diagonal
+                # push!(vals, 1)   # Off-diagonal value above the main diagonal
                 push!(rows, i)   # Row index
                 push!(cols, j)   # Column index
 
+                push!(vals, exp(1im * phi)) # Lower diagonal
                 # push!(vals, -1im)  # Negative imaginary unit below the diagonal
-                push!(vals, 1)   # Off-diagonal value below the main diagonal
+                # push!(vals, 1)   # Off-diagonal value below the main diagonal
                 push!(rows, j)   # Column index
                 push!(cols, i)   # Row index
             end
@@ -61,6 +63,7 @@ function BlockMatrix(n::Int, blockSize::Int)
 end
 
 
+# This function is not used. Instead, the top box is conjugate transposed and used in its place.
 # Retrieves the i-th diagonal block from the block matrix.
 function getIthDiagonalBlock(matrixObject::BlockMatrix, i::Int)
     # Calculate the start and end row indices for the i-th diagonal block
@@ -126,42 +129,34 @@ end
 # Function to compute forward and backward generators for a block matrix.
 function computeGenerators(matrixObject::BlockMatrix)
     # Initialize forward and backward generators as arrays of zero matrices.
-    forwardGen = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 2:matrixObject.numBlocks]
-    backwardGen = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 2:matrixObject.numBlocks]
+    forwardGen = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]
+    backwardGen = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]
     # Initialize the first backward generator using the first block's inverse and the top diagonal block.
-    backwardGen[1] = inv(getIthDiagonalBlock(matrixObject, 1)) * -getIthTopDiagonalBlock(matrixObject, 2)
+    backwardGen[1] = inv(getIthDiagonalBlock(matrixObject, 1))
     # Calculate remaining backward generators using a loop.
-    for i in 2:(matrixObject.numBlocks - 1)
-        backwardGen[i] = inv(getIthDiagonalBlock(matrixObject, i) - (-getIthBottomDiagonalBlock(matrixObject, i - 1) * backwardGen[i-1])) * -getIthTopDiagonalBlock(matrixObject, i + 1)
+    for i in 2:(matrixObject.numBlocks)
+        backwardGen[i] = inv(getIthDiagonalBlock(matrixObject, i) - (getIthTopDiagonalBlock(matrixObject, i) * backwardGen[i-1] * getIthTopDiagonalBlock(matrixObject, i)'))
     end 
     # Initialize the last forward generator using the last block's top diagonal block and its inverse.
-    forwardGen[matrixObject.numBlocks - 1] = -getIthTopDiagonalBlock(matrixObject, matrixObject.numBlocks) * inv(getIthDiagonalBlock(matrixObject, matrixObject.numBlocks))
+    forwardGen[matrixObject.numBlocks] = inv(getIthDiagonalBlock(matrixObject, matrixObject.numBlocks))
     # Calculate remaining forward generators in reverse order using a loop.
-    for i in (matrixObject.numBlocks - 2):-1:1
-        forwardGen[i] = -getIthTopDiagonalBlock(matrixObject, i + 1) * inv(getIthDiagonalBlock(matrixObject, i + 1) - (forwardGen[i + 1] * -getIthBottomDiagonalBlock(matrixObject, i + 1)))
+    for i in (matrixObject.numBlocks - 1):-1:1
+        forwardGen[i] = inv(getIthDiagonalBlock(matrixObject, i) - (getIthTopDiagonalBlock(matrixObject, i + 1) * forwardGen[i + 1] * getIthTopDiagonalBlock(matrixObject, i + 1)'))
     end
-    # Return the computed forward and backward generators.
     return forwardGen, backwardGen
 end
 
 # Function to compute diagonal blocks of a block matrix using forward generators.
-function computeDiagonalBlocks(matrixObject::BlockMatrix, forwardGen::Vector{Matrix{ComplexF64}})
+function computeDiagonalBlocks(matrixObject::BlockMatrix, backwardGen::Vector{Matrix{ComplexF64}})
     # Initialize diagonal blocks as an array of zero matrices.
     diagonalBlocks = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]
-    # Compute the first diagonal block separately due to its unique position.
-    diagonalBlocks[1] = inv(getIthDiagonalBlock(matrixObject, 1) - (forwardGen[1] * -getIthBottomDiagonalBlock(matrixObject, 1)))
-    # Loop through the remaining blocks to compute their values.
-    for i in (2:matrixObject.numBlocks - 1)
-        # Compute the first term of the diagonal block.
-        term1 = inv(getIthDiagonalBlock(matrixObject, i) - (forwardGen[i] * -getIthBottomDiagonalBlock(matrixObject, i)))
-        # Compute the second term using the previous diagonal block and forward generator.
-        term2 = I + -getIthBottomDiagonalBlock(matrixObject, i - 1) * diagonalBlocks[i - 1] * forwardGen[i - 1]
-        # Calculate the current diagonal block as a product of the first and second terms.
-        diagonalBlocks[i] = term1 * term2
+    # Compute the diagonal block separately.
+    diagonalBlocks[matrixObject.numBlocks] = backwardGen[matrixObject.numBlocks]
+    for i in (matrixObject.numBlocks - 1:-1:1)
+        generatorI = backwardGen[i]
+        V = getIthTopDiagonalBlock(matrixObject, i + 1)
+        diagonalBlocks[i] = backwardGen[i] * (I + getIthTopDiagonalBlock(matrixObject, i + 1) * diagonalBlocks[i + 1] * getIthTopDiagonalBlock(matrixObject, i + 1)' * backwardGen[i])
     end
-    # Compute the last diagonal block, accounting for its unique position.
-    diagonalBlocks[matrixObject.numBlocks] = inv(getIthDiagonalBlock(matrixObject, matrixObject.numBlocks)) * (I + (-getIthBottomDiagonalBlock(matrixObject, matrixObject.numBlocks - 1) * diagonalBlocks[matrixObject.numBlocks - 1] * forwardGen[end]))
-    # Return the computed diagonal blocks.
     return diagonalBlocks
 end
 
@@ -171,16 +166,17 @@ function computeTopBlocks(matrixObject::BlockMatrix, forwardGen::Vector{Matrix{C
     topBlocks = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]
     # Set the first block in the top row.
     topBlocks[1] = firstDiagBlock
-    # Initialize running product to identity matrix.
-    runningProduct = I
-    # Compute each top block iteratively.
+
     for i in 2:matrixObject.numBlocks
-        # Update running product by multiplying with the forward generator.
-        runningProduct = runningProduct * forwardGen[i - 1]
-        # Calculate each top block as a product of the first diagonal block and the running product.
-        topBlocks[i] = firstDiagBlock * runningProduct
+        topBlocks[i] = forwardGen[i] * -getIthTopDiagonalBlock(matrixObject, i)' * topBlocks[i - 1]
+
+        # println()
+        # println("forwardGen[$i]: ", forwardGen[i])
+        # println("Top Diagonal Block: ", getIthTopDiagonalBlock(matrixObject, i))
+        # println("topBlocks[$(i - 1)]: ", topBlocks[i - 1])
+        # println()
     end
-    # Return the array of top row blocks.
+
     return topBlocks
 end
 
@@ -190,14 +186,9 @@ function computeBottomBlocks(matrixObject::BlockMatrix, backwardGen::Vector{Matr
     bottomBlocks = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]
     # Set the last block in the bottom row.
     bottomBlocks[matrixObject.numBlocks] = lastDiagBlock
-    # Initialize running product to identity matrix.
-    runningProduct = I
     # Compute each bottom block iteratively in reverse order.
     for i in (matrixObject.numBlocks - 1):-1:1
-        # Update running product by multiplying with the backward generator.
-        runningProduct = runningProduct * backwardGen[i]
-        # Calculate each bottom block as a product of the running product and the last diagonal block.
-        bottomBlocks[i] = runningProduct * lastDiagBlock
+        bottomBlocks[i] = backwardGen[i] * -getIthTopDiagonalBlock(matrixObject, i + 1) * bottomBlocks[i + 1]
     end
     # Return the array of bottom row blocks.
     return bottomBlocks
@@ -214,7 +205,8 @@ function getInvRGF(matrixObject::BlockMatrix)
     # Compute the forward and backward generators.
     forwardGen, backwardGen = computeGenerators(matrixObject)
     # Compute the diagonal blocks of the inverse matrix.
-    diag = computeDiagonalBlocks(matrixObject, forwardGen)
+    diag = computeDiagonalBlocks(matrixObject, backwardGen)
+    
     # Return the diagonal blocks along with the top and bottom row blocks of the inverse matrix.
     return diag, computeTopBlocks(matrixObject, forwardGen, diag[1]), computeBottomBlocks(matrixObject, backwardGen, diag[end])
 end
@@ -222,18 +214,21 @@ end
 
 # Main function to drive the block matrix operations
 function main()
-    matrixObject = BlockMatrix(10, 1)  # Create a block matrix of size 1000 with block size 1
+    matrixObject = BlockMatrix(8, 2, 0.2001)  # Create a block matrix of size 1000 with block size 1 0.2001
     dense = getDense(matrixObject)  # Convert the block matrix to a dense matrix
 
+    println(dense)
+    # return
+
     # Time the computation of the inverse of the block matrix using RGF method
-    print("RGF Inversion")
-    @time diag, top, bottom = getInvRGF(matrixObject)
+    diag, top, bottom = getInvRGF(matrixObject)
+
+    # return
     
     # Time the computation of the inverse of the dense matrix using built-in inversion
-    print("Built-In Inversion")
-    @time matrix = inv(dense)
+    matrix = inv(dense)
 
-    return
+    # return
 
     rows, _ = size(matrix)
 
@@ -241,10 +236,13 @@ function main()
     # Print out comparisons between the computed blocks and the corresponding blocks in the dense inverse matrix
     # Comparing Diagonals
     println("Comparing Diagonals")
-    for i in 1:rows
-        print(matrix[i, i])
-        print("   ")
-        print(diag[i][1])
+    # println(length(matrix[i:(i+numBlocks), i:(i+numBlocks)][:]))
+    # println(length(diag[:]))
+    for i in 1:matrixObject.numBlocks
+        start_index = (i - 1) * matrixObject.blockSize + 1
+        end_index = i * matrixObject.blockSize
+        println(matrix[start_index:end_index, start_index:end_index])
+        println(diag[i][:])
         println()
     end
     println()
@@ -253,10 +251,11 @@ function main()
     
     # Comparing Top Row
     println("Comparing Top")
-    for i in 1:rows
-        print(matrix[1, i])
-        print("   ")
-        print(top[i][1])
+    for i in 1:matrixObject.numBlocks
+        start_index = (i - 1) * matrixObject.blockSize + 1
+        end_index = i * matrixObject.blockSize
+        println(matrix[1:matrixObject.blockSize, start_index:end_index])
+        println(top[i][:])
         println()
     end
     println()
@@ -265,17 +264,16 @@ function main()
     
     # Comparing Bottom Row
     println("Comparing Bottom")
-    for i in 1:rows
-        print(matrix[rows, i])
-        print("   ")
-        print(bottom[i][1])
+    for i in 1:matrixObject.numBlocks
+        start_index = (i - 1) * matrixObject.blockSize + 1
+        end_index = i * matrixObject.blockSize
+        println(matrix[end-matrixObject.blockSize+1:end, start_index:end_index])
+        println(bottom[i][:])
         println()
     end
     println()
     println()
     println()
-    
-
 end
 
 main()
