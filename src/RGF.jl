@@ -11,6 +11,12 @@ mutable struct BlockMatrix
     numBlocks::Int  # Number of blocks along one dimension
 end
 
+mutable struct SparseBuilder
+    rowIndices::Vector{Int}
+    columnIndices::Vector{Int}
+    values::Vector{ComplexF64}
+end
+
 # Constructor for a symmetric, block tridiagonal matrix
 function BlockMatrix(n::Int, blockSize::Int, phi::Float64)
     # Ensure the matrix size is a multiple of the block size
@@ -61,6 +67,42 @@ function BlockMatrix(n::Int, blockSize::Int, phi::Float64)
     S = sparse(rows, cols, vals, n, n)
     return BlockMatrix(S, n, blockSize, numBlocks)
 end
+
+function decomposeMatrix(matrixObject::BlockMatrix, str::String, i::Int, matrix::Matrix{ComplexF64}, sparseBuild::SparseBuilder)
+    threshold = 1e-10  # Define a small threshold
+    rowIndices = Vector{Int}()
+    colIndices = Vector{Int}()
+    values = Vector{ComplexF64}()
+
+    for col in 1:size(matrix, 2)
+        for row in 1:size(matrix, 1)
+            value = matrix[col, row] # this is done on purpose for the transpose
+            if abs(value) > threshold  # Check if the magnitude of the value is above the threshold
+                push!(rowIndices, row)
+                push!(colIndices, col)
+                push!(values, value)
+            end
+        end
+    end
+
+    offset = (i - 1) * matrixObject.blockSize
+    colIndices .+= offset
+    if str == "diagonal"
+        rowIndices .+= offset
+    elseif str == "top"
+        # No change to rowIndices
+        nothing
+    elseif str == "bottom"
+        rowIndices .+= matrixObject.matrixSize - matrixObject.blockSize
+    else
+        error("Invalid string")
+    end
+
+    append!(sparseBuild.rowIndices, rowIndices)
+    append!(sparseBuild.columnIndices, colIndices)
+    append!(sparseBuild.values, values)
+end
+
 
 
 # This function is not used. Instead, the top box is conjugate transposed and used in its place.
@@ -147,51 +189,58 @@ function computeGenerators(matrixObject::BlockMatrix)
 end
 
 # Function to compute diagonal blocks of a block matrix using forward generators.
-function computeDiagonalBlocks(matrixObject::BlockMatrix, backwardGen::Vector{Matrix{ComplexF64}})
+function computeDiagonalBlocks(matrixObject::BlockMatrix, backwardGen::Vector{Matrix{ComplexF64}}, sparseBuild::SparseBuilder)
     # Initialize diagonal blocks as an array of zero matrices.
-    diagonalBlocks = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]
+    # diagonalBlocks = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]
     # Compute the diagonal block separately.
-    diagonalBlocks[matrixObject.numBlocks] = backwardGen[matrixObject.numBlocks]
+    # diagonalBlocks[matrixObject.numBlocks] = backwardGen[matrixObject.numBlocks]
+
+    lastDiagBlock = backwardGen[matrixObject.numBlocks]
+    currentDiagBlock = nothing
+    lastBlock = lastDiagBlock
+    decomposeMatrix(matrixObject, "diagonal", matrixObject.numBlocks, lastDiagBlock, sparseBuild)
+    
     for i in (matrixObject.numBlocks - 1:-1:1)
-        generatorI = backwardGen[i]
-        V = getIthTopDiagonalBlock(matrixObject, i + 1)
-        diagonalBlocks[i] = backwardGen[i] * (I + getIthTopDiagonalBlock(matrixObject, i + 1) * diagonalBlocks[i + 1] * getIthTopDiagonalBlock(matrixObject, i + 1)' * backwardGen[i])
+        currentDiagBlock = backwardGen[i] * (I + getIthTopDiagonalBlock(matrixObject, i + 1) * lastDiagBlock * getIthTopDiagonalBlock(matrixObject, i + 1)' * backwardGen[i])
+        decomposeMatrix(matrixObject, "diagonal", i, currentDiagBlock, sparseBuild) 
+        lastDiagBlock = currentDiagBlock
     end
-    return diagonalBlocks
+
+    firstBlock = currentDiagBlock
+    return firstBlock, lastBlock
 end
 
 # Function to compute the top row of blocks in the inverse of a block matrix.
-function computeTopBlocks(matrixObject::BlockMatrix, forwardGen::Vector{Matrix{ComplexF64}}, firstDiagBlock::Matrix{ComplexF64})
+function computeTopBlocks(matrixObject::BlockMatrix, forwardGen::Vector{Matrix{ComplexF64}}, firstDiagBlock::Matrix{ComplexF64}, sparseBuild::SparseBuilder)
     # Initialize top row blocks as an array of zero matrices.
-    topBlocks = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]
+    # topBlocks = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]
     # Set the first block in the top row.
-    topBlocks[1] = firstDiagBlock
 
+    lastTopBlock = firstDiagBlock
     for i in 2:matrixObject.numBlocks
-        topBlocks[i] = forwardGen[i] * -getIthTopDiagonalBlock(matrixObject, i)' * topBlocks[i - 1]
+        currentTopBlock = (forwardGen[i] * -getIthTopDiagonalBlock(matrixObject, i)' * lastTopBlock)
+        # println(currentTopBlock)
 
-        # println()
-        # println("forwardGen[$i]: ", forwardGen[i])
-        # println("Top Diagonal Block: ", getIthTopDiagonalBlock(matrixObject, i))
-        # println("topBlocks[$(i - 1)]: ", topBlocks[i - 1])
-        # println()
+        decomposeMatrix(matrixObject, "top", i, currentTopBlock, sparseBuild) 
+        lastTopBlock = currentTopBlock
     end
-
-    return topBlocks
 end
 
 # Function to compute the bottom row of blocks in the inverse of a block matrix.
-function computeBottomBlocks(matrixObject::BlockMatrix, backwardGen::Vector{Matrix{ComplexF64}}, lastDiagBlock::Matrix{ComplexF64})
+function computeBottomBlocks(matrixObject::BlockMatrix, backwardGen::Vector{Matrix{ComplexF64}}, lastDiagBlock::Matrix{ComplexF64}, sparseBuild::SparseBuilder)
     # Initialize bottom row blocks as an array of zero matrices.
-    bottomBlocks = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]
+    # bottomBlocks = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]
     # Set the last block in the bottom row.
-    bottomBlocks[matrixObject.numBlocks] = lastDiagBlock
+    # bottomBlocks[matrixObject.numBlocks] = lastDiagBlock
+    lastBottomBlock = lastDiagBlock
     # Compute each bottom block iteratively in reverse order.
     for i in (matrixObject.numBlocks - 1):-1:1
-        bottomBlocks[i] = backwardGen[i] * -getIthTopDiagonalBlock(matrixObject, i + 1) * bottomBlocks[i + 1]
+        currentBottomBlock = backwardGen[i] * -getIthTopDiagonalBlock(matrixObject, i + 1) * lastBottomBlock
+        decomposeMatrix(matrixObject, "bottom", i, currentBottomBlock, sparseBuild) 
+        lastBottomBlock = currentBottomBlock
     end
     # Return the array of bottom row blocks.
-    return bottomBlocks
+    # pop!(bottomBlocks)
 end
 
 # Function to convert the block matrix to a dense matrix format. Recommended only for small matrices due to high space complexity cost.
@@ -204,35 +253,22 @@ end
 function getInvRGF(matrixObject::BlockMatrix)
     # Compute the forward and backward generators.
     forwardGen, backwardGen = computeGenerators(matrixObject)
+
+    sparseBuild = SparseBuilder(Int[], Int[], ComplexF64[])
     # Compute the diagonal blocks of the inverse matrix.
-    diag = computeDiagonalBlocks(matrixObject, backwardGen)
+    firstDiag, lastDiag = computeDiagonalBlocks(matrixObject, backwardGen, sparseBuild)
+    computeTopBlocks(matrixObject, forwardGen, firstDiag, sparseBuild)
+    computeBottomBlocks(matrixObject, backwardGen, lastDiag, sparseBuild)
+    # display(sparse(sparseBuild.rowIndices, sparseBuild.columnIndices, sparseBuild.values, matrixObject.matrixSize, matrixObject.matrixSize))
+
     
     # Return the diagonal blocks along with the top and bottom row blocks of the inverse matrix.
-    return diag, computeTopBlocks(matrixObject, forwardGen, diag[1]), computeBottomBlocks(matrixObject, backwardGen, diag[end])
+    # return diag, computeTopBlocks(matrixObject, forwardGen, diag[1]), computeBottomBlocks(matrixObject, backwardGen, diag[end])
+    return BlockMatrix(sparse(sparseBuild.rowIndices, sparseBuild.columnIndices, sparseBuild.values, matrixObject.matrixSize, matrixObject.matrixSize), matrixObject.matrixSize, matrixObject.blockSize, matrixObject.numBlocks)
 end
 
-
-# Main function to drive the block matrix operations
-function main()
-    matrixObject = BlockMatrix(8, 2, 0.2001)  # Create a block matrix of size 1000 with block size 1 0.2001
-    dense = getDense(matrixObject)  # Convert the block matrix to a dense matrix
-
-    println(dense)
-    # return
-
-    # Time the computation of the inverse of the block matrix using RGF method
-    diag, top, bottom = getInvRGF(matrixObject)
-
-    # return
+function debugValues()
     
-    # Time the computation of the inverse of the dense matrix using built-in inversion
-    matrix = inv(dense)
-
-    # return
-
-    rows, _ = size(matrix)
-
-
     # Print out comparisons between the computed blocks and the corresponding blocks in the dense inverse matrix
     # Comparing Diagonals
     println("Comparing Diagonals")
@@ -274,6 +310,23 @@ function main()
     println()
     println()
     println()
+end
+
+
+# Main function to drive the block matrix operations
+function main()
+    args = (8, 2, 0.2001)
+    matrixObject = BlockMatrix(args...)  # Create a block matrix of size 1000 with block size 1 0.2001
+    dense = getDense(matrixObject)  # Convert the block matrix to a dense matrix
+
+    # Time the computation of the inverse of the dense matrix using built-in inversion
+    juliaInv = inv(dense)
+
+    # Time the computation of the inverse of the block matrix using RGF method
+    rgfInv = getInvRGF(matrixObject)
+
+    return
+
 end
 
 main()
