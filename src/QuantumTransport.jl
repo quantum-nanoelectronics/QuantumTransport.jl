@@ -9,11 +9,12 @@ include("sample-code/column-major.jl")
 export sampleTest, calculate_time, row_major, column_major 
 
 
-export block_inv_main
-include("block-matrix/block-inv.jl")
 # Run matrix inversion test codes
-include("matrices/woodbury-inverse-1.jl")
-include("matrices/recursive-greens/RGF.jl")
+
+# for the woodbury method
+include("matrices/block-matrix/block-inv.jl")
+#for the RGF method
+include("matrices/recursive-greens/RGF.jl") 
 export block_inv_main, rgf_main
 
 # Run input output test codes
