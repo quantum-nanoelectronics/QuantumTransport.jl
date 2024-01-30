@@ -1,4 +1,3 @@
-using Arpack
 using SparseArrays
 using LinearAlgebra
 

@@ -1,8 +1,7 @@
-using Arpack
 using SparseArrays
 using LinearAlgebra
 
-include("./../../../test/TestMatrices.jl")
+include("./TestMatrices.jl")
 include("./BlockMatrix.jl")
 
 # Create/set test matrix
@@ -123,7 +122,7 @@ function debugValues()
 end
 
 # Main function to drive the block matrix operations
-function main()
+function rgf_main()
     display(testMatrix.matrix)
 
     # The inverse is computed correctly for the approximatedGʳ matrix for large sizes but not fullGʳ
@@ -131,11 +130,12 @@ function main()
     # return
 
     # Call the function to test for correctness
-    println("RGF Inverse Correctness: ", verifyCorrectness(approximatedGʳ, fullGʳ, args[1]))
+    correct = verifyCorrectness(approximatedGʳ, fullGʳ, args[1])
+    println("RGF Inverse Correctness: ", correct)
 
     # Call the timing function - Energy of 3.0
     timeInv(3.0)
+
+    return correct
 end
 
-
-main()
