@@ -6,7 +6,7 @@ module QuantumTransport
 # Run sample test codes
 include("sample-code/hello-world.jl")
 include("sample-code/column-major.jl")
-export sampleTest, calculate_time, row_major, column_major
+export sampleTest, calculate_time, row_major, column_major 
 
 
 # Run matrix inversion test codes
