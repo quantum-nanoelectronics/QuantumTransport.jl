@@ -4,7 +4,8 @@ using DataFrames
 # we want to use CairoMakie for GitHub actions and GLMakie locally
 # GLMakie wont precompile on GitHub actions because there is no graphics card
 # Set a default backend if the environment variable is not defined
-backend = get(ENV, "PLOTTING_BACKEND", "local")
+# Change this to local for local testing
+backend = get(ENV, "PLOTTING_BACKEND", "github")
 
 # for github testing
 if backend == "github"
