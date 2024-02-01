@@ -3,5 +3,6 @@
 # sample Hello World function
 
 function sampleTest()
+    println("Returning Hello World!")
     return "Hello World!"
 end

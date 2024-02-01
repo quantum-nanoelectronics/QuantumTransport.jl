@@ -1,29 +1,61 @@
+# The functions here should not be called anywhere else.
+
 module QuantumTransport
 
-# Export the function if you want it to be accessible from outside the module, such as the test folder
-# Include the file where the function is defined
-
-# Run sample test codes
-include("sample-code/hello-world.jl")
-include("sample-code/column-major.jl")
-export sampleTest, calculate_time, row_major, column_major 
-
-
-# Run matrix inversion test codes
-
-# for the woodbury method
-include("matrices/block-matrix/block-inv.jl")
-#for the RGF method
-include("matrices/recursive-greens/RGF.jl") 
-export block_inv_main, rgf_main
-
-# Run input output test codes
-include("io/read-positions.jl")
-include("io/write-positions.jl")
-export generate_csv, get_data
-
-# Run data visualization test codes
-include("data-vis/plot.jl")
-export generate_plot_makie, plot_pos
-
+# Given a directory, include all modules in subdirectories
+function _helperIncludeModules(dir)
+    moduleExists = false
+    for item in readdir(dir, join=true)
+        if isfile(item) && basename(item) == "Module.jl"
+            # println("Including item $item")
+            include(item)
+            moduleExists = true
+        end
+    end
+    if !moduleExists
+        return false
+    end
+    moduleExistsInAllSubdirs = true
+    for item in readdir(dir, join=true)
+        if isdir(item) && !_helperIncludeModules(item)
+            moduleExistsInAllSubdirs = false
+        end
+    end
+    return moduleExistsInAllSubdirs
 end
+
+# Include all modules in subdirectories of the src directory
+function _includeModulesInSubdirs(item = @__DIR__)
+    # Iterate over all directories in the src directory
+    for item in readdir(item, join=true)
+        if isdir(item)
+            # println("Adding item: $item")
+            if !_helperIncludeModules(item)
+                error("No module found in directory or subdirectories of $item")
+                # println("No module found in directory or subdirectories of $item")
+                return false
+            end
+        end
+    end
+    return true
+end
+
+# Import and export all modules in QuantumTransport
+function _importAndExportModules()
+    module_names = filter(name -> typeof(getfield(QuantumTransport, name)) <: Module, names(QuantumTransport, all=true))
+    for name in module_names
+        # Dynamically construct and evaluate the import statement within QuantumTransport
+        eval(:(using .$(name)))
+        exported_names = names(getfield(QuantumTransport, name), all=false)
+        # println("Exported names in $name: ", exported_names)
+        for ename in exported_names
+            eval(:(export $(ename)))
+        end
+    end
+end
+
+# Call functions in this module
+_includeModulesInSubdirs()
+_importAndExportModules()
+
+end # module
