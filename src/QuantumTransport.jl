@@ -1,6 +1,8 @@
 # The functions here should not be called anywhere else.
+# Besides this file, all other items in this directory should be folders containing modules. 
 
 module QuantumTransport
+
 
 # Given a directory, include all modules in subdirectories
 function _helperIncludeModules(dir)
