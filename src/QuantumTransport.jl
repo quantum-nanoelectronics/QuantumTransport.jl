@@ -60,7 +60,4 @@ end
 _includeModulesInSubdirs()
 _importAndExportModules()
 
-
-println("ENV['QT_BASEPATH'] set to ", ENV["QT_BASEPATH"])
-
 end # module
