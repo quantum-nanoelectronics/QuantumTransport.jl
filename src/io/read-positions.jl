@@ -1,13 +1,11 @@
 using CSV
 using DataFrames
 
-# should move this to a new file
-const IO_DIR = "src/io/"
 
-function get_data()
-    println(@__DIR__)
+function get_data(readDir::String)
+    println("Reading from: ", readDir)
     try
-        csv_file_path = joinpath(@__DIR__, "scatterplot.csv")
+        csv_file_path = joinpath(readDir, "scatterplot.csv")
         df = CSV.File(csv_file_path) |> DataFrame
         # println(df)
         x = df.X
@@ -25,5 +23,4 @@ function get_data()
     end
 end
 
-get_data()
-
+# get_data()

@@ -3,6 +3,8 @@ using Test
 
 # test the files in the io folder
 
-@test generate_csv()
-@test !isnothing(get_data())
+baseDir = abspath(joinpath(@__DIR__, ".."))
+ioDir = joinpath(baseDir, "data-output")
+@test generate_csv(ioDir)
+@test !isnothing(get_data(ioDir))
 

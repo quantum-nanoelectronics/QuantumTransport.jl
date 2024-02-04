@@ -1,6 +1,8 @@
 # The functions here should not be called anywhere else.
+# Besides this file, all other items in this directory should be folders containing modules. 
 
 module QuantumTransport
+
 
 # Given a directory, include all modules in subdirectories
 function _helperIncludeModules(dir)
@@ -57,5 +59,8 @@ end
 # Call functions in this module
 _includeModulesInSubdirs()
 _importAndExportModules()
+
+
+println("ENV['QT_BASEPATH'] set to ", ENV["QT_BASEPATH"])
 
 end # module
