@@ -38,7 +38,7 @@ using QuantumTransport
 
 For detailed examples and usage instructions, please refer to the `examples` directory.
 
-## For Developer Team
+## For Developers
 
 If you are interested in contributing to QuantumTransport, follow these steps to set up your development environment.
 
@@ -62,12 +62,6 @@ Example of running tests in the REPL:
 activate .
 test
 ```
-
-### Precompiling package locally
-
-1. Set the environment variable to github in Julia REPL. `ENV["PLOTTING_BACKEND"] = "github"`
-2. `using QuantumTransport`
-3. Access non-exported functions by: `QuantumTransport.FunctionName(arguments...)`
 
 ## Contributing
 
