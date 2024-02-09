@@ -20,6 +20,26 @@ function spinOrbitHamiltonian(n::Int)
 end
 
 
+# do not use this for benchmarking
+# creates a matrix with random hoppings
+function randomHoppingHamiltonian(n::Int,m::Int=4)
+        A = zeros(ComplexF64,n*m,n*m)
+        A += 1E-4*im*I(m*n)
+        for i = 1:(n-1)
+                colvec = zeros(n)
+                rowvec = zeros(n)'
+                rowvec[i] = 1;
+                colvec[i+1] = 1;
+                t = rand(ComplexF64,m,m)
+                # do the top 
+                offdiagBlock = colvec*rowvec⊗t
+                A += offdiagBlock + offdiagBlock'
+        end
+        return A
+end
+
+
+
 function verifyCorrectness(approximatedGʳ::Function, fullGʳ::Function, N::Int, Emin::Float64=-3.0, Emax::Float64=3.0, nE::Int=50, cutoff=0.05)
         sumdiff = 0
         Evals = LinRange(Emin,Emax, nE)
