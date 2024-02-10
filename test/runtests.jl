@@ -14,8 +14,8 @@ using Test
     # This will include and run the tests from `hello_world.jl`
     println("---------------RUNNING SAMPLE TESTS---------------")
     @testset "Sample Test" begin
-        include("hello_world.jl")
-        include("column_major.jl")
+        include("hello-world.jl")
+        include("column-major.jl")
     end
     println("----------RUNNING MATRIX INVERSION TESTS----------")
     @testset "Matrix Inversion Test" begin

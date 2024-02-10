@@ -1,6 +1,6 @@
 module RecursiveGreensModule
 
 include("RGF.jl") 
-export rgf_main
+export CreateBlockMatrix, BlockMatrix, getInvRGF, getInvJulia
 
 end

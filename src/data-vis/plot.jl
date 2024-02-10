@@ -1,34 +1,25 @@
 using CSV
 using DataFrames
 
-# we want to use CairoMakie for GitHub actions and GLMakie locally
-# GLMakie wont precompile on GitHub actions because there is no graphics card
-# Set a default backend if the environment variable is not defined
-# Change this to local for local testing
-backend = get(ENV, "PLOTTING_BACKEND", "github")
+# Adding GLMakie, Makie, etc. to the dependencies will not work on github
+using CairoMakie
+# using Makie, DataFrames
 
-# for github testing
-if backend == "github"
-    using CairoMakie
-# for local testing
-else
-    using GLMakie
-    include("../io/read-positions.jl")
-end
-
-include("constants.jl")
+include("../io/read-positions.jl")
 
 
 
-function generate_plot_makie(margin::Float64 = 0.0)
+function generate_plot_makie(df, margin::Float64 = 0.0)
     # Check for invalid margin values
     if margin < 0
         throw(ArgumentError("Margin must be greater than 0"))
     end
 
-    x, y, z, d = get_data()
-    zs = LinRange(0, 3, length(x))
-
+    # Extract data directly from the DataFrame
+    x = df[!, :X]
+    y = df[!, :Y]
+    z = df[!, :Z]
+    d = df[!, :D]
 
     fig = Figure()
     ax = Axis3(
@@ -38,10 +29,9 @@ function generate_plot_makie(margin::Float64 = 0.0)
         limits = (minimum(x)-margin, maximum(x)+margin, minimum(y)-margin, maximum(y)+margin, minimum(z)-margin, maximum(z)+margin),
         xlabel = "X",
         ylabel = "Y",
-        zlabel = "Z",
-
-        )
-    Colorbar(fig[1, 2], colormap = :viridis, flipaxis = false) 
+        zlabel = "Z"
+    )
+    Colorbar(fig[1, 2], colormap = :viridis, flipaxis = false)
     
     scatter!(
         ax, 
@@ -50,16 +40,22 @@ function generate_plot_makie(margin::Float64 = 0.0)
         z, 
         color = d,
         markersize = d/5,
-        colormap = :viridis, 
-        )
+        colormap = :viridis
+    )
     display(fig)
 
     return true
 end
 
 
-function plot_pos()
-    x, y, z, d = get_data()
+
+function plot_pos(df, nm::Float64)
+    # Extract data directly from the DataFrame
+    x = df[!, :X]
+    y = df[!, :Y]
+    z = df[!, :Z]
+    d = df[!, :D]
+
     d = d / 100.0
 
     fig = meshscatter(x/nm, y/nm, z/nm, alpha=0.5,markersize=0.05)
@@ -72,9 +68,6 @@ function plot_pos()
     # readline()
     return true
 end
-
-# generate_plot_makie()
-# plot_pos()
 
 
 

@@ -1,11 +1,8 @@
 using CSV
 using DataFrames
 using Random
+using Base.Filesystem: mktemp  # For creating a temporary file
 
-include("../data-vis/make-cnt-data.jl")
-
-
-# This function is currently hard-coded to generate a df with random electron density and for testing purposes.
 function generate_csv(data::Vector{Vector{Float64}})
     num_positions = length(data)
     randomElectronDensity = rand(1.0:100.0, num_positions)
@@ -22,45 +19,35 @@ function generate_csv(data::Vector{Vector{Float64}})
     return df, metadata
 end
 
-function insert_header(file_path::String, header::String)
-    # Read the content of the file into an array of strings
-    lines = readlines(file_path)
-
-    # Insert a string at the second position
-    if length(lines) >= 1
-        insert!(lines, 2, header)
-    else
-        push!(lines, header)
-    end
-
-    # Write the updated content back to the file
-    open(file_path, "w") do file
-        for line in lines
-            println(file, line)
-        end
-    end
-end
-
 function save_csv(output_dir::String, df::DataFrame, metadata::Vector{String})
-
     header = join(metadata, ",")
-    # Define the CSV file path with the optional output directory
-    csv_file_path = joinpath(output_dir, "scatterplot.csv")
+
+    # Create a temporary file to first write the DataFrame
+    temp_csv_path, temp_file = mktemp()
+    close(temp_file)  # Close the file because CSV.write opens it again
+
+    # Define the final CSV file path with the optional output directory
+    final_csv_path = joinpath(output_dir, "scatterplot.csv")
 
     try
-        CSV.write(csv_file_path, df)
-        insert_header(csv_file_path, header)
+        # Write the DataFrame to the temporary file
+        CSV.write(temp_csv_path, df)
 
-        println("CSV file '$csv_file_path' has been created.")
+        # Open the final CSV file for writing
+        open(final_csv_path, "w") do file
+            # Write the header first
+            println(file, header)
+            # Then write the content of the temporary CSV file
+            write(file, read(temp_csv_path))
+        end
+
+        println("CSV file '$final_csv_path' has been created.")
     catch e
         println("An IO error probably occurred: ", e)
         return false
+    finally
+        # Clean up: remove the temporary file
+        rm(temp_csv_path; force = true)
     end
     return true
 end
-
-# positions = make_metallic_CNT_positions(20,1*nm)
-
-# generate_csv("src/io/", positions)
-
-# generate_csv("src/io/")
