@@ -2,7 +2,7 @@ using LinearAlgebra
 using SparseArrays
 using Arpack
 
-include("./block-tridiagonal.jl")
+include("block-tridiagonal.jl")
 
 mutable struct Eigens{T}
     values::Vector{T}

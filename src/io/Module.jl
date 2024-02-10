@@ -1,6 +1,6 @@
 # reading csv files:
-# The first row of the file should contain the column headings.
-# The second row of the csv file should contain information about the type of plot.
+# The first row of the csv file should contain information about the type of plot.
+# The second row of the file should contain the column headings.
 # The third row onwards should contain the data.
 
 module InputOutputModule
