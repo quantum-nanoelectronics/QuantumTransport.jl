@@ -1,9 +1,6 @@
-#using Pkg; Pkg.add("Arpack");
-#using Pkg; Pkg.add(Pkg.PackageSpec(;name="Arpack", version="0.5"));
 using LinearAlgebra
 using SparseArrays
-#using Arpack: eigs
-include("./Decomp.jl")
+include("./LRA_type.jl")
 
 offset(A) = A .+ 1e-5im
 
@@ -15,6 +12,20 @@ function construct_laplace(n)
                     1 => offset(ones(ComplexF64,n-1)))
 end
 
-n = 4
-H = construct_laplace(n)
-test_struct = EigDecomp_mod.EigDecomp(Matrix(H))
+# takes nxn size
+# returns ComplexF64 position operator
+function construct_pos(n)
+    return spdiagm(-1 => (sqrt.(1:n-1)),
+                    1 => (sqrt.(1:n-1)))
+end
+
+function truncate_eigens(eigen_vals, eigen_vecs, cutoff)
+    for i in eachindex(eigen_vals)
+        # complex magnitude abs()
+        if abs(eigen_vals[i]) > cutoff
+            eigen_vecs[:, i] .= 0
+            eigen_vals[i] = 0
+        end
+    end
+    return eigen_vals, eigen_vecs
+end
