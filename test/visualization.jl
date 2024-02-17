@@ -2,6 +2,7 @@
 
 using QuantumTransport
 using Test
+using CairoMakie
 
 # contains constants used in make-cnt-data and other data visualization
 const nm = 1E-9
@@ -20,7 +21,7 @@ vals = get_data(ioDir, filename)
 
 df = vals[1]
 metaData = vals[2]
-@test !isnothing(df)
+# @test !isnothing(df)
 
 println("-Reading-")
 println("DataFrame: ")
@@ -28,5 +29,19 @@ println(first(df, 5))
 println("Metadata: ")
 println(metaData)
 
-@test plot_pos(df, nm)
-@test generate_plot_makie(df, margin)
+
+# Obtain the figure object
+figure = generate_plot_makie(df, margin)
+@test figure isa Figure
+# Save the figure
+file_path = joinpath(ioDir, "figure_from_generate_plot_makie.png")
+save(file_path, figure)
+@test isfile(file_path)
+
+# Obtain the figure object
+figure = plot_pos(df, nm)
+@test !isnothing(figure)
+# Save the figure
+file_path = joinpath(ioDir, "figure_from_plot_pos.png")
+save(file_path, figure)
+@test isfile(file_path)

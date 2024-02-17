@@ -1,6 +1,7 @@
 using QuantumTransport
 using Test
 using LinearAlgebra
+using DataFrames
 
 # test the files in the io folder, but first generate positions
 
@@ -101,6 +102,8 @@ println("DataFrame: ")
 println(first(df, 5))
 println("Metadata: ")
 println(meta)
+@test isfile(joinpath(ioDir, filename))
+
 
 # reading data
 vals = get_data(ioDir, filename)
@@ -110,4 +113,5 @@ println("DataFrame: ")
 println(first(vals[1], 5))
 println("Metadata: ")
 println(vals[2])
+@test isfile(joinpath(ioDir, filename))
 
