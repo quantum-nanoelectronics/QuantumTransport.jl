@@ -24,7 +24,7 @@ To install QuantumTransport, open Julia's interactive session (REPL) and run the
 
 ```julia
 using Pkg
-Pkg.add("QuantumTransport")
+Pkg.add("/full/path/to/QuantumTransport")
 ```
 
 ## Usage
