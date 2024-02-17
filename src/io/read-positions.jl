@@ -2,9 +2,9 @@ using CSV
 using DataFrames
 using Base.Filesystem: mktemp
 
-function get_data(readDir::String)
+function get_data(readDir::String, filename::String)
     println("Reading from: ", readDir)
-    csv_file_path = joinpath(readDir, "scatterplot.csv")
+    csv_file_path = joinpath(readDir, filename)
     
     # Open the original CSV file to read the metadata line
     metadata_line = open(csv_file_path, "r") do file

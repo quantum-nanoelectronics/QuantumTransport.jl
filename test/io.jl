@@ -1,6 +1,7 @@
 using QuantumTransport
 using Test
 using LinearAlgebra
+using DataFrames
 
 # test the files in the io folder, but first generate positions
 
@@ -9,6 +10,9 @@ using LinearAlgebra
 const nm = 1E-9
 const δ₀ = 0.142*nm
 const a = 0.246*nm
+
+const unicodeMeta = ["ħ", "ψ" , "σₓ", "ϕ"]
+
 
 function Rx(θ::Float64) # returns a rotation matrix that rotates in the y-z plane, or around x
 	A = [1 0 0; 0 cos(θ) -sin(θ); 0 sin(θ) cos(θ)]
@@ -60,23 +64,24 @@ const SAMPLE_POSITIONS = [
 ]
 
 positions = CNT_positions
+filename = "scatterplot.csv"
 
+# generate data
 baseDir = abspath(joinpath(@__DIR__, ".."))
 ioDir = joinpath(baseDir, "data-output")
 df, meta = generate_csv(positions)
 
-@test save_csv(ioDir, df, meta)
-
+# saving data
+@test save_csv(ioDir, filename, df, meta)
 println("-Writing-")
 println("DataFrame: ")
 println(first(df, 5))
 println("Metadata: ")
 println(meta)
 
-vals = get_data(ioDir)
-
+# reading data
+vals = get_data(ioDir, filename)
 @test !isnothing(vals[1])
-
 println("-Reading-")
 println("DataFrame: ")
 println(first(vals[1], 5))
@@ -85,4 +90,28 @@ println(vals[2])
 
 
 
+
+# repeat for another file with unicode metadata + headers
+filename = "scatterplot-unicode.csv"
+rename!(df, names(df) .=> Symbol.(unicodeMeta))
+
+# saving data
+@test save_csv(ioDir, filename, df, unicodeMeta)
+println("-Writing-")
+println("DataFrame: ")
+println(first(df, 5))
+println("Metadata: ")
+println(meta)
+@test isfile(joinpath(ioDir, filename))
+
+
+# reading data
+vals = get_data(ioDir, filename)
+@test !isnothing(vals[1])
+println("-Reading-")
+println("DataFrame: ")
+println(first(vals[1], 5))
+println("Metadata: ")
+println(vals[2])
+@test isfile(joinpath(ioDir, filename))
 

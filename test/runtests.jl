@@ -27,9 +27,10 @@ using Test
         include("io.jl")
     end
 
-    # cannot test Data Visualization because GitHub does not have a GPU
-    # @testset "Data Visualization Test" begin
-    #     include("visualization.jl")
-    # end
+    # cannot fully test Data Visualization because GitHub does not have a GPU
+    # non interactive image plots generated, however we want to generate interactive plots
+    @testset "Data Visualization Test" begin
+        include("visualization.jl")
+    end
 
 end
