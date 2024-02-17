@@ -9,13 +9,14 @@ const δ₀ = 0.142*nm
 const a = 0.246*nm
 
 margin = 0.0
+filename = "scatterplot.csv"
 
 # Assuming the required file exists in the io folder
 baseDir = abspath(joinpath(@__DIR__, ".."))
 ioDir = joinpath(baseDir, "data-output")
 
 
-vals = get_data(ioDir)
+vals = get_data(ioDir, filename)
 
 df = vals[1]
 metaData = vals[2]

@@ -19,7 +19,7 @@ function generate_csv(data::Vector{Vector{Float64}})
     return df, metadata
 end
 
-function save_csv(output_dir::String, df::DataFrame, metadata::Vector{String})
+function save_csv(output_dir::String, filename::String, df::DataFrame, metadata::Vector{String})
     header = join(metadata, ",")
 
     # Create a temporary file to first write the DataFrame
@@ -27,7 +27,7 @@ function save_csv(output_dir::String, df::DataFrame, metadata::Vector{String})
     close(temp_file)  # Close the file because CSV.write opens it again
 
     # Define the final CSV file path with the optional output directory
-    final_csv_path = joinpath(output_dir, "scatterplot.csv")
+    final_csv_path = joinpath(output_dir, filename)
 
     try
         # Write the DataFrame to the temporary file
