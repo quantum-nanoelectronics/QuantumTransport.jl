@@ -48,6 +48,11 @@ function setTestMatrix()
 end
 
 
+function diagApproximatedGʳ(Energy::Float64)
+    matrixCopy = deepcopy(testMatrix)
+    matrixCopy.matrix = (Energy + args[4]) * I - testMatrix.matrix
+    return getInvRGFDiagonal(matrixCopy).matrix
+end
 
 function approximatedGʳ(Energy::Float64)
     matrixCopy = deepcopy(testMatrix)
