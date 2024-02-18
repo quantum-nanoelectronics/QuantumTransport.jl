@@ -22,6 +22,20 @@ function getInvRGF(matrixObject::BlockMatrix)
     return matrix
 end
 
+# Function to perform the getInvRGF function except without the top and bottom rows of the matrix
+function getInvRGFDiagonal(matrixObject::BlockMatrix)
+    # Compute the forward and backward generators.
+    _, backwardGen = computeGenerators(matrixObject)
+
+    sparseBuild = SparseBuilder(Int[], Int[], ComplexF64[])
+    # Compute the diagonal blocks of the inverse matrix.
+    computeDiagonalBlocks(matrixObject, backwardGen, sparseBuild)
+    
+    matrix = deepcopy(matrixObject)
+    matrix.matrix = sparse(sparseBuild.rowIndices, sparseBuild.columnIndices, sparseBuild.values, matrixObject.matrixSize, matrixObject.matrixSize)
+    return matrix
+end
+
 function getInvJulia(matrixObject::BlockMatrix)
     matrix = deepcopy(matrixObject)
     matrix.matrix = inv(Matrix(matrixObject.matrix))

@@ -29,10 +29,29 @@ function rgf_main()
     return correct
 end
 
+# Do the same except for only the diagonal blocks
+function rgf_main_diag()
+    display(testMatrix.matrix)
+
+    # The inverse is computed correctly for the approximatedGʳ matrix for large sizes but not fullGʳ
+    # @time approximatedGʳ(0.0)
+    # return
+
+    # Call the function to test for correctness
+    correct = verifyCorrectness(diagApproximatedGʳ, fullGʳ, args[1])
+    println("RGF Inverse Correctness: ", correct)
+
+    # Call the timing function - Energy of 3.0
+    timeInv(3.0)
+
+    return correct
+end
+
 # Test the rgf method
 @test rgf_main()
 
-
+# Test the method that only returns the matrix with inverted diagonal blocks
+@test rgf_main_diag()
 
 # Test the woodbury inverse method
 @test block_inv_main()
