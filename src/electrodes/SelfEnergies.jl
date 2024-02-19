@@ -33,12 +33,8 @@ function genΣₖs(p::NamedTuple,ElectrodeInfo::Vector{Electrode})
                 βₐ = Hs[iCfromD] # away from device
                 βₜ = Hs[iCinD] # towards device
             end
-            #Σk(k) = Σgen(p,Hs[1](k),Hᵥₑ(k),Hᵥₘ(k),ElectrodeInfo[i],P)
             kxes, kweights, kindices = genTetBZ(electrodeParams(p,ElectrodeInfo[1]),1000,0,0)
             Σk(k) = TΣgen(p,Hs[1](k),βₐ(k),βₜ(k),V(k),ElectrodeInfo[i],P)
-            #Σk(k) = Σgen(p,Hs[1](k),βₐ(k),βₜ(k),V(k),ElectrodeInfo[i],P)
-            #Σk(k) = ∫Σgen(p,Hs[4], Hs[1](k), βₐ(k), βₜ(k), V(k),ElectrodeInfo[i],P,k,kxes,kweights)
-            #Σk(k) = Σgen(p,Hs[1](k),Hs[2](k).+Hs[3](k),Hᵥₘ(k),ElectrodeInfo[i],P)
             Σks[i] = Σk
 	end
 	return Σks
@@ -88,6 +84,7 @@ end
 	return Σks
 end=#
 
+# implements the Sancho-Rubio method for efficient contact self-energy generation
 function TΣgen(p::NamedTuple,H::SparseMatrixCSC,βₐ::SparseMatrixCSC, βₜ::SparseMatrixCSC, V::SparseMatrixCSC, ElectrodeInfo::Electrode, P, cutoff::Float64=10^-12*eV)
 #function Σgen(p::NamedTuple,H::SparseMatrixCSC,H_coupling::SparseMatrixCSC, Hᵥ::SparseMatrixCSC, ElectrodeInfo::Electrode, P, cutoff::Float64=10^-7*eV)
     n = ElectrodeInfo.n*p.nsite*p.norb*2
@@ -144,7 +141,7 @@ function TΣgen(p::NamedTuple,H::SparseMatrixCSC,βₐ::SparseMatrixCSC, βₜ::
     return Σ
 end
 #function Σgen(p::NamedTuple,H::Matrix,Hₗ::Matrix, Hᵣ::Matrix, ElectrodeInfo::Electrode, cutoff::Float64=10^-7*eV)
-function Σgen(p::NamedTuple,H::SparseMatrixCSC,βₐ::SparseMatrixCSC, βₜ::SparseMatrixCSC, V::SparseMatrixCSC, ElectrodeInfo::Electrode, P, cutoff::Float64=10^-13*eV)
+#=function Σgen(p::NamedTuple,H::SparseMatrixCSC,βₐ::SparseMatrixCSC, βₜ::SparseMatrixCSC, V::SparseMatrixCSC, ElectrodeInfo::Electrode, P, cutoff::Float64=10^-13*eV)
 #function Σgen(p::NamedTuple,H::SparseMatrixCSC,H_coupling::SparseMatrixCSC, Hᵥ::SparseMatrixCSC, ElectrodeInfo::Electrode, P, cutoff::Float64=10^-7*eV)
     n = ElectrodeInfo.n*p.nsite*p.norb*2
     # so H needs to be instantiated and called outside of the loop
@@ -224,10 +221,10 @@ function Σgen(p::NamedTuple,H::SparseMatrixCSC,βₐ::SparseMatrixCSC, βₜ::S
         end=#
     end
     return Σ
-end
+end=#
 
 
-function ∫Σgen(p::NamedTuple, H::Function, Hslab::SparseMatrixCSC, βₐ::SparseMatrixCSC, βₜ::SparseMatrixCSC, V::SparseMatrixCSC, ElectrodeInfo::Electrode, P::SparseMatrixCSC, k::Vector{Float64}, kxes::Vector{Vector{Float64}}, kweights::Vector{Float64}, cutoff::Float64=10^-5*eV)
+#=function ∫Σgen(p::NamedTuple, H::Function, Hslab::SparseMatrixCSC, βₐ::SparseMatrixCSC, βₜ::SparseMatrixCSC, V::SparseMatrixCSC, ElectrodeInfo::Electrode, P::SparseMatrixCSC, k::Vector{Float64}, kxes::Vector{Vector{Float64}}, kweights::Vector{Float64}, cutoff::Float64=10^-5*eV)
     n = ElectrodeInfo.n*p.nsite*p.norb*2
     kvals = [[kₓ[1],k[2],k[3]] for kₓ in kxes]
     function Σ(E::Float64)
@@ -241,5 +238,5 @@ function ∫Σgen(p::NamedTuple, H::Function, Hslab::SparseMatrixCSC, βₐ::Spa
         return P*Σ_surf*P'
     end
     return Σ
-end
+end=#
 
