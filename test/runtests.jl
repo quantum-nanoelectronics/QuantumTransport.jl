@@ -35,6 +35,12 @@ All other dependencies for tests besides the QuantumTransport package and the Te
         include("self-energies.jl")
     end
 
+    println("------------RUNNING HOPPING HAMILTONIAN TESTS------------")
+    @testset "Hopping Hamiltonian Test" begin
+        include("testHoppings.jl")
+
+    end
+
     # cannot fully test Data Visualization because GitHub does not have a GPU
     # non interactive image plots generated, however we want to generate interactive plots
     @testset "Data Visualization Test" begin
