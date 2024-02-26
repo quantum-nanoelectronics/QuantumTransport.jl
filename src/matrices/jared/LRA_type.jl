@@ -12,6 +12,7 @@ module LRA_mod
         R :: Matrix{ComplexF64}
         #L :: Matrix{ComplexF64}
         λ :: Array{ComplexF64}
+        Λ :: Matrix{ComplexF64}
         rank :: Int64
         shape :: Tuple{Int64, Int64}
 
@@ -20,17 +21,23 @@ module LRA_mod
             if A.n != A.m
                 throw(DomainError(A, "LRA DEFINED FOR SQUARE MATRICES ONLY."))
             end
+
             if A * conj(A) == conj(A) * A
-                current_rank = Int(sqrt(A.n))
+                #sub hermition condiion for able to get L = R*
+                last_rank = 0 
+                current_rank = 0
                 λ = undef
                 R = undef
                 while current_rank <= A.n
-                    R_decomp, R_hist = partialschur(A, nev = current_rank, tol = sqrt(eps()), which = SR())
+                    last_rank = Int(ceil(sqrt(A.n)))
+                    current_rank = last_rank
+                    R_decomp, R_hist = partialschur(A, nev = current_rank, tol = sqrt(eps()), which = ArnoldiMethod.SR())
                     λ, R = partialeigen(R_decomp)
                     if ((abs(Emin - minimum(real.(λ))) < delta && abs(Emax - maximum(real.(λ))) < delta)
                         || (minimum(real.(λ)) < Emin && maximum(real.(λ)) > Emax))
                        break
                     end
+                    current_rank = Int(ceil(sqrt(A.n)))
                     current_rank = (current_rank <= A.n) ? current_rank*2 : A.n
                 end
             else
@@ -38,7 +45,7 @@ module LRA_mod
                 #R_decomp, R_hist = partialschur(A, nev = A.n, tol = sqrt(eps()), which = SR())
                 #L_decomp, L_hist = partialschur(transpose(A), nev = A.n, tol = sqrt(eps()), which = SR())
             end
-            new(R, λ, current_rank, size(A))
+            new(R, λ, diagm(λ), last_rank, size(A))
         end
     end
 
@@ -52,22 +59,58 @@ module LRA_mod
         display(reconstruct(A))
     end
 
+    # world ending critical failure if reconstruct
+    #function reconstruct(lra::LRA)
+    #    A = Matrix{ComplexF64}(undef, lra.shape...)
+    #    if A * conj(A) == conj(A) * A
+    #        for j in eachindex(lra.λ)
+    #            A .+= lra.λ[j] * lra.R[j,:] * transpose(conj(lra.R)[j,:])
+    #        end
+    #    else
+    #        throw(DomainError(A, "LRA NOT DEFINED FOR NON NORMAL MATRIX YET"))
+    #    end
+    #    return A
+    #end
+
     function reconstruct(lra::LRA)
         A = Matrix{ComplexF64}(undef, lra.shape...)
         if A * conj(A) == conj(A) * A
-            for j in eachindex(lra.λ)
-                A .+= lra.λ[j] * lra.R[j,:] * transpose(conj(lra.R)[j,:])
-            end
+            return lra.R * lra.Λ * inv(lra.R)
         else
             throw(DomainError(A, "LRA NOT DEFINED FOR NON NORMAL MATRIX YET"))
         end
-        return A
     end
 
-    Base.:getindex(A::T) where T<:LRA = getindex( reconstruct(A) )
+    function prod_element(A::T, B::T, i::I, j::I) where T<:LRA where I <: integer
+            return sum(A[i][k] * B[k][j] for k in 1:length(A[1]))
+        end
+
+    function inv_element(A::lra, row::I, col::I) where I <: integer
+        n = length(A)
+        cofactors = zeros(n, n)
+        for i in 1:n
+            for j in 1:n
+                minor = A[setdiff(1:n, i), setdiff(1:n, j)]
+                cofactors[i, j] = (-1)^(i+j) * det(minor)
+            end
+        end
+        return cofactors[row, col] / det(A)
+    end
+
+    function getindex_LRA(lra::lra, i::I, j::I) where I <: integer
+        return 0
+    end
+
+
+
+
+    Base.:getindex(A::T, i::I, j::I) where T<:LRA where I <: Integer = getindex_LRA(A, i, j)
+    #Base.:getindex(A::T) where T<:LRA = getindex(reconstruct(A))
     Base.:size(A::LRA) = A.shape
     Base.:promote_rule(::Type{Matrix{ComplexF64}}, ::Type{<:LRA}) = Matrix{ComplexF64}
+    # convert up instead of down
     Base.:convert(::Type{<:Matrix{ComplexF64}}, A::LRA) = reconstruct(A)
+    # define shifting of eigenenergies when add identity matrix
 
     Base.:+(x::LRA, y::T) where T<:Matrix = +(promote(x,y)...)
     Base.:*(x::LRA, y::T) where T<:Matrix = *(promote(x,y)...)

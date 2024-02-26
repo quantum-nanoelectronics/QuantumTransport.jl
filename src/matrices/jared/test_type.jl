@@ -1,5 +1,6 @@
 using LinearAlgebra
 using SparseArrays
+using ArnoldiMethod
 include("./LRA_type.jl")
 
 offset(A) = A .+ 1e-5im
@@ -29,3 +30,10 @@ function truncate_eigens(eigen_vals, eigen_vecs, cutoff)
     end
     return eigen_vals, eigen_vecs
 end
+
+
+X = SparseMatrixCSC(  [ 1.0 1.0im; -1.0im 1.0 ] )
+display(X)
+L = LRA_mod.LRA(X, 0.3, 3.0, 0.25)
+print(L)
+
