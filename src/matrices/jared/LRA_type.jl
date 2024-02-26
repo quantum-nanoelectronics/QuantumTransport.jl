@@ -60,52 +60,35 @@ module LRA_mod
     end
 
     # world ending critical failure if reconstruct
-    #function reconstruct(lra::LRA)
-    #    A = Matrix{ComplexF64}(undef, lra.shape...)
-    #    if A * conj(A) == conj(A) * A
-    #        for j in eachindex(lra.λ)
-    #            A .+= lra.λ[j] * lra.R[j,:] * transpose(conj(lra.R)[j,:])
-    #        end
-    #    else
-    #        throw(DomainError(A, "LRA NOT DEFINED FOR NON NORMAL MATRIX YET"))
-    #    end
-    #    return A
-    #end
-
     function reconstruct(lra::LRA)
         A = Matrix{ComplexF64}(undef, lra.shape...)
         if A * conj(A) == conj(A) * A
-            return lra.R * lra.Λ * inv(lra.R)
+            for j in eachindex(lra.λ)
+                A .+= lra.λ[j] * lra.R[j,:] * transpose(conj(lra.R)[j,:])
+            end
         else
             throw(DomainError(A, "LRA NOT DEFINED FOR NON NORMAL MATRIX YET"))
         end
+        return A
     end
 
-    function prod_element(A::T, B::T, i::I, j::I) where T<:LRA where I <: integer
-            return sum(A[i][k] * B[k][j] for k in 1:length(A[1]))
-        end
+    #function reconstruct(lra::LRA)
+    #    A = Matrix{ComplexF64}(undef, lra.shape...)
+    #    if A * conj(A) == conj(A) * A
+    #        return lra.R * lra.Λ * inv(lra.R)
+    #    else
+    #        throw(DomainError(A, "LRA NOT DEFINED FOR NON NORMAL MATRIX YET"))
+    #    end
+    #end
 
-    function inv_element(A::lra, row::I, col::I) where I <: integer
-        n = length(A)
-        cofactors = zeros(n, n)
-        for i in 1:n
-            for j in 1:n
-                minor = A[setdiff(1:n, i), setdiff(1:n, j)]
-                cofactors[i, j] = (-1)^(i+j) * det(minor)
-            end
-        end
-        return cofactors[row, col] / det(A)
-    end
-
-    function getindex_LRA(lra::lra, i::I, j::I) where I <: integer
-        return 0
-    end
+    #requires a better way to get index
+    #function prod_element(A::T, B::T, i::I, j::I) where T<:LRA where I <: integer
+    #    return A[i, :] ⋅ B[:,j]
+    #end
 
 
-
-
-    Base.:getindex(A::T, i::I, j::I) where T<:LRA where I <: Integer = getindex_LRA(A, i, j)
-    #Base.:getindex(A::T) where T<:LRA = getindex(reconstruct(A))
+    #Base.:getindex(A::T, i::I, j::I) where T<:LRA where I <: Integer = getindex_LRA(A, i, j)
+    Base.:getindex(A::T) where T<:LRA = getindex(reconstruct(A))
     Base.:size(A::LRA) = A.shape
     Base.:promote_rule(::Type{Matrix{ComplexF64}}, ::Type{<:LRA}) = Matrix{ComplexF64}
     # convert up instead of down
