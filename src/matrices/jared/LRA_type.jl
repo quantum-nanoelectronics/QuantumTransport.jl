@@ -114,29 +114,16 @@ module LRA_mod
         if A′.n != B′.n
             throw(DomainError(A′, "BAD SHAPE IN LRA MATRIX MULTIPLICATION"))
         end
-        #FIXME: still a matrix product
-        #NOTE: Assumes A is linear
-        λs = ( A′.Rvecs ⋅ B′.Rvecs ) * ( A′.λs ⋅ B′.λs )
+        # reconstruction
         C′ = LRA( reconstruct(A′) * B′.Rvecs, B′.Lvecs, B′.λs, B′.rank, B′.n)
         return C′
     end
-
-    #=
-    function LRAbyLRA(A′::LRA, B′::LRA)
-        if A′.n != B′.n
-            throw(DomainError(A′, "BAD SHAPE IN LRA MATRIX MULTIPLICATION"))
-        end
-        #FIXME: still a matrix product
-        #NOTE: Assumes A is linear
-        C′ = LRA( reconstruct(A′) * B′.Rvecs, B′.Lvecs, B′.λs, B′.rank, B′.n)
-        return C′
-    end
-    =#
 
     function LRAbyMatrix(A′::LRA, A::Union{SparseMatrixCSC{ComplexF64, Int64}, Matrix{ComplexF64}})
         if A′.n != A.n
             throw(DomainError(A′, "BAD SHAPE IN LRA MATRIX MULTIPLICATION"))
         end
+        #NOTE: Assumes A is linear
         C′ = LRA( A * A′.Rvecs, A′.Lvecs, A′.λs, A′.rank, A′.n)
         return C′
     end
