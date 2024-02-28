@@ -32,8 +32,11 @@ function truncate_eigens(eigen_vals, eigen_vecs, cutoff)
 end
 
 
-X = SparseMatrixCSC(  [ 1.0 1.0im; -1.0im 1.0 ] )
-display(X)
-L = LRA_mod.LRA(X, 0.3, 3.0, 0.25)
+#X = SparseMatrixCSC(  [ 1.0 1.0im; -1.0im 1.0 ] )
+X = construct_laplace(4)
+L = LRA_mod.LRA(X, -3.6, -0.38, 0.2, 2,1)
+L2 = deepcopy(L)
+
 print(L)
+println()
 

@@ -2,105 +2,164 @@ module LRA_mod
     using LinearAlgebra
     using SparseArrays
     using ArnoldiMethod
-    # ArnoldiMethod implements eigs from ARPACK... ARPACK machine broke
-    # NOTE: for hermitian matrices, the Arnoldi iteration reduces to the
-    # Lanczos algorithm — potential speed improvement
 
-    # in  -> sparse matrix
-    # holds the deconstructed, low rank matrix
-    struct LRA <: AbstractMatrix{ComplexF64}
-        R :: Matrix{ComplexF64}
-        #L :: Matrix{ComplexF64}
-        λ :: Array{ComplexF64}
-        Λ :: Matrix{ComplexF64}
-        rank :: Int64
-        shape :: Tuple{Int64, Int64}
+    # can likely pull these functions in from elsewhere
+    norm_error(A,B) = norm( A - B ) / norm(A)
+    
+    #= in -> sparse, square matrix of value type ComplexF64 =#
+    struct LRA #<: AbstractMatrix{ComplexF64}
+        Rvecs :: Matrix{ComplexF64}
+        Lvecs :: Matrix{ComplexF64}
+        λs    :: Array{ComplexF64}
+        rank  :: Int64
+        n     :: Int64
 
         function LRA(A::SparseMatrixCSC{ComplexF64, Int64},
-                           Emin::Rt, Emax::Rt, delta::Rt) where Rt <: Real
+                Emin::𝐑, Emax::𝐑, ΔE::𝐑,
+                initialrank::Int = 10, rankstep::Int = 1,
+                maxiters::Int = 100, errortol::𝐑 = 1e-2) where 𝐑 <: Real
             if A.n != A.m
                 throw(DomainError(A, "LRA DEFINED FOR SQUARE MATRICES ONLY."))
             end
 
-            if A * conj(A) == conj(A) * A
-                #sub hermition condiion for able to get L = R*
-                last_rank = 0 
-                current_rank = 0
-                λ = undef
-                R = undef
-                while current_rank <= A.n
-                    last_rank = Int(ceil(sqrt(A.n)))
-                    current_rank = last_rank
-                    R_decomp, R_hist = partialschur(A, nev = current_rank, tol = sqrt(eps()), which = ArnoldiMethod.SR())
-                    λ, R = partialeigen(R_decomp)
-                    if ((abs(Emin - minimum(real.(λ))) < delta && abs(Emax - maximum(real.(λ))) < delta)
-                        || (minimum(real.(λ)) < Emin && maximum(real.(λ)) > Emax))
-                       break
-                    end
-                    current_rank = Int(ceil(sqrt(A.n)))
-                    current_rank = (current_rank <= A.n) ? current_rank*2 : A.n
-                end
-            else
+            #= Only normal matrices are supported s.t. vₗ = vᵣ* =#
+            #= TODO: For hermitian matrices, implement Lanczos method =#
+             if norm_error(A * conj(A) , conj(A) * A) > errortol
                 throw(DomainError(A, "LRA NOT DEFINED FOR NON NORMAL MATRIX YET"))
-                #R_decomp, R_hist = partialschur(A, nev = A.n, tol = sqrt(eps()), which = SR())
-                #L_decomp, L_hist = partialschur(transpose(A), nev = A.n, tol = sqrt(eps()), which = SR())
             end
-            new(R, λ, diagm(λ), last_rank, size(A))
+
+            #= Ignore small matrices. Decrease INITIAL_RANK for testing. =#
+            if A.n < initialrank
+                return A
+            end
+
+            λs = undef; Rvecs = undef
+            curr_rank = initialrank
+            success = false
+            iters = 0
+
+            #= 
+             Two stop conditions: number of iterations exceeds allowed maxiumum or
+             eigen-energies are sufficiently close to defined window and the normalized
+             error is small. In case maximum iterations achieved, will return original matrix.
+            =#
+
+            #= NOTE: second condition unnecessary, but useful for debugging small matrices =#
+            while iters <= maxiters && curr_rank <= A.n
+                schur, hist = partialschur(A, nev = curr_rank, tol = sqrt(eps()), which = ArnoldiMethod.SR())
+                λs, Rvecs = partialeigen(schur)
+                error = norm_error(A, reconstruct(Rvecs, conj(Rvecs), λs)) #NOTE: expensive
+                if abs(Emin - minimum(real.(λs))) < ΔE &&
+                   abs(Emax - maximum(real.(λs))) < ΔE &&
+                   error < errortol
+                    success = true
+                    break
+                end
+                iters+=1; curr_rank+=rankstep
+            end
+
+            if success return new(Rvecs, conj(Rvecs), λs, curr_rank, A.n) else return A end
+
         end
+
+        function LRA(Rvecs::Matrix{ComplexF64}, Lvecs::Matrix{ComplexF64},
+                     λs::Array{ComplexF64}, rank::Int64, n::Int64)
+            return new(Rvecs, Lvecs, λs, rank, n)
+        end
+
     end
 
-    function Base.show(io::IO, A::LRA)
-        print(io, "Decomposed matrix of rank ", A.rank, "\n")
+    function Base.show(io::IO, A′::LRA)
+        print(io, "Decomposed matrix of rank ", A′.rank, "\n")
         print(io, "Eigenvalues:\n")
-        display(A.λ)
+        display(A′.λs)
         print(io, "Right eigenvectors:\n")
-        display(A.R)
+        display(A′.Rvecs)
+        #NOTE: can display if debugging
         print(io, "Reconstructed ∑λvvᴴ:\n")
-        display(reconstruct(A))
+        display(reconstruct(A′))
     end
 
-    # world ending critical failure if reconstruct
-    function reconstruct(lra::LRA)
-        A = Matrix{ComplexF64}(undef, lra.shape...)
-        if A * conj(A) == conj(A) * A
-            for j in eachindex(lra.λ)
-                A .+= lra.λ[j] * lra.R[j,:] * transpose(conj(lra.R)[j,:])
-            end
-        else
-            throw(DomainError(A, "LRA NOT DEFINED FOR NON NORMAL MATRIX YET"))
+    # world ending critical failure if reconstruct. reconstruct expects normal matrix
+    function reconstruct(A′::LRA)
+        A = Matrix{ComplexF64}(undef, A′.n, A′.n)
+        for k in eachindex(A′.λs)
+            A .+= A′.λs[k] * A′.Rvecs[:,k] * transpose( A′.Lvecs[:,k] )
         end
         return A
     end
 
-    #function reconstruct(lra::LRA)
-    #    A = Matrix{ComplexF64}(undef, lra.shape...)
-    #    if A * conj(A) == conj(A) * A
-    #        return lra.R * lra.Λ * inv(lra.R)
-    #    else
-    #        throw(DomainError(A, "LRA NOT DEFINED FOR NON NORMAL MATRIX YET"))
-    #    end
-    #end
+    function reconstruct(Rvecs::Matrix{ComplexF64}, Lvecs::Union{Matrix{ComplexF64}, Transpose{ComplexF64}},
+                         λs::Array{ComplexF64})
+        A = Matrix{ComplexF64}(undef, size(Rvecs)[1], size(Rvecs)[1])
+        for k in eachindex(λs)
+            A .+= λs[k] * Rvecs[:,k] * transpose( Lvecs[:,k] )
+        end
+        return A
+    end
 
-    #requires a better way to get index
-    #function prod_element(A::T, B::T, i::I, j::I) where T<:LRA where I <: integer
-    #    return A[i, :] ⋅ B[:,j]
-    #end
+    function getindex_LRA(A′::LRA, i::Int, j::Int)
+        Aᵢⱼ = 0
+        for k in eachindex(A′.λs)
+            Aᵢⱼ += A′.λs[k] * A′.Rvecs[i,k] * A′.Lvecs[j,k]
+        end
+        return Aᵢⱼ
+    end
 
+    function trace(A′::LRA)
+        return sum(A′.λs)
+    end
 
-    #Base.:getindex(A::T, i::I, j::I) where T<:LRA where I <: Integer = getindex_LRA(A, i, j)
-    Base.:getindex(A::T) where T<:LRA = getindex(reconstruct(A))
-    Base.:size(A::LRA) = A.shape
-    Base.:promote_rule(::Type{Matrix{ComplexF64}}, ::Type{<:LRA}) = Matrix{ComplexF64}
-    # convert up instead of down
-    Base.:convert(::Type{<:Matrix{ComplexF64}}, A::LRA) = reconstruct(A)
-    # define shifting of eigenenergies when add identity matrix
+    function LRAbyLRA(A′::LRA, B′::LRA)
+        if A′.n != B′.n
+            throw(DomainError(A′, "BAD SHAPE IN LRA MATRIX MULTIPLICATION"))
+        end
+        #FIXME: still a matrix product
+        #NOTE: Assumes A is linear
+        λs = ( A′.Rvecs ⋅ B′.Rvecs ) * ( A′.λs ⋅ B′.λs )
+        C′ = LRA( reconstruct(A′) * B′.Rvecs, B′.Lvecs, B′.λs, B′.rank, B′.n)
+        return C′
+    end
 
-    Base.:+(x::LRA, y::T) where T<:Matrix = +(promote(x,y)...)
-    Base.:*(x::LRA, y::T) where T<:Matrix = *(promote(x,y)...)
-    Base.:-(x::LRA, y::T) where T<:Matrix = -(promote(x,y)...)
-    Base.:/(x::LRA, y::T) where T<:Matrix = /(promote(x,y)...)
-    Base.:+(x::LRA, y::LRA) = +(reconstruct(x), reconstruct(y))
-    Base.:*(x::LRA, y::LRA) = *(reconstruct(x), reconstruct(y))
-    Base.:-(x::LRA, y::LRA) = -(reconstruct(x), reconstruct(y))
-    Base.:/(x::LRA, y::LRA) = /(reconstruct(x), reconstruct(y))
+    #=
+    function LRAbyLRA(A′::LRA, B′::LRA)
+        if A′.n != B′.n
+            throw(DomainError(A′, "BAD SHAPE IN LRA MATRIX MULTIPLICATION"))
+        end
+        #FIXME: still a matrix product
+        #NOTE: Assumes A is linear
+        C′ = LRA( reconstruct(A′) * B′.Rvecs, B′.Lvecs, B′.λs, B′.rank, B′.n)
+        return C′
+    end
+    =#
+
+    function LRAbyMatrix(A′::LRA, A::Union{SparseMatrixCSC{ComplexF64, Int64}, Matrix{ComplexF64}})
+        if A′.n != A.n
+            throw(DomainError(A′, "BAD SHAPE IN LRA MATRIX MULTIPLICATION"))
+        end
+        C′ = LRA( A * A′.Rvecs, A′.Lvecs, A′.λs, A′.rank, A′.n)
+        return C′
+    end
+
+    #TODO: maybe a nice operator representation of this?
+    function mul_ind_LRA(A′::LRA, B′::LRA, i::Int, j::Int)
+        return A′[i, :] ⋅ B′[:,j]
+    end
+
+    Base.:size(A′::LRA) = A′.n, A′.n
+    Base.:getindex(A′::LRA, i::Int, j::Int) = getindex_LRA(A′::LRA, i::Int, j::Int)
+    
+    #TODO: convert down to LRA?
+    #Base.:promote_rule(...)
+    #Base.:convert(...)
+
+    # TODO: define shifting of eigenenergies when add identity matrix
+    #Base.:+(A′::LRA, A::T) where T<:Matrix = +(promote(A′,A)...)
+    #Base.:-(A′::LRA, A::T) where T<:Matrix = -(promote(A′,A)...)
+    #Base.:+(A′::LRA, B′::LRA) = +(reconstruct(A′), reconstruct(B′))
+    #Base.:-(A′::LRA, B′::LRA) = -(reconstruct(A′), reconstruct(B′))
+
+    Base.:*(A′::LRA, A::Union{SparseMatrixCSC{ComplexF64, Int64}, Matrix{ComplexF64}}) = LRAbyMatrix(A′, A)
+    Base.:*(A::Union{SparseMatrixCSC{ComplexF64, Int64}, Matrix{ComplexF64}}, A′::LRA) = LRAbyMatrix(A′, A)
+    Base.:*(A′::LRA, B′::LRA) = LRAbyLRA(A′, B′)
 end
