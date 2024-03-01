@@ -1,5 +1,4 @@
-using QuantumTransport
-
+# this file tests the self-energies module
 p = (
     t = 1.0, 
     t₁ = 0.1, 
@@ -96,4 +95,13 @@ ElectrodesArray = [
 Σks = genΣₖs(p,ElectrodesArray) 
 
 
-println(!isnothing(Σks))
+function testΣks()
+    println("First few elements of Σₖs: ")
+    print(Σks[1:5,1:5])
+    println()
+
+    return !isnothing(Σks)
+
+end
+
+@test testΣks()

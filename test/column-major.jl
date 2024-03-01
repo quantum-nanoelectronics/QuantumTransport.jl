@@ -1,6 +1,3 @@
-using QuantumTransport
-using Test
-
 # this file includes a test for performance of column and row major functions
 # test based on local machine 
 

@@ -1,6 +1,3 @@
-using QuantumTransport
-using Test
-
 # this file includes tests that checks for correctness for the block matrix inversion methods
 
 include("test-matrices.jl")

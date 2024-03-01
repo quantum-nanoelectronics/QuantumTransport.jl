@@ -1,7 +1,4 @@
 # test the files in the data-vis folder
-
-using QuantumTransport
-using Test
 using CairoMakie
 
 # contains constants used in make-cnt-data and other data visualization

@@ -1,12 +1,13 @@
 using QuantumTransport
 using Test
 
-
 # This is the main test file that is called first when running any tests.
 
 # Include other test files here, organizing them as needed
 # If you have more test files, include them in the same way:
 # include("another_test_file.jl")
+
+# Test should not use dependencies besides the QuantumTransport package and the Test package
 
 # Main test set that wraps all included tests
 @testset "QuantumTransport.jl Tests" begin
@@ -25,6 +26,11 @@ using Test
     println("------------RUNNING INPUT OUTPUT TESTS------------")
     @testset "Input Output Test" begin
         include("io.jl")
+    end
+
+    println("------------RUNNING SELF ENERGIES TESTS------------")
+    @testset "Self Energies Test" begin
+        include("self-energies.jl")
     end
 
     # cannot fully test Data Visualization because GitHub does not have a GPU
