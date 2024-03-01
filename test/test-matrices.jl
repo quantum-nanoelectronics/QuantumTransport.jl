@@ -1,10 +1,13 @@
 # This file is included in matrix.jl
 
-using LinearAlgebra
-using SparseArrays
+# Data - globals for now
+argsMatrix = nothing
+testMatrix = nothing
 
+# Functions
+
+# Kron
 ⊗(A,B) = kron(A,B)
-σ₂ = [0 -im; im 0]
 
 # makes a (n x m) x (n x m) matrix, where m is the block size.
 # this function was changed such that all elements are complex.
@@ -17,7 +20,7 @@ end
 
 # Fixed this function by adding Tridiagonals of the same type
 # Creates a tridiagonal with a block size of 2. 
-function spinOrbitHamiltonian(n::Int)
+function spinOrbitHamiltonian(n::Int, σ₂)
     return Tridiagonal(ones(n-1), zeros(n), ones(n-1))⊗σ₂ + Tridiagonal(ComplexF64[(-1)*mod(i, 2) for i in 1:(2n-1)], ComplexF64[-1 for i in 1:(2n)], ComplexF64[(-1)*mod(i, 2) for i in 1:(2n-1)])
 end
 
@@ -38,31 +41,39 @@ function verifyCorrectness(testMatrix::Function, correctMatrix::Function, N::Int
 end
 
 # Create/set test matrix
-function setTestMatrix()
-    # This is the initially created test matrix
-    # return CreateBlockMatrix(args[1], args[2], args[3], args[5])  
-    # effective mass test matrix.
-    # return CreateBlockMatrix(args[1], args[2], args[3], args[5], sparse(effectiveMass(args[1] ÷ args[2], args[2])))
-    # spin orbit hamiltonian test matrix - Block sizes of 2s only
-    return CreateBlockMatrix(args[1], args[2], args[3], args[5], sparse(spinOrbitHamiltonian(args[1] ÷ args[2])))
+function setVars(args)
+    if args[7] == 0
+        # This is the initially created test matrix
+        retVal = CreateBlockMatrix(args[1], args[2], args[3], args[5])  
+    elseif args[7] == 1
+        # effective mass test matrix.
+        retVal = CreateBlockMatrix(args[1], args[2], args[3], args[5], sparse(effectiveMass(args[1] ÷ args[2], args[2])))
+    else
+        # spin orbit hamiltonian test matrix - Block sizes of 2s only
+        retVal = CreateBlockMatrix(args[1], args[2], args[3], args[5], sparse(spinOrbitHamiltonian(args[1] ÷ args[2], args[6])))
+    end 
+    global argsMatrix = args
+    global testMatrix = retVal
+
+    return retVal
 end
 
 
 function diagApproximatedGʳ(Energy::Float64)
     matrixCopy = deepcopy(testMatrix)
-    matrixCopy.matrix = (Energy + args[4]) * I - testMatrix.matrix
+    matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
     return getInvRGFDiagonal(matrixCopy).matrix
 end
 
 function approximatedGʳ(Energy::Float64)
     matrixCopy = deepcopy(testMatrix)
-    matrixCopy.matrix = (Energy + args[4]) * I - testMatrix.matrix
+    matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
     return getInvRGF(matrixCopy).matrix
 end
 
 function fullGʳ(Energy::Float64)
     matrixCopy = deepcopy(testMatrix)
-    matrixCopy.matrix = (Energy + args[4]) * I - testMatrix.matrix
+    matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
     return getInvJulia(matrixCopy).matrix
 end
 
@@ -70,7 +81,7 @@ end
 # Function to time the two methods of computing the inverse of a block matrix.
 function timeInv(Energy::Float64)
     matrixCopy = deepcopy(testMatrix)
-    matrixCopy.matrix = (Energy + args[4]) * I - testMatrix.matrix
+    matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
     # Time the computation of the inverse of the dense matrix using built-in inversion
     print("Julia Inverse Time: ")
     @time juliaInv = getInvJulia(matrixCopy)
@@ -82,10 +93,7 @@ end
 
 
 
-
-
 # other functions to test the correctness
-
 function debugAllValues()
     a = fullGʳ(0.0)[:]
     b = approximatedGʳ(0.0)[:]

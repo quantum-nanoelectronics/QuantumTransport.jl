@@ -5,8 +5,6 @@
 
 using BenchmarkTools
 
-A = reshape(collect(1:100000000),10000,10000)
-
 function column_major(A::Matrix{Int64})
     s = 0
     for j in 1:size(A, 2)
@@ -28,6 +26,6 @@ function row_major(A::Matrix{Int64})
 end
 
 
-function calculate_time(f::Function, A::Matrix{Int64}=A)
+function calculate_time(f::Function, A::Matrix{Int64})
     return @belapsed $f($A)
 end

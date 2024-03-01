@@ -1,7 +1,45 @@
-using DataFrames
-using Random
+# This file is used to test the IO code
 
-# test the files in the io folder, but first generate positions
+
+"""
+	testIO(ioDir, filename, positions, meta, header)
+
+This function performs the tests for this file.
+
+# Arguments
+- `ioDir`: The directory where the file will be saved.
+- `filename`: The name of the file.
+- `positions`: The positions of the elements.
+- `meta`: The metadata associated with the file.
+- `header`: The header information.
+
+# Returns
+- None
+"""
+function testIO(ioDir, filename, positions, meta, header)
+    # generate data
+    df, meta = generate_df(positions, meta, header)
+
+    # saving data
+    @test save_csv(ioDir, filename, df, meta)
+    println("-Writing-")
+    println("DataFrame: ")
+    println(first(df, 5))
+    println("Metadata: ")
+    println(meta)
+    @test isfile(joinpath(ioDir, filename))
+
+
+    # reading data
+    vals = get_data(ioDir, filename)
+    @test !isnothing(vals[1])
+    println("-Reading-")
+    println("DataFrame: ")
+    println(first(vals[1], 5))
+    println("Metadata: ")
+    println(vals[2])
+    @test isfile(joinpath(ioDir, filename))
+end
 
 
 """
@@ -19,7 +57,8 @@ Constructs the positions of metallic carbon nanotubes (CNTs) in a two-dimensiona
 A vector of vectors containing the positions of the metallic CNTs.
 
 """
-function make_metallic_CNT_positions(nx::Int, radius::Float64=3.0, a::Float64=0.246 * 1E-9, δ₀::Float64 = 0.142 * 1E-9)::Vector{Vector{Float64}}
+
+function make_metallic_CNT_positions(nx::Int, radius::Float64=3.0 * 1E-9, a::Float64=0.246 * 1E-9, δ₀::Float64 = 0.142 * 1E-9)::Vector{Vector{Float64}}
 	function Rx(θ::Float64) # returns a rotation matrix that rotates in the y-z plane, or around x
 		A = [1 0 0; 0 cos(θ) -sin(θ); 0 sin(θ) cos(θ)]
 		return A
@@ -55,9 +94,8 @@ function make_metallic_CNT_positions(nx::Int, radius::Float64=3.0, a::Float64=0.
 end
 
 
-
 """
-	generate_csv(data::Vector{Vector{Float64}}, metaData::Vector{String}, header)::Tuple{DataFrame,Vector{String}}
+	generate_df(data::Vector{Vector{Float64}}, metaData::Vector{String}, header)::Tuple{DataFrame,Vector{String}}
 
 Generate a CSV file from the given data and metadata.
 
@@ -70,7 +108,7 @@ Generate a CSV file from the given data and metadata.
 - `Tuple{DataFrame,Vector{String}}`: A tuple containing the DataFrame representing the CSV file and the header.
 
 """
-function generate_csv(data::Vector{Vector{Float64}}, metaData::Vector{String}, header)::Tuple{DataFrame,Vector{String}}
+function generate_df(data::Vector{Vector{Float64}}, metaData::Vector{String}, header)::Tuple{DataFrame,Vector{String}}
     num_positions = length(data)
     randomElectronDensity = rand(1.0:100.0, num_positions)
 
@@ -87,53 +125,14 @@ function generate_csv(data::Vector{Vector{Float64}}, metaData::Vector{String}, h
 
     # Rename the header of the DataFrame
     rename!(df, names(df) .=> Symbol.(header))
-    return df, metadata
+    return df, metaData
 end
 
 
-"""
-	testIO(ioDir, filename, positions, meta, header)
-
-This function performs the tests for this file.
-
-# Arguments
-- `ioDir`: The directory where the file will be saved.
-- `filename`: The name of the file.
-- `positions`: The positions of the elements.
-- `meta`: The metadata associated with the file.
-- `header`: The header information.
-
-# Returns
-- None
-"""
-function testIO(ioDir, filename, positions, meta, header)
-    # generate data
-    df, meta = generate_csv(positions, meta, header)
-
-    # saving data
-    @test save_csv(ioDir, filename, df, meta)
-    println("-Writing-")
-    println("DataFrame: ")
-    println(first(df, 5))
-    println("Metadata: ")
-    println(meta)
-    @test isfile(joinpath(ioDir, filename))
-
-
-    # reading data
-    vals = get_data(ioDir, filename)
-    @test !isnothing(vals[1])
-    println("-Reading-")
-    println("DataFrame: ")
-    println(first(vals[1], 5))
-    println("Metadata: ")
-    println(vals[2])
-    @test isfile(joinpath(ioDir, filename))
-end
-
-
-
+println("Generating CNT positions")
 CNT_positions = make_metallic_CNT_positions(20)
+println("Generated CNT positions")
+
 
 const SAMPLE_POSITIONS = [
     [1.0, 0.0, 0.0],
@@ -148,25 +147,18 @@ const SAMPLE_POSITIONS = [
     [10.0, 0.0, 0.0]
 ]
 
-baseDir = abspath(joinpath(@__DIR__, ".."))
-ioDir = joinpath(baseDir, "data-output")
+# set data and call test functions
+function runIOTests()
+    baseDir = abspath(joinpath(@__DIR__, ".."))
+    ioDir = joinpath(baseDir, "data-output")
+    positions = CNT_positions
+    filename1 = "scatterplot.csv"
+    filename2 = "scatterplot-unicode.csv"
+    metadata = ["metadata1", "metadata2"]
+    unicodeMeta = ["ħ", "ψ" , "σₓ", "ϕ"]
+    header = copy(unicodeMeta)
+    testIO(ioDir, filename1, positions, metadata, [])
+    testIO(ioDir, filename2, positions, unicodeMeta, header)
+end
 
-
-# test the save_csv and get_data functions
-
-# set data
-positions = CNT_positions
-filenames = ["scatterplot.csv", "scatterplot-unicode.csv"]
-metadata = ["metadata1", "metadata2"]
-unicodeMeta = ["ħ", "ψ" , "σₓ", "ϕ"]
-header = unicodeMeta
-
-testIO(ioDir, filenames[1], positions, metadata, [])
-
-# repeat for another file with unicode metadata + headers
-# set metadata
-
-testIO(ioDir, filenames[2], positions, unicodeMeta, header)
-
-
-
+runIOTests()

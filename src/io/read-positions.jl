@@ -2,6 +2,22 @@ using CSV
 using DataFrames
 using Base.Filesystem: mktemp
 
+"""
+    get_data(readDir::String, filename::String)
+
+Reads data from a file.
+The first row of the csv file should contain information about the type of plot.
+The second row of the file should contain the column headings.
+The third row onwards should contain the data.
+
+# Arguments
+- `readDir::String`: The directory path where the file is located.
+- `filename::String`: The name of the file to read.
+
+# Returns
+The data read from the file.
+
+"""
 function get_data(readDir::String, filename::String)
     println("Reading from: ", readDir)
     csv_file_path = joinpath(readDir, filename)
