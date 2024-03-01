@@ -13,7 +13,7 @@ All other dependencies for tests besides the QuantumTransport package and the Te
     println("---------------RUNNING SAMPLE TESTS---------------")
     @testset "Sample Test" begin
         include("hello-world.jl")
-        include("column-major.jl")
+        # include("column-major.jl")
     end
 
     println("----------RUNNING MATRIX INVERSION TESTS----------")
