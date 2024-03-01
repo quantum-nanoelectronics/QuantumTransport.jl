@@ -1,5 +1,6 @@
 # This file includes all the structs used for the module
 
+# TODO Must specify the type of it here
 struct AtomNN
 	A1 # atom 1
 	A2 # atom 2 
@@ -18,8 +19,8 @@ mutable struct Electrode
 	A::Function # magnitude of the exchange field
 end
 
-# Also in Materials.jl
-#=mutable struct Hopping
+# # Also in Materials.jl
+mutable struct Hopping
 	a::Int # orbital/site index 1
 	b::Int # orbital/site index 2 with PBC
 	ia # index vector of site A
@@ -31,4 +32,5 @@ end
 	edge::Bool # does this hop off the edge of the superlattice?
 	N # vector describing the [n₁;n₂;n₃]⋅[a₁;a₂;a₃] superlattice unit cell of site ib
 	desc::String
-end=#
+end
+

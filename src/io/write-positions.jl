@@ -3,22 +3,6 @@ using DataFrames
 using Random
 using Base.Filesystem: mktemp  # For creating a temporary file
 
-function generate_csv(data::Vector{Vector{Float64}})
-    num_positions = length(data)
-    randomElectronDensity = rand(1.0:100.0, num_positions)
-
-    # Preallocate and directly construct DataFrame with all columns
-    df = DataFrame(
-        Matrix(hcat(data...))',  # Transpose the position matrix to match DataFrame format
-        [:X, :Y, :Z]
-    )
-    df[!, :D] = randomElectronDensity  # Add the density column to the DataFrame
-
-    metadata = ["metadata1", "metadata2"]
-
-    return df, metadata
-end
-
 function save_csv(output_dir::String, filename::String, df::DataFrame, metadata::Vector{String})
     header = join(metadata, ",")
 

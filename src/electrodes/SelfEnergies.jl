@@ -1,8 +1,6 @@
 using LinearAlgebra
 using SparseArrays
 
-include("Structs.jl")
-
 # return a vector of Σ(k) functions which return Σₖ(E) which return a sparse nsite × nsite matrix at a given energy
 function genΣₖs(p::NamedTuple,ElectrodeInfo::Vector{Electrode})   
 	nE = size(ElectrodeInfo)[1]
@@ -140,6 +138,8 @@ function TΣgen(p::NamedTuple,H::SparseMatrixCSC,βₐ::SparseMatrixCSC, βₜ::
     end
     return Σ
 end
+
+
 #function Σgen(p::NamedTuple,H::Matrix,Hₗ::Matrix, Hᵣ::Matrix, ElectrodeInfo::Electrode, cutoff::Float64=10^-7*eV)
 #=function Σgen(p::NamedTuple,H::SparseMatrixCSC,βₐ::SparseMatrixCSC, βₜ::SparseMatrixCSC, V::SparseMatrixCSC, ElectrodeInfo::Electrode, P, cutoff::Float64=10^-13*eV)
 #function Σgen(p::NamedTuple,H::SparseMatrixCSC,H_coupling::SparseMatrixCSC, Hᵥ::SparseMatrixCSC, ElectrodeInfo::Electrode, P, cutoff::Float64=10^-7*eV)
@@ -239,4 +239,6 @@ end=#
     end
     return Σ
 end=#
+
+
 

@@ -1,6 +1,11 @@
 using LinearAlgebra
-# using PrettyTables
 
+"""
+    generate_matrix()
+
+Generate a matrix based on some criteria.
+
+"""
 function generate_matrix()
     A = rand(0:100, 1100, 1100)
 
@@ -16,8 +21,20 @@ function generate_matrix()
     return A
 end
 
-using LinearAlgebra
 
+"""
+    block_inversion(matrix, threshold=8)
+
+Compute the inverse of a block matrix using a recursive algorithm.
+
+# Arguments
+- `matrix`: The block matrix to be inverted.
+- `threshold`: The maximum size of the blocks at which the algorithm switches to directly computing the inverse using `inv()`.
+
+# Returns
+The inverse of the input block matrix.
+
+"""
 function block_inversion(matrix, threshold=8)
     rows, cols = size(matrix)
     
@@ -47,25 +64,3 @@ function block_inversion(matrix, threshold=8)
 end
 
 
-function block_inv_main()
-    matrix = generate_matrix()
-
-    # Uncomment the following lines if you want to pretty print the matrices
-    # PrettyTables.pretty_table(matrix)
-    # PrettyTables.pretty_table(inv_matrix)
-    # PrettyTables.pretty_table(inv(matrix))
-
-    @time juliaInv = inv(matrix)
-    @time blockInv = block_inversion(matrix)
-
-
-    # Calculate the norm of the difference between the two inverses
-    norm_diff = norm(juliaInv - blockInv)
-
-    # Check if the norm is close to zero when rounded to an integer
-    println(round(Int, abs(norm_diff)) == 0 ? "Accurate Output." : "Inaccurate Output.")
-    return round(Int, abs(norm_diff)) == 0
-
-end
-
-# main()
