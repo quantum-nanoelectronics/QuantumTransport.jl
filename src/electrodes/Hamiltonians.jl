@@ -1,8 +1,8 @@
 using LinearAlgebra
 using SparseArrays
 
-include("Structs.jl")
-include("Utilities.jl")
+# include("Structs.jl")
+# include("Utilities.jl")
 
 function makeElectrodeH(p::NamedTuple,ElectrodeInfo::Electrode,edge_NNs::Vector{Hopping})
 	kfilter = [0;1;1] # to ensure that self-energy in x is Γ centered

@@ -1,4 +1,5 @@
-include("Structs.jl")
+# include("Structs.jl")
+
 
 function xyztoi(p,ivec, N::Vector{Int} = [0;0;0]) 
 	# indexing 0 to N-1
@@ -130,6 +131,3 @@ rot(θ) = [cos(θ) -sin(θ); sin(θ) cos(θ)]
 function nsite(isite::Int)
 	return -2*isite + 1
 end
-
-
-

@@ -1,7 +1,7 @@
 using LinearAlgebra
 using SparseArrays
 
-include("Structs.jl")
+# include("Structs.jl")
 
 function genNNs(p,ElectrodeInfo::Electrode) # all of the terms in the hamiltonian get added here, get back the relevant bonds
 	n = p.n
@@ -9,6 +9,7 @@ function genNNs(p,ElectrodeInfo::Electrode) # all of the terms in the hamiltonia
 	ep = electrodeParams(p,ElectrodeInfo) # electrodeparams
 	ix = 0
 	nx = 1
+	println("ElectrodeInfo.type: ", ElectrodeInfo.type)
 	hopping! = hoppingDict[ElectrodeInfo.type]
 	for iy = 0:(ep.ny-1)
 		for iz = 0:(ep.nz-1)
@@ -23,6 +24,8 @@ function genNNs(p,ElectrodeInfo::Electrode) # all of the terms in the hamiltonia
 			end
 		end
 	end
+
+	
 	# now fix the designation for the vectors that hop out of the lattice
 	# Will connect them around later using bloch's theorem to generate H(k) function
 	for NN in NNs

@@ -1,7 +1,11 @@
 using LinearAlgebra
 using SparseArrays
 
-include("Structs.jl")
+# include("Structs.jl")
+# include("NearestNeighbors.jl")
+# include("Utilities.jl")
+# include("Hamiltonians.jl")
+# include("Dependencies.jl")
 
 # return a vector of Σ(k) functions which return Σₖ(E) which return a sparse nsite × nsite matrix at a given energy
 function genΣₖs(p::NamedTuple,ElectrodeInfo::Vector{Electrode})   
@@ -44,7 +48,7 @@ function genΣₖs(p::NamedTuple,ElectrodeInfo::Vector{Electrode})
 	return Σks
 end
 
-#=function genΣₖs(p::NamedTuple,ElectrodeInfo::Vector{Electrode})   
+#=function modifiedGenΣₖs(p::NamedTuple,ElectrodeInfo::Vector{Electrode})   
 	nE = size(ElectrodeInfo)[1]
 	Σks = Vector{Function}(undef,nE)
 	for i = 1:nE # define a self-energy function for every electrode attached to device
@@ -242,4 +246,6 @@ function ∫Σgen(p::NamedTuple, H::Function, Hslab::SparseMatrixCSC, βₐ::Spa
     end
     return Σ
 end
+
+
 
