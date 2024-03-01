@@ -22,11 +22,11 @@ function spinOrbitHamiltonian(n::Int)
 end
 
 
-function verifyCorrectness(approximatedGʳ::Function, fullGʳ::Function, N::Int, Emin::Float64=-3.0, Emax::Float64=3.0, nE::Int=50, cutoff=0.05)
+function verifyCorrectness(testMatrix::Function, correctMatrix::Function, N::Int, Emin::Float64=-3.0, Emax::Float64=3.0, nE::Int=50, cutoff=0.05)
     sumdiff = 0
     Evals = LinRange(Emin,Emax, nE)
     for E ∈ Evals
-            sumdiff += sum(abs.(abs.(approximatedGʳ(E)).*(approximatedGʳ(E) - fullGʳ(E))))/(N)^2 
+            sumdiff += sum(abs.(abs.(testMatrix(E)).*(testMatrix(E) - correctMatrix(E))))/(N)^2 
     end
     sumdiff = sumdiff/nE
     println("Error = ", sumdiff)
