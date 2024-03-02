@@ -1,44 +1,34 @@
-using QuantumTransport
-using Test
-
 """
 This is the main test file that is called first when running any tests.
-All other dependencies for tests besides the QuantumTransport package and the Test package should be included in this file.
+Uses modules in the test files to avoid polluting the global namespace, with QuantumTransport, Test, and other packages used. 
 """
 
+using Test
 
 @testset "QuantumTransport.jl Tests" begin
-
-    # This will include and run the tests from `hello_world.jl`
-    println("---------------RUNNING SAMPLE TESTS---------------")
+    println("\033[1m---------------RUNNING SAMPLE TESTS---------------\033[0m")
     @testset "Sample Test" begin
-        include("hello-world.jl")
-        # include("column-major.jl")
+        include("hello_world.jl")
+        include("column_major.jl")
     end
 
-    println("----------RUNNING MATRIX INVERSION TESTS----------")
+    println("\033[1m----------RUNNING MATRIX INVERSION TESTS----------\033[0m")
     @testset "Matrix Inversion Test" begin
-        using LinearAlgebra
-        using SparseArrays
-        include("matrix.jl")
+        include("matrices.jl")
     end
 
-    println("------------RUNNING INPUT OUTPUT TESTS------------")
+    println("\033[1m------------RUNNING INPUT OUTPUT TESTS------------\033[0m")
     @testset "Input Output Test" begin
-        using DataFrames
-        using Random
         include("io.jl")
     end
 
-    println("------------RUNNING SELF ENERGIES TESTS------------")
+    println("\033[1m------------RUNNING SELF ENERGIES TESTS------------\033[0m")
     @testset "Self Energies Test" begin
-        include("self-energies.jl")
+        include("self_energies.jl")
     end
 
-    # cannot fully test Data Visualization because GitHub does not have a GPU
-    # non interactive image plots generated, however we want to generate interactive plots
+    println("\033[1m---------RUNNING DATA VISUALIZATION TESTS----------\033[0m")
     @testset "Data Visualization Test" begin
-        using CairoMakie
         include("visualization.jl")
     end
 

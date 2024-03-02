@@ -5,8 +5,6 @@ using DataFrames
 using CairoMakie
 # using Makie, DataFrames
 
-include("../io/read-positions.jl")
-
 
 
 function generate_plot_makie(df, margin::Float64 = 0.0)

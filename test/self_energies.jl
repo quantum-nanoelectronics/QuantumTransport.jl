@@ -1,7 +1,16 @@
 # this file tests the self-energies module
 
+module TestSelfEnergies
+using QuantumTransport
+using Test
+using LinearAlgebra
 
+"""
+    testElectrodes()
 
+Test function for the `Electrodes` module. It defines the parameters `p` and `A`, creates an `ElectrodesArray`, generates the self-energies `Σₖs`, and checks if `Σₖs` is empty.
+
+"""
 function testElectrodes()
     # Define p and A
     p = (
@@ -87,6 +96,7 @@ function testElectrodes()
         arpack = true, 
         klist = ["M", "Γ", "X₁", "M", "X₂", "Γ", "X₃"]
     )
+    
     function A(R::Vector{Float64})
         return [0.0;0.0;0.0]
     end
@@ -106,3 +116,5 @@ function testElectrodes()
     end
 
 testElectrodes()
+
+end # module
