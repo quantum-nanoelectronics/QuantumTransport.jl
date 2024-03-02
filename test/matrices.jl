@@ -76,7 +76,7 @@ function block_inv_main()
     norm_diff = norm(juliaInv - blockInv)
 
     # Check if the norm is close to zero when rounded to an integer
-    println(round(Int, abs(norm_diff)) == 0 ? "Accurate Output." : "Inaccurate Output.")
+    println((Int, abs(norm_diff))) # == 0 ? "Accurate Output." : "Inaccurate Output.")
     return round(Int, abs(norm_diff)) == 0
 
 end
