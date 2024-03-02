@@ -3,8 +3,15 @@
 
 module QuantumTransport
 
+"""
+    _helperIncludeModules(dir)
 
-# Given a directory, include all modules in subdirectories
+Function to include modules in all subdirectories of the given directory where all module files are titled Module.jl.
+
+# Arguments
+- `dir`: The directory to include modules from.
+
+"""
 function _helperIncludeModules(dir)
     moduleExists = false
     for item in readdir(dir, join=true)
@@ -26,10 +33,16 @@ function _helperIncludeModules(dir)
     return moduleExistsInAllSubdirs
 end
 
-# Include all modules in subdirectories of the src directory
-function _includeModulesInSubdirs(item = @__DIR__)
+
+"""
+_includeModulesInSubdirs()
+
+This function is responsible for calling _helperIncludeModules(item), where item is each top-level subdirectory of /src. QuantumTransport module.
+
+"""
+function _includeModulesInSubdirs()
     # Iterate over all directories in the src directory
-    for item in readdir(item, join=true)
+    for item in readdir(@__DIR__, join=true)
         if isdir(item)
             # println("Adding item: $item")
             if !_helperIncludeModules(item)
@@ -43,21 +56,41 @@ function _includeModulesInSubdirs(item = @__DIR__)
 end
 
 # Import and export all modules in QuantumTransport
-function _importAndExportModules()
+"""
+_importAndExportModules()
+
+Dynamically imports and exports modules within the QuantumTransport module.
+
+This function iterates over the modules defined within the QuantumTransport module and dynamically imports them using the `using` statement. It then exports all the names defined within each module using the `export` statement.
+
+No arguments are required for this function.
+    
+"""
+function _importAndExportModules(verbose::Bool=false)
     module_names = filter(name -> typeof(getfield(QuantumTransport, name)) <: Module, names(QuantumTransport, all=true))
     for name in module_names
         # Dynamically construct and evaluate the import statement within QuantumTransport
         eval(:(using .$(name)))
+        
         exported_names = names(getfield(QuantumTransport, name), all=false)
-        # println("Exported names in $name: ", exported_names)
+        
+        # Print information if verbose is true
+        if verbose
+            println("Exported names in $name: ", join(exported_names, ", "))
+        end
+
         for ename in exported_names
             eval(:(export $(ename)))
         end
     end
 end
 
+println("--------LOADING QuantumTransport MODULES----------")
+
 # Call functions in this module
 _includeModulesInSubdirs()
-_importAndExportModules()
+_importAndExportModules(true)
+
+println("---------LOADED QuantumTransport MODULES----------")
 
 end # module

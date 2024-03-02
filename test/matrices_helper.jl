@@ -1,9 +1,5 @@
 # This file is included in matrix.jl
 
-# Data - globals for now
-argsMatrix = nothing
-testMatrix = nothing
-
 # Functions
 
 # Kron
@@ -42,18 +38,16 @@ end
 
 # Create/set test matrix
 function setVars(args)
-    if args[7] == 0
+    if args[8] == 0
         # This is the initially created test matrix
         retVal = CreateBlockMatrix(args[1], args[2], args[3], args[5])  
-    elseif args[7] == 1
+    elseif args[8] == 1
         # effective mass test matrix.
         retVal = CreateBlockMatrix(args[1], args[2], args[3], args[5], sparse(effectiveMass(args[1] ÷ args[2], args[2])))
     else
         # spin orbit hamiltonian test matrix - Block sizes of 2s only
         retVal = CreateBlockMatrix(args[1], args[2], args[3], args[5], sparse(spinOrbitHamiltonian(args[1] ÷ args[2], args[6])))
     end 
-    global argsMatrix = args
-    global testMatrix = retVal
 
     return retVal
 end
@@ -82,15 +76,22 @@ end
 function timeInv(Energy::Float64)
     matrixCopy = deepcopy(testMatrix)
     matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
-    # Time the computation of the inverse of the dense matrix using built-in inversion
-    print("Julia Inverse Time: ")
-    @time juliaInv = getInvJulia(matrixCopy)
-    # Time the computation of the inverse of the block matrix using RGF method
-    print("RGF Inverse Time: ")
-    @time rgfInv = getInvRGF(matrixCopy)
+
+    # Benchmark the computation of the inverse of the dense matrix using built-in inversion
+    juliaInvBenchmark = @benchmark getInvJulia($matrixCopy)
+
+    # Benchmark the computation of the inverse of the block matrix using RGF method
+    rgfInvBenchmark = @benchmark getInvRGF($matrixCopy)
+
+    # Extract median times for a fair comparison
+    juliaInvTime = median(juliaInvBenchmark.times)  # Median time in nanoseconds
+    rgfInvTime = median(rgfInvBenchmark.times)      # Median time in nanoseconds
+
+    println("Julia Inverse Median Time: $(juliaInvTime / 1e6) ms")
+    println("RGF Inverse Median Time: $(rgfInvTime / 1e6) ms")
+
+    return juliaInvTime > rgfInvTime
 end
-
-
 
 
 # other functions to test the correctness
