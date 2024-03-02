@@ -1,7 +1,15 @@
+module TestDataVisualization
+using QuantumTransport
+using Test
+using CairoMakie
+
 """
     runVisualizationTests()
 
 Run the visualization tests for the QuantumTransport package.
+Cannot fully test Data Visualization on GitHub, as no GPU is available.
+Non-interactive image plots generated, for now.
+
 """
 function runVisualizationTests()
     nm = 1E-9
@@ -39,3 +47,5 @@ function runVisualizationTests()
 end
 
 runVisualizationTests()
+
+end # module TestDataVisualization

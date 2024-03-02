@@ -1,5 +1,11 @@
 # This file is used to test the IO code
 
+module TestIO
+
+using QuantumTransport
+using Test
+using DataFrames
+using Random
 
 """
 	testIO(ioDir, filename, positions, meta, header)
@@ -128,13 +134,7 @@ function generate_df(data::Vector{Vector{Float64}}, metaData::Vector{String}, he
     return df, metaData
 end
 
-
-println("Generating CNT positions")
-CNT_positions = make_metallic_CNT_positions(20)
-println("Generated CNT positions")
-
-
-const SAMPLE_POSITIONS = [
+sample_positions = [
     [1.0, 0.0, 0.0],
     [2.0, 0.0, 0.0],
     [3.0, 0.0, 0.0],
@@ -149,6 +149,10 @@ const SAMPLE_POSITIONS = [
 
 # set data and call test functions
 function runIOTests()
+    println("\033[1mGenerating CNT positions\033[0m")
+    CNT_positions = make_metallic_CNT_positions(20)
+    println("\033[1mGenerated CNT positions\033[0m")
+
     baseDir = abspath(joinpath(@__DIR__, ".."))
     ioDir = joinpath(baseDir, "data-output")
     positions = CNT_positions
@@ -162,3 +166,5 @@ function runIOTests()
 end
 
 runIOTests()
+
+end # module MyModule
