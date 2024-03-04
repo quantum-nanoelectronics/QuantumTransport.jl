@@ -49,6 +49,7 @@ module LRA_mod
                 schur, hist = partialschur(A, nev = curr_rank, tol = sqrt(eps()), which = ArnoldiMethod.SR())
                 λs, Rvecs = partialeigen(schur)
                 error = norm_error(A, reconstruct(Rvecs, conj(Rvecs), λs)) #NOTE: expensive
+                println(error)
                 if abs(Emin - minimum(real.(λs))) < ΔE &&
                    abs(Emax - maximum(real.(λs))) < ΔE &&
                    error < errortol
@@ -58,7 +59,8 @@ module LRA_mod
                 iters+=1; curr_rank+=rankstep
             end
 
-            if success return new(Rvecs, conj(Rvecs), λs, curr_rank, A.n) else return A end
+            #if success return new(Rvecs, conj(Rvecs), λs, curr_rank, A.n) else return A end
+            if success return new(Rvecs, conj(Rvecs), λs, curr_rank, A.n) else return nothing end
 
         end
 
@@ -75,6 +77,8 @@ module LRA_mod
         display(A′.λs)
         print(io, "Right eigenvectors:\n")
         display(A′.Rvecs)
+        print(io, "Left eigenvectors:\n")
+        display(A′.Lvecs)
         #NOTE: can display if debugging
         print(io, "Reconstructed ∑λvvᴴ:\n")
         display(reconstruct(A′))
@@ -114,8 +118,19 @@ module LRA_mod
         if A′.n != B′.n
             throw(DomainError(A′, "BAD SHAPE IN LRA MATRIX MULTIPLICATION"))
         end
-        # reconstruction
-        C′ = LRA( reconstruct(A′) * B′.Rvecs, B′.Lvecs, B′.λs, B′.rank, B′.n)
+        Ω = zeros(ComplexF64, B′.n, B′.rank)   
+        ω = Matrix{ComplexF64}(undef, B′.n, B′.rank)  
+        λs = Matrix{ComplexF64}(undef, B′.rank, 1)   
+        for j in eachindex(B′.λs)
+            for i in eachindex(A′.λs)
+                Ω[:,j] += (A′.λs[i] * B′.λs[j] * A′.Lvecs[:,i]' * B′.Rvecs[:,j]) * A′.Rvecs[:,i] 
+            end
+            #n = dot(conj(transpose(Ω[:,j])), Ω[:,j])
+            n = Ω[:,j]' * Ω[:,j]
+            λs[j] = n
+            ω[:,j] = Ω[:,j] / n
+        end
+        C′ = LRA(ω, B′.Lvecs, λs, B′.rank, B′.n)
         return C′
     end
 
@@ -136,11 +151,12 @@ module LRA_mod
     Base.:size(A′::LRA) = A′.n, A′.n
     Base.:getindex(A′::LRA, i::Int, j::Int) = getindex_LRA(A′::LRA, i::Int, j::Int)
     
-    #TODO: convert down to LRA?
+    #TODO: define rule for conversion?
     #Base.:promote_rule(...)
     #Base.:convert(...)
 
     # TODO: define shifting of eigenenergies when add identity matrix
+    # TODO: define addition
     #Base.:+(A′::LRA, A::T) where T<:Matrix = +(promote(A′,A)...)
     #Base.:-(A′::LRA, A::T) where T<:Matrix = -(promote(A′,A)...)
     #Base.:+(A′::LRA, B′::LRA) = +(reconstruct(A′), reconstruct(B′))
