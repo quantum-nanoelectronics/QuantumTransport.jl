@@ -148,6 +148,16 @@ module LRA_mod
         return A′[i, :] ⋅ B′[:,j]
     end
 
+    function add_scaled_identity(D::Diagonal, A′::LRA)
+        D_1 = D[1]
+        for i in eachindex(D)
+            if D[i] != D_1
+                throw(DomainError(A′, "WEIRD PERTURBATION NOT IMPLEMENTED."))
+            end
+        end
+        A′.λs += D_1
+    end
+
     Base.:size(A′::LRA) = A′.n, A′.n
     Base.:getindex(A′::LRA, i::Int, j::Int) = getindex_LRA(A′::LRA, i::Int, j::Int)
     
@@ -161,6 +171,8 @@ module LRA_mod
     #Base.:-(A′::LRA, A::T) where T<:Matrix = -(promote(A′,A)...)
     #Base.:+(A′::LRA, B′::LRA) = +(reconstruct(A′), reconstruct(B′))
     #Base.:-(A′::LRA, B′::LRA) = -(reconstruct(A′), reconstruct(B′))
+    Base.:+(D::Diagonal, A′::LRA) = add_scaled_identity(D,A′)
+    Base.:+(A′::LRA, D::Diagonal) = add_scaled_identity(D,A′)
 
     Base.:*(A′::LRA, A::Union{SparseMatrixCSC{ComplexF64, Int64}, Matrix{ComplexF64}}) = LRAbyMatrix(A′, A)
     Base.:*(A::Union{SparseMatrixCSC{ComplexF64, Int64}, Matrix{ComplexF64}}, A′::LRA) = LRAbyMatrix(A′, A)
