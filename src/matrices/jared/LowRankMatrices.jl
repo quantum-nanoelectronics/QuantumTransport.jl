@@ -17,8 +17,8 @@ module LowRankMatrices
         n     :: Int64
 
         function LRA(A::SparseMatrixCSC{ComplexF64, Int64},
-                Emin::𝐑, Emax::𝐑, ΔE::𝐑,
-                initialrank::Int = 32, rankstep::Int = 16,
+                Emin::𝐑, Emax::𝐑; 
+                initialrank::Int = 64, rankstep::Int = 32,
                 maxiters::Int = 100, errortol::𝐑 = 1e-2) where 𝐑 <: Real
             if A.n != A.m
                 throw(DomainError(A, "LRA DEFINED FOR SQUARE MATRICES ONLY."))
@@ -149,8 +149,9 @@ module LowRankMatrices
         return C′
     end
 
+
     function LRAbyMatrix(A′::LRA, A::Union{SparseMatrixCSC{ComplexF64, Int64}, Matrix{ComplexF64}})
-        if A′.n != A.n
+        if A′.n != size(A)[2]
             throw(DomainError(A′, "BAD SHAPE IN LRA MATRIX MULTIPLICATION"))
         end
         #NOTE: Assumes A is linear
@@ -167,23 +168,22 @@ module LowRankMatrices
         D_1 = D[1]
         for i in eachindex(D)
             if D[i] != D_1
-                throw(DomainError(A′, "WEIRD PERTURBATION NOT IMPLEMENTED."))
+                throw(DomainError(A′, "Perturbative sum not yet implemented for Diagonal matrices"))
             end
         end
         A′.λs += D_1
     end
 
     function inv(A::LRA)
-        B = deepcopy(A)
-        B.λs = (B.λs).^(-1)
-        return B
+        invλs = (A.λs).^(-1)
+        return LRA(A.Rvecs, A.Lvecs, invλs, A.rank, A.n)
     end
 
     function perturbative_sum(A::LRA, B::LRA)
         # figure out which matrix is bigger
         sumλs_A = sum(abs.(A.λs))
         sumλs_B = sum(abs.(B.λs))
-        H::LRA; δH::LRA
+        H = undef; δH = undef;
         if sumλs_A > sumλs_B
             H = A
             δH = B
@@ -191,12 +191,12 @@ module LowRankMatrices
             δH = A
             H = B
         end
-        # now do non-hermitian degenerate perturbation theory, basically
+        # now do non-hermitian degenerate perturbation theory
         Heff = zeros(ComplexF64,H.rank,H.rank)
         Heff += Diagonal(H.λs)
         for row ∈ 1:H.rank
             for col ∈ 1:H.rank
-                Heff[row, col] = H.Lvecs[:,row]'*δH*H.Rvecs[:,col]
+                Heff[row, col] = Matrix(H.Lvecs[:,row]')*δH*H.Rvecs[:,col]
             end
         end
         # Rcoeffs and Lcoeffs are rank × n matrices
@@ -204,9 +204,23 @@ module LowRankMatrices
         Lcoeffs = eigvecs(Heff')
         newRvecs = H.Rvecs*Rcoeffs
         newLvecs = H.Lvecs*Lcoeffs
-        return new(newRvecs, newLvecs, λs, H.rank, H.n)
+        return LRA(newRvecs, newLvecs, λs, H.rank, H.n)
     end
 
+    function number_multiplication(A′::LRA, C::Number)
+        return LRA(A′.Rvecs, A′.Lvecs, C*A′.λs, A′.rank, A′.n)
+    end
+
+    function LRA_vector_multiplication(A::LRA, V::Vector)
+        # assert size of vector same as A
+        return A.Lvecs*(Diagonal(A.λs)*(A.Rvecs*V))
+    end
+ 
+    function LRA_vector_multiplication(V::Vector, A::LRA)
+        # assert size of vector same as A
+        return ((V*A.Lvecs)*Diagonal(A.λs))*A.Rvecs
+    end
+    
     Base.:size(A′::LRA) = A′.n, A′.n
     Base.:getindex(A′::LRA, i::Int, j::Int) = getindex_LRA(A′::LRA, i::Int, j::Int)
     
@@ -224,7 +238,12 @@ module LowRankMatrices
     Base.:+(D::Diagonal, A′::LRA) = add_scaled_identity(D,A′)
     Base.:+(A′::LRA, D::Diagonal) = add_scaled_identity(D,A′)
     Base.:+(A::LRA,B::LRA) = perturbative_sum(A,B)
+    Base.:inv(A::LRA) = inv(A)
 
+    Base.:*(V::Vector,A′::LRA) = LRA_vector_multiplication(V, A′)  
+    Base.:*(A′::LRA,V::Vector) = LRA_vector_multiplication(A′, V)
+    Base.:*(A′::LRA,C::Number) = number_multiplication(A′, C)
+    Base.:*(C::Number, A′::LRA) = number_multiplication(A′, C)
     Base.:*(A′::LRA, A::Union{SparseMatrixCSC{ComplexF64, Int64}, Matrix{ComplexF64}}) = LRAbyMatrix(A′, A)
     Base.:*(A::Union{SparseMatrixCSC{ComplexF64, Int64}, Matrix{ComplexF64}}, A′::LRA) = LRAbyMatrix(A′, A)
     Base.:*(A′::LRA, B′::LRA) = LRAbyLRA(A′, B′)
