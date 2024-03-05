@@ -1,4 +1,4 @@
-module LRA_mod
+module LowRankMatrices
     using LinearAlgebra
     using SparseArrays
     using ArnoldiMethod
