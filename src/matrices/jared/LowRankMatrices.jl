@@ -15,11 +15,12 @@ module LowRankMatrices
         λs    :: Array{ComplexF64}
         rank  :: Int64
         n     :: Int64
+        eigendecomp :: Bool
 
         function LRA(A::SparseMatrixCSC{ComplexF64, Int64},
                 Emin::𝐑, Emax::𝐑; 
                 initialrank::Int = 64, rankstep::Int = 32,
-                maxiters::Int = 100, errortol::𝐑 = 1e-2) where 𝐑 <: Real
+                maxiters::Int = 20, errortol::𝐑 = 1e-2) where 𝐑 <: Real
             if A.n != A.m
                 throw(DomainError(A, "LRA DEFINED FOR SQUARE MATRICES ONLY."))
             end
@@ -30,10 +31,11 @@ module LowRankMatrices
             end
 
             #= Ignore small matrices. Decrease INITIAL_RANK for testing. =#
+            #=
             if A.n < initialrank
                 return A
             end
-
+            =#
             λs = undef; Rvecs = undef; Lvecs = undef
             curr_rank = initialrank
             success = false
@@ -60,11 +62,14 @@ module LowRankMatrices
                 _, Lvecs = eigs(shiftedA', nev = curr_rank, tol = sqrt(eps()), which=:SM)
                 minλ = minimum(real.(λs))
                 maxλ = maximum(real.(λs))
+                # increase ARPACK decreases # eigvals
+                curr_rank = length(λs)
                 println("Rank = $curr_rank, Min λ = $minλ, Max λ = $maxλ, Energy window = $energywindow")
                 if minλ < - energywindow/2 && maxλ > energywindow/2
                     success = true
                     break
                 end
+                # normalize the phase on the first index of each eigvec
                 #=if abs(Emin - minλ) < ΔE &&
                    abs(Emax - maxλ) < ΔE &&
                    error < errortol
@@ -73,43 +78,45 @@ module LowRankMatrices
                 end=#
                 iters+=1; curr_rank+=rankstep
             end
-
+            # normalize the phase on each eigvec
+            for i = 1:curr_rank
+                Rvecs[:,i] = Rvecs[:,i]/Rvecs[1,i]
+                Lvecs[:,i] = Lvecs[:,i]/Lvecs[1,i]
+            end
             #if success return new(Rvecs, conj(Rvecs), λs, curr_rank, A.n) else return A end
-            if success return new(Rvecs, Lvecs, λs.+centralenergy, curr_rank, A.n) else return nothing end
+            if success return new(Rvecs, Lvecs, λs.+centralenergy, curr_rank, A.n, true) else return nothing end
 
         end
 
         function LRA(Rvecs::Matrix{ComplexF64}, Lvecs::Matrix{ComplexF64},
                      λs::Array{ComplexF64}, rank::Int64, n::Int64)
-            return new(Rvecs, Lvecs, λs, rank, n)
+            return new(Rvecs, Lvecs, λs, rank, n, false)
         end
 
     end
 
     function Base.show(io::IO, A′::LRA)
-        print(io, "Decomposed matrix of rank ", A′.rank, "\n")
-        print(io, "Eigenvalues:\n")
-        display(A′.λs)
-        print(io, "Right eigenvectors:\n")
-        display(A′.Rvecs)
-        print(io, "Left eigenvectors:\n")
-        display(A′.Lvecs)
-        #NOTE: can display if debugging
-        print(io, "Reconstructed ∑λvvᴴ:\n")
-        display(reconstruct(A′))
+        n = A′.n
+        println("$n×$n Low Rank Matrix of rank $(A′.rank)")
+        println("Eigenvalues: $(A′.λs)")
+        println("Size of left eigenvector block: $(size(A′.Lvecs))")
+        println("Size of right eigenvector block: $(size(A′.Rvecs))")
     end
 
     # world ending critical failure if reconstruct. reconstruct expects normal matrix
     function reconstruct(A′::LRA)
-        A = zeros(ComplexF64, A′.n, A′.n)
-        for k in eachindex(A′.λs)
-            A .+= A′.λs[k] * A′.Rvecs[:,k] * transpose( A′.Lvecs[:,k] )
-        end
-        return A
+        @warn "You probably don't want to reconstruct a dense matrix. Reconsider, and do not use with large matrices."
+        return A′.Rvecs*Diagonal(A′.λs)*transpose(A′.Lvecs)
+        #A = zeros(ComplexF64, A′.n, A′.n)
+        #for k in eachindex(A′.λs)
+        #    A .+= A′.λs[k] * A′.Rvecs[:,k] * transpose( A′.Lvecs[:,k] )
+        #end
+        #return A
     end
 
     function reconstruct(Rvecs::Matrix{ComplexF64}, Lvecs::Union{Matrix{ComplexF64}, Transpose{ComplexF64}},
                          λs::Array{ComplexF64})
+        @warn "You probably don't want to do this. Reconsider, and do not use with large matrices."
         A = zeros(ComplexF64, size(Rvecs)[1], size(Rvecs)[1])
         for k in eachindex(λs)
             A .+= λs[k] * Rvecs[:,k] * transpose( Lvecs[:,k] )
@@ -235,6 +242,7 @@ module LowRankMatrices
     #Base.:-(A′::LRA, A::T) where T<:Matrix = -(promote(A′,A)...)
     #Base.:+(A′::LRA, B′::LRA) = +(reconstruct(A′), reconstruct(B′))
     #Base.:-(A′::LRA, B′::LRA) = -(reconstruct(A′), reconstruct(B′))
+    Array(A::LRA) = reconstruct(A)
     Base.:+(D::Diagonal, A′::LRA) = add_scaled_identity(D,A′)
     Base.:+(A′::LRA, D::Diagonal) = add_scaled_identity(D,A′)
     Base.:+(A::LRA,B::LRA) = perturbative_sum(A,B)
