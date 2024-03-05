@@ -16,7 +16,7 @@ module LRA_mod
 
         function LRA(A::SparseMatrixCSC{ComplexF64, Int64},
                 Emin::𝐑, Emax::𝐑, ΔE::𝐑,
-                initialrank::Int = 10, rankstep::Int = 1,
+                initialrank::Int = 10, rankstep::Int = 5,
                 maxiters::Int = 100, errortol::𝐑 = 1e-2) where 𝐑 <: Real
             if A.n != A.m
                 throw(DomainError(A, "LRA DEFINED FOR SQUARE MATRICES ONLY."))
@@ -48,10 +48,14 @@ module LRA_mod
             while iters <= maxiters && curr_rank <= A.n
                 schur, hist = partialschur(A, nev = curr_rank, tol = sqrt(eps()), which = ArnoldiMethod.SR())
                 λs, Rvecs = partialeigen(schur)
-                error = norm_error(A, reconstruct(Rvecs, conj(Rvecs), λs)) #NOTE: expensive
-                println(error)
-                if abs(Emin - minimum(real.(λs))) < ΔE &&
-                   abs(Emax - maximum(real.(λs))) < ΔE &&
+                error = 0
+                #error = norm_error(A, reconstruct(Rvecs, conj(Rvecs), λs)) #NOTE: expensive
+                #println(error)
+                minλ = minimum(real.(λs))
+                maxλ = maximum(real.(λs))
+                println("Rank = $curr_rank, Min λ = $minλ, Max λ = $maxλ")
+                if abs(Emin - minλ) < ΔE &&
+                   abs(Emax - maxλ) < ΔE &&
                    error < errortol
                     success = true
                     break
@@ -86,7 +90,7 @@ module LRA_mod
 
     # world ending critical failure if reconstruct. reconstruct expects normal matrix
     function reconstruct(A′::LRA)
-        A = Matrix{ComplexF64}(undef, A′.n, A′.n)
+        A = zeros(ComplexF64, A′.n, A′.n)
         for k in eachindex(A′.λs)
             A .+= A′.λs[k] * A′.Rvecs[:,k] * transpose( A′.Lvecs[:,k] )
         end
@@ -95,7 +99,7 @@ module LRA_mod
 
     function reconstruct(Rvecs::Matrix{ComplexF64}, Lvecs::Union{Matrix{ComplexF64}, Transpose{ComplexF64}},
                          λs::Array{ComplexF64})
-        A = Matrix{ComplexF64}(undef, size(Rvecs)[1], size(Rvecs)[1])
+        A = zeros(ComplexF64, size(Rvecs)[1], size(Rvecs)[1])
         for k in eachindex(λs)
             A .+= λs[k] * Rvecs[:,k] * transpose( Lvecs[:,k] )
         end
