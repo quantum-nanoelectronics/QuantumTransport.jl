@@ -158,6 +158,40 @@ module LRA_mod
         A′.λs += D_1
     end
 
+    function inv(A::LRA)
+        B = deepcopy(A)
+        B.λs = (B.λs).^(-1)
+        return B
+    end
+
+    function perturbative_sum(A::LRA, B::LRA)
+        # figure out which matrix is bigger
+        sumλs_A = sum(abs.(A.λs))
+        sumλs_B = sum(abs.(B.λs))
+        H::LRA; δH::LRA
+        if sumλs_A > sumλs_B
+            H = A
+            δH = B
+        else
+            δH = A
+            H = B
+        end
+        # now do non-hermitian degenerate perturbation theory, basically
+        Heff = zeros(ComplexF64,H.rank,H.rank)
+        Heff += Diagonal(H.λs)
+        for row ∈ 1:H.rank
+            for col ∈ 1:H.rank
+                Heff[row, col] = H.Lvecs[:,row]'*δH*H.Rvecs[:,col]
+            end
+        end
+        # Rcoeffs and Lcoeffs are rank × n matrices
+        λs, Rcoeffs = eigen(Heff)
+        Lcoeffs = eigvecs(Heff')
+        newRvecs = H.Rvecs*Rcoeffs
+        newLvecs = H.Lvecs*Lcoeffs
+        return new(newRvecs, newLvecs, λs, H.rank, H.n)
+    end
+
     Base.:size(A′::LRA) = A′.n, A′.n
     Base.:getindex(A′::LRA, i::Int, j::Int) = getindex_LRA(A′::LRA, i::Int, j::Int)
     
@@ -167,12 +201,14 @@ module LRA_mod
 
     # TODO: define shifting of eigenenergies when add identity matrix
     # TODO: define addition
+
     #Base.:+(A′::LRA, A::T) where T<:Matrix = +(promote(A′,A)...)
     #Base.:-(A′::LRA, A::T) where T<:Matrix = -(promote(A′,A)...)
     #Base.:+(A′::LRA, B′::LRA) = +(reconstruct(A′), reconstruct(B′))
     #Base.:-(A′::LRA, B′::LRA) = -(reconstruct(A′), reconstruct(B′))
     Base.:+(D::Diagonal, A′::LRA) = add_scaled_identity(D,A′)
     Base.:+(A′::LRA, D::Diagonal) = add_scaled_identity(D,A′)
+    Base.:+(A::LRA,B::LRA) = perturbative_sum(A,B)
 
     Base.:*(A′::LRA, A::Union{SparseMatrixCSC{ComplexF64, Int64}, Matrix{ComplexF64}}) = LRAbyMatrix(A′, A)
     Base.:*(A::Union{SparseMatrixCSC{ComplexF64, Int64}, Matrix{ComplexF64}}, A′::LRA) = LRAbyMatrix(A′, A)
