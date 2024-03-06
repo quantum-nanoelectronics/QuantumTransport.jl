@@ -1,4 +1,6 @@
-using QuantumTransport
+module testHoppings
+
+using Test
 
 include("InBi.jl")
 include("../src/hoppings/createHoppings.jl")
@@ -47,3 +49,4 @@ checkNNs(NNs, pNNs)
 NNs = pruneHoppings(NNs, []) #p needs a prune value
 H₀, edge_NNs = nnHoppingMat(NNs, pHopMat)
 H = testHGen(pH, H₀, edge_NNs)
+end
