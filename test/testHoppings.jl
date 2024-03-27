@@ -7,6 +7,22 @@ include("../src/hoppings/createHoppings.jl")
 include("../src/hoppings/Materials.jl")
 include("../src/hamiltonian/ConstructHamiltonian.jl")
 
+function HoppingsTest() 
+    p, p1, p2, p3, A  = InBi.generateParams()
+    dict = Dict()
+        
+        for (key,value) in zip(keys(p), p)
+            dict[string(key)] = value
+        end
+    dict["deviceMaterial"] = "ins"
+    dict["deviceMagnetization"] = false
+    NNs = genNN(dict)
+    checkNNs(NNs, dict)
+    NNs = pruneHoppings(NNs, []) #p needs a prune value
+    H₀, edge_NNs = nnHoppingMat(NNs, dict)
+    H = testHGen(dict, H₀, edge_NNs)
+end
+
 function genNN(pNNs) 
     NNs = genNNs(pNNs)
 
@@ -36,17 +52,11 @@ function checkNNs(NNs, pNNs)
 end
 
 function testHGen(p, H₀, edge_NNs)
-    H = genH(p, H₀, edge_NNs)
+    H = genH(p, H₀, edge_NNs, [])
     sparseArray = H([0;0;0])
     #up-spin, down-spin
     @assert sparseArray.m == 2 && sparseArray.n == 2
 end
 
 ⊗(A,B) = kron(A,B)
-pNNs, pH, pHopMat = InBi.generateParams()
-NNs = genNN(pNNs)
-checkNNs(NNs, pNNs)
-NNs = pruneHoppings(NNs, []) #p needs a prune value
-H₀, edge_NNs = nnHoppingMat(NNs, pHopMat)
-H = testHGen(pH, H₀, edge_NNs)
-end
+HoppingsTest()

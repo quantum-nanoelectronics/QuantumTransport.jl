@@ -38,9 +38,6 @@ a₁ = A[:,1]; a₂ = A[:,2]; a₃ = A[:,3]
 B = transpose(2*π*inv(A))
 b₁ = B[:,1]; b₂ = B[:,2]; b₃ = B[:,3]
 
-nx = ny = nz = 1; n = nx*ny*nz
-
-
 function kdictGen(A)
 	B = transpose(2*π*inv(A))
 	kdict = Dict(
@@ -66,15 +63,166 @@ function kdictGen(A)
 	return kdict
 end
 
+function βgen(p,runtype::String,β₀::Float64=0.2*eV, θ::Float64=360, startDWs::Float64=-5*nm)
+	C = ħ/m₀
+        β₀ = C^-1 * β₀
+	if(runtype=="fmdotsP")
+		function fmdotPβ(R::Vector{Float64})
+			rad = 0.25; λ = 2*nm
+			SLa₁ = p.A[:,1]; SLa₂ = p.A[:,2]
+                        coeff = C^-1*β₀*exp(-((p.nz-1)*p.a₃[3] - R[3])/λ)*[1;0;0]
+                        #println("Coeff = $(round.(C*coeff,sigdigits=3)), R = $R")
+                        for i = 0:1
+				for j = 0:1
+					R₀ = i*SLa₁ + j*SLa₂
+					if( (R[1]-R₀[1])^2 + (R[2]-R₀[2])^2 < (0.25*norm(SLa₂))^2)
+						return 1*coeff
+					end
+				end
+			end
+			if( (R[1]-0.5*SLa₁[1])^2 + (R[2]-0.5*SLa₂[2])^2 < (0.25*norm(SLa₂))^2)
+				return 1*coeff
+			else
+				return 0*coeff
+			end
+		end
+                return fmdotPβ
+	elseif(runtype=="multineeldws")
+            function mndwβ(R::Vector{Float64})
+                θ = 0
+                error = 1
+                # see: O'Handley on domain walls
+                #a = 5*nm; l = 1*nm
+                #a = 30*nm; l = 5*nm
+                i = 0
+                #decay = 1
+                decay= exp(-((p.nz-1)*p.a₃[3] - R[3])/p.λ)
+                while error > 10^-5
+                    θ₋ = deepcopy(θ)
+                    θ += 2*atan(exp(π*(p.startDWs - R[1] - p.DWspacing*i)/p.DWwidth))
+                    i += 1
+                    error = abs(θ-θ₋)
+                end
+                return β₀*[sin(θ);cos(θ);0]*decay
+            end
+            return mndwβ
+	elseif(runtype=="multiblochdws")
+            function mbdwβ(R::Vector{Float64})
+                θ = 0
+                error = 1
+                # see: O'Handley on domain walls
+                #a = 5*nm; l = 1*nm
+                #a = 30*nm; l = 5*nm
+                i = 0
+                #decay = 1
+                decay= exp(-((p.nz-1)*p.a₃[3] - R[3])/p.λ)
+                while error > 10^-5
+                    θ₋ = deepcopy(θ)
+                    θ += 2*atan(exp(π*(p.startDWs - R[1] - p.DWspacing*i)/p.DWwidth))
+                    i += 1
+                    error = abs(θ-θ₋)
+                end
+                return β₀*[0;cos(θ);sin(θ)]*decay
+            end
+            return mbdwβ
+	elseif(runtype=="fmdotsAP")
+            function fmdotAPβ(R::Vector{Float64})
+			rad = 0.25; λ = 2*nm
+			SLa₁ = p.A[:,1]; SLa₂ = p.A[:,2]
+                        coeff = C^-1*β₀*exp(-((p.nz-1)*p.a₃[3] - R[3])/λ)*[1;0;0]
+                        #println("Coeff = $(round.(coeff,sigdigits=3)), R = $R")
+                        for i = 0:1
+				for j = 0:1
+					R₀ = i*SLa₁ + j*SLa₂
+					if( (R[1]-R₀[1])^2 + (R[2]-R₀[2])^2 < (0.25*norm(SLa₂))^2)
+						return 1*coeff
+					end
+				end
+			end
+			if( (R[1]-0.5*SLa₁[1])^2 + (R[2]-0.5*SLa₂[2])^2 < (0.25*norm(SLa₂))^2)
+				return -1*coeff
+			else
+				return 0*coeff
+			end
+		end
+		return fmdotAPβ
+	elseif(runtype=="neelwall")
+		function dwnβ(R::Vector{Float64})
+			α = 51 # arbitrary constant to smooth square wave
+			λ = 2*nm # penetration depth of ferromagnetism into slab
+                        xmag = cos(2*π*(θ/360)*(R⋅p.A[:,1]/(p.A[:,1]⋅p.A[:,1])))^α
+                        ymag = (1-xmag^2)*sign(sin(2*π*(θ/360)*R⋅p.A[:,1]/(p.A[:,1]⋅p.A[:,1])))
+			decay= C^-1*exp(-((p.nz-1)*p.a₃[3] - R[3])/λ)
+			return β₀*[xmag;ymag;0]*decay
+		end
+		return dwnβ
+	elseif(runtype=="simplejunction")
+		function sjβ(R::Vector{Float64})
+			α = 51 # arbitrary constant to smooth square wave
+                        half = p.A[1,1]/2
+			λ = 2*nm # penetration depth of ferromagnetism into slab
+			decay= exp(-((p.nz-1)*p.a₃[3] - R[3])/λ)
+                        if(R[1] > half*(1-0.00001))
+                            return β₀*[0;cosd(θ);sind(θ)]*decay
+                        else
+                            return β₀*[0;1;0]*decay
+                        end
+		end
+		return sjβ
+	elseif(runtype=="blochdw")
+		function dwbβ(R::Vector{Float64})
+			α = 51 # arbitrary constant to smooth square wave
+			λ = p.λ # penetration depth of ferromagnetism into slab
+                        ymag = cos(2*π*(θ/360)*(R⋅p.A[:,1]/(p.A[:,1]⋅p.A[:,1])))
+                        zmag = (1-ymag^2)*sign(sin(2*π*(θ/360)*R⋅p.A[:,1]/(p.A[:,1]⋅p.A[:,1])))
+			decay=1
+                        #decay= C^-1*exp(-((p.nz-1)*p.a₃[3] - R[3])/λ)
+			return β₀*[0;ymag;zmag]*decay
+		end
+		return dwbβ
+	elseif(runtype=="neellattice")
+		function latnβ(R::Vector{Float64})
+			α = 51 # arbitrary constant to smooth square wave
+			λ = p.λ # penetration depth of ferromagnetism into slab
+                        ymag = cos(2*π*(p.θ/360)*(R⋅p.A[:,1]/(p.A[:,1]⋅p.A[:,1])))
+                        xmag = sin(2*π*(p.θ/360)*(R⋅p.A[:,1]/(p.A[:,1]⋅p.A[:,1])))
+                        decay= exp(-((p.nz-1)*p.a₃[3] - R[3])/λ)
+			return β₀*[xmag;ymag;0]*decay
+		end
+		return latnβ
+	elseif(runtype=="blochlattice")
+		function latbβ(R::Vector{Float64})
+			α = 51 # arbitrary constant to smooth square wave
+			λ = p.λ # penetration depth of ferromagnetism into slab
+                        ymag = cos(2*π*(p.θ/360)*(R⋅p.A[:,1]/(p.A[:,1]⋅p.A[:,1])))
+                        zmag = sin(2*π*(p.θ/360)*(R⋅p.A[:,1]/(p.A[:,1]⋅p.A[:,1])))
+                        decay= exp(-((p.nz-1)*p.a₃[3] - R[3])/λ)
+			return β₀*[0;ymag;zmag]*decay
+		end
+		return latbβ
+	elseif(runtype=="fmthinfilm")
+		function fmβ(R::Vector{Float64})
+			λ = 5*nm
+			decay= C^-1*exp(-((p.nz-1)*p.a₃[3] - R[3])/λ)
+			return β₀*[0;1;0]*decay
+		end
+		return fmβ
+	else
+		function noβ(R::Vector{Float64})
+			return [0.0;0.0;0.0]
+		end
+	end
+end
+
 
 params = (
 	  t = t, t₁ = t₁, t₂ = t₂, t₃ = t₃, t₄ = t₄, t₅ = t₅, t₆ = t₆, t₇ = t₇, t₈ = t₈, t₉ = t₉,
-	  vf = 10^6, η = 10^-3,
+	  vf = 10^6, η = 10^-4,
 	  ε = ε, ε₁ = 2*eV, 
 	  a₁ = a₁, a₂ = a₂, a₃ = a₃, A = A, a=a, b=a, c=c,
 	  SLa₁ = a₁, SLa₂ = a₂, SLa₃ = a₃,
-	  nx = nx, ny = ny, nz = nz, n = n, norb = 1, nsite = 1,
-	  kdict = kdictGen(A), prune = [], μ_disorder = 0.025*eV
+	  norb = 1, nsite = 1,
+	  kdict = kdictGen(A), prune = [], μ_disorder = 0.0*eV
 	  )
 
 function pruneHoppingType(runtype::String="")
@@ -100,7 +248,7 @@ function genLatSL(p,SL1::Vector{Int},SL2::Vector{Int},SL3::Vector{Int})
 	return SLa₁, SLa₂, SLa₃
 end
 
-function genSL(p,nx::Int,ny::Int,nz::Int,SL1::Vector{Int},SL2::Vector{Int},SL3::Vector{Int},runtype::String="",fieldtype="A")
+function genSL(p,nx::Int,ny::Int,nz::Int,SL1::Vector{Int},SL2::Vector{Int},SL3::Vector{Int},runtype::String="",fieldtype="β")
 	SLa₁, SLa₂, SLa₃ = genLatSL(p,SL1,SL2,SL3)
 	newA = hcat(nx*p.SLa₁,ny*p.SLa₂,nz*p.SLa₃)
 	if(nx*ny*nz*p.norb*p.nsite > 64)
@@ -123,7 +271,23 @@ function genSL(p,nx::Int,ny::Int,nz::Int,SL1::Vector{Int},SL2::Vector{Int},SL3::
 		arpack=arpack,
 		prune=pruning,
 		klist = ["M","Γ","X₁","M","X₂","Γ", "X₃"],
-		fieldtype=fieldtype
+		fieldtype=fieldtype,
+		electrodeMaterial="weyl",
+		electrodeMagnetization = true,
+		mixedDOS = false,
+		nk = 50,
+		E_samples = [0.1],
+		l_scattering = 0,
+		δV = 0.01,
+		T = 300,
+		n_BLAS = 8,
+		savedata = false,
+		path = "../data-output/",
+		startDWs = -5*nm, DWwidth = 9*nm, DWspacing = 15*nm, λ = 10^16*nm,
+		β = 0.25*eV,
+		η = 1*10^-4,
+		ηD = 10^-4,
+		θ=360.0
 	)
 	return merge(p,SLparams)
 end
@@ -135,14 +299,16 @@ function generateParams()
 
     runparams = (
         # fermi energy, σ of background disorder
-        μ = 0.0*eV, μ_disorder = 0.0*eV, 
+        μ = 0.1*eV, μ_disorder = 0.0*eV, 
 
         # exchange splitting, name of field pattern, A or β (vector pot or exchange), finite-time broadenings
-        runtype = "blochlattice", fieldtype = "β",
+        runtype = "simplejunction", fieldtype = "β",
 
         # things to return 
         returnvals = ["transmission"],
-        prune=[]
+        prune=[],
+		deviceMaterial = "weyl",
+		deviceMagnetization = true
     )
 
     parms = merge(params,runparams)
@@ -154,7 +320,8 @@ function generateParams()
 	pH = (μ = p.μ, μ_disorder = p.μ_disorder, n = p.n, norb = p.norb, nsite = p.nsite, 
 			A = p.A, t = p.t, ε₁ = p.ε₁)
 	pHopMat = (n = p.n, nsite = p.nsite, norb = p.norb, t = p.t, ε₁ = p.ε₁)
-    return pNNs, pH, pHopMat
+	A = βgen(p,p.runtype,p.β,p.θ,p.startDWs)
+    return p, pNNs, pH, pHopMat, A
 end
 
 end

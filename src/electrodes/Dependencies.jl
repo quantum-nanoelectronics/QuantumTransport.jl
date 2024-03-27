@@ -1,4 +1,3 @@
-include("Structs.jl")
 include("NearestNeighbors.jl")
 include("Utilities.jl")
 include("Hamiltonians.jl")
@@ -242,14 +241,14 @@ end
 
 # from UsefulFunctions.jl
 
-function genTetBZ(p::NamedTuple,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cubic lattice
+function genTetBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cubic lattice
     # nx, ny, and nz specifically refer to # of points in IBZ
     kpoints = Vector{Float64}[]
     kindices = Vector{Int}[]
     kweights = Float64[]
-    X1 = p.kdict["X₁"];
-    X2 = p.kdict["X₂"];
-    X3 = p.kdict["X₃"];
+    X1 = p["kdict"]["X₁"];
+    X2 = p["kdict"]["X₂"];
+    X3 = p["kdict"]["X₃"];
     function divFixNaN(a::Int,b::Int) # for this particular instance, n/0 represents a Γ-centred sampling @ k = 0. 
             if(b==0)
                     return 0
