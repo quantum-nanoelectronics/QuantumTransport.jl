@@ -106,9 +106,14 @@ function testElectrodes()
             Electrode([-1,0],[0,p.ny],[0,p.nz],p.ny*p.nz,"-x",p.electrodeMaterial,A);
             Electrode([p.nx,p.nx+1],[0,p.ny],[0,p.nz],p.ny*p.nz,"+x",p.electrodeMaterial,A)
     ]
+    dict = Dict()
+    
+    for (key,value) in zip(keys(p), p)
+        dict[string(key)] = value
+    end
 
     # Generate the self-energies Σₖs
-    Σₖs = genΣₖs(p,ElectrodesArray) 
+    Σₖs = genΣₖs(dict,ElectrodesArray) 
 
     # Print a message to check if Σₖs is empty
     println("Test is checking whether Σₖs is empty")
