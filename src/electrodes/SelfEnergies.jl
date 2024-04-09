@@ -2,6 +2,7 @@ using LinearAlgebra
 using SparseArrays
 include("Utilities.jl")
 include("Hamiltonians.jl")
+include("../hoppings/createHoppings.jl")
 
 # return a vector of Σ(k) functions which return Σₖ(E) which return a sparse nsite × nsite matrix at a given energy
 function genΣₖs(p::Dict, ElectrodeInfo::Vector{Electrode})

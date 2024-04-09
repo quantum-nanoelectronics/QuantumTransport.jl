@@ -1,5 +1,4 @@
 using QuantumTransport
-using PyPlot
 
 function genBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cubic lattice
     # nx, ny, and nz specifically refer to # of points in IBZ
@@ -55,45 +54,6 @@ function genBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cub
     ksum = sum([w for w in kweights])
     kweights = (1/ksum).*kweights
     return kpoints, kweights, kindices, kxs, kys, kzs
-end
-
-function SaveFigure(fig,path,name="",type=".svg")
-	fig.savefig(path*"/"*name*type)
-	PyPlot.close(fig)
-        GC.gc()
-end
-
-function pyplotHeatmap(x,y,z,xlab="",ylab="",name="",cmap= :nipy_spectral,save=false, path="")
-	fig, ax = PyPlot.subplots();
-	#=
-        #dx = maximum(x)-minimum(x); dy = maximum(y)-minimum(y)
-	C = 500
-	width = C
-	height = C*AR
-	#surf = PyPlot.heatmap(x,y,z, xlabel=xlab, ylabel=ylab, title=name, c = cmap, size=(width,height))
-	show(size(z))
-	show(size(x))
-	show(size(y))
-        #surf = Plots.heatmap(x,y,z, xlabel=xlab, ylabel=ylab, title=name, c = cmap)
-        #surf = Plots.heatmap(x,y,z, xlabel=xlab, ylabel=ylab, title=name, cmap = cmap, 
-        #                      norm=matplotlib[:colors][:SymLogNorm](1e-2),
-        #                     size=(width,height), margin=5mm, zscale=:log10)
-        =#
-        min=10^-20
-        vmin = maximum([min,minimum(z)])
-        surf = ax[:imshow](z.+vmin, cmap=cmap, norm=matplotlib[:colors][:LogNorm](vmin=10^0, vmax=10^-1), extent= [minimum(x), maximum(x), minimum(y), maximum(y)])
-        ax[:set_xlabel](xlab)
-        ax[:set_ylabel](ylab)
-        PyPlot.colorbar(surf, label=name)
-        if(save)
-            SaveFigure(fig,path,name)
-            #fig.savefig(path*name*".svg")
-            #close(fig)
-        end
-        #heatmap!
-        #xlabel
-	#gui(surf)
-        return surf
 end
 
 function main(p::Dict, A::Function)
@@ -157,7 +117,7 @@ function main(p::Dict, A::Function)
     TofE, Tmap = totalT(genScatteredT, kindices, S .* kgrid, kweights, p["E_samples"], p["E_samples"][1], parallelk, Operators)
     TofE = S^2*TofE
     #print(Tmap)
-    figh = pyplotHeatmap(S*kys/(π/p["a"]),S*kzs/(π/p["a"]),Tmap',"ky (π/a)","kz (π/a)","T(ky,kz)",:nipy_spectral, p["savedata"], p["path"])
+    #figh = pyplotHeatmap(S*kys/(π/p["a"]),S*kzs/(π/p["a"]),Tmap',"ky (π/a)","kz (π/a)","T(ky,kz)",:nipy_spectral, p["savedata"], p["path"])
     if("tplot" ∈ p["returnvals"])
         push!(returnvals,figh)
     end

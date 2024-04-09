@@ -60,3 +60,4 @@ end
 
 ⊗(A,B) = kron(A,B)
 HoppingsTest()
+end

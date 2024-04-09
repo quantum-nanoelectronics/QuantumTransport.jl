@@ -30,7 +30,6 @@ function makeElectrodeH(p::Dict, ElectrodeInfo::Electrode, edge_NNs::Vector{Hopp
 end
 
 # Defines a cᵦ†cₐ term 
-#=
 function zeeman(Bvals::Vector{Vector{Float64}}, p::Dict, ElectrodeInfo::Electrode)
     # only defined for S-like orbitals with lz = 0
     N = ElectrodeInfo.n * p["nsite"] * p["norb"] * 2
@@ -44,7 +43,7 @@ function zeeman(Bvals::Vector{Vector{Float64}}, p::Dict, ElectrodeInfo::Electrod
         zeeman .+= 2 * C * Diagonal(BiVals) ⊗ I(p["norb"]) ⊗ σ[ax]
     end
     return sparse(zeeman)
-end=#
+end
 
 
 function HcontactGen(p::Dict, NNs::Vector{Hopping}, ElectrodeInfo::Electrode)
