@@ -3,9 +3,23 @@ using SparseArrays
 using Arpack
 using Distributions
 
-# Takes in the parameter list and the vector potential
+# For some reason, needed to add this for driver to work correctly after fixing other errors
+function xyztor(p, ivec)
+    ix = ivec[1]
+    iy = ivec[2]
+    iz = ivec[3]
+    isite = ivec[4]
+    δdict = Dict(0 => p["A"] * [0.0; 0.0; 0.0], #In 1 
+        1 => p["A"] * [0.5; 0.5; 0.5]) #In 2
+    #2 => pA*[0.0; 0.5; 0.8975-0.5], #Bi 1
+    #3 => pA*[0.5; 0.0; 1.10248-0.5]) #Bi 2
+    δ = δdict[isite]
+    R = p["a₁"] * ix + p["a₂"] * iy + p["a₃"] * iz + δ
+    return R
+end
 
-function genH(p, H₀, edge_NNs, returnvals)
+# Takes in the parameter list and the vector potential
+function genH(p, A, H₀, edge_NNs, returnvals)
     ⊗(A, B) = kron(A, B)
     NormalDist = Normal(0, p["μ_disorder"])
     H_onsite = Diagonal(rand(NormalDist, p["n"] * p["nsite"])) ⊗ I(p["norb"] * 2) .+ p["μ"] * I(p["n"] * p["nsite"] * p["norb"] * 2)
@@ -61,6 +75,32 @@ function genH(p, H₀, edge_NNs, returnvals)
 end
 
 function zeeman(Bvals::Vector{Vector{Float64}}, p::Dict)
+    # redeclared consts (need a better way)
+    ħ = 1.05457E-34
+    m₀ = 9.10938E-31
+    ⊗(A, B) = kron(A, B)
+    σ₀ = [
+        1 0
+        0 1
+    ]
+    σ₁ = [
+        0 1
+        1 0
+    ]
+    σ₂ = [
+        0 -im
+        im 0
+    ]
+    σ₃ = [
+        1 0
+        0 -1
+    ]
+    σ = Vector{Matrix}(undef, 3)
+    σ[1] = σ₁;
+    σ[2] = σ₂;
+    σ[3] = σ₃;
+
+
     # only defined for S-like orbitals with lz = 0
     N = p["n"] * p["nsite"] * p["norb"] * 2
     zeeman = spzeros(ComplexF64, N, N)
@@ -91,6 +131,10 @@ function RvalsGen(p)
 end
 
 function fieldUtils(p, A::Function, Rsurf::Vector{Vector{Float64}}, Rvals::Vector{Vector{Float64}}, returnvals)
+
+    ħ = 1.05457E-34
+    m₀ = 9.10938E-31
+
     println("===== Calculating applied zeeman field properties =====")
     #checkPeriodicField(A,p) tells you if gauge field periodic with SL temporary comment
     if (p["fieldtype"] == "A")

@@ -15,12 +15,13 @@ function HoppingsTest()
             dict[string(key)] = value
         end
     dict["deviceMaterial"] = "ins"
-    dict["deviceMagnetization"] = false
+    # dict["deviceMagnetization"] = false
+    dict["deviceMagnetization"] = true
     NNs = genNN(dict)
     checkNNs(NNs, dict)
     NNs = pruneHoppings(NNs, []) #p needs a prune value
     H₀, edge_NNs = nnHoppingMat(NNs, dict)
-    H = testHGen(dict, H₀, edge_NNs)
+    H = testHGen(dict, A, H₀, edge_NNs)
 end
 
 function genNN(pNNs) 
@@ -51,8 +52,8 @@ function checkNNs(NNs, pNNs)
     end
 end
 
-function testHGen(p, H₀, edge_NNs)
-    H = genH(p, H₀, edge_NNs, [])
+function testHGen(p, A, H₀, edge_NNs)
+    H = genH(p, A, H₀, edge_NNs, [])
     sparseArray = H([0;0;0])
     #up-spin, down-spin
     @assert sparseArray.m == 2 && sparseArray.n == 2

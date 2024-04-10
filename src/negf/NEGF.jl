@@ -1,10 +1,11 @@
-include("../electrodes/Dependencies.jl")
+include("../hoppings/createHoppings.jl")
+include("../common/Module.jl")
+using .CommonModule: ⊗, ħ, q, eV
+
 using LinearAlgebra
 using SparseArrays
 using Distributed
 using Random
-
-export NEGF_prep, totalT, DOS, siteDOS, sitePDOS
 
 
 function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
@@ -23,8 +24,10 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
         end
         Γks[i] = deepcopy(Γ)
     end
+    
     # Gamma matrices are useful too...
     function totΣk(E::Float64, k::Vector{Float64})
+        println("E = $E")
         Σs = Vector{Function}(undef, size(Σks))
         for iΣ in eachindex(Σks)
             Σk = Σks[iΣ](k)
@@ -45,7 +48,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
             #G = grInv(effH)
             #G = pGrInv(effH,4,"transport")
             if (p["l_scattering"] > 0)
-                G = pGrInv(effH, 4, false)
+                G = pGrInv(effH, 4, false) # TODO get top, bottom, diag
                 η_scattering = (ħ / q) * p["vf"] / (2 * p["l_scattering"])
                 error = 1
                 mixing = 0.5
@@ -53,16 +56,17 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
                     Gprev = copy(G)
                     #effH = Array((E + im*p.η)*I(ntot) .- H(k) .- Σ .- p.η_scattering*G)
                     effH = (E + im * p["η"]) * I(ntot) .- H(k) .- Σ .- η_scattering * (I(p["n"] * p["norb"]) ⊗ [1 1; 1 1]) .* G
-                    G = mixing * pGrInv(effH, 4, false) .+ (1 - mixing) * G
+                    G = mixing * pGrInv(effH, 4, false) .+ (1 - mixing) * G #TODO get diag only
                     #G = grInv(effH)
                     error = norm((G .- Gprev), 1) / norm(G, 1)
                     println("Error = $error")
                 end
             end
-            if (p["n_BLAS"] > 1)
+            if (p["n_BLAS"] > 1) 
+            # TODO also check for inversion = true / type of inversion
                 G = inv(Array(effH))
             else
-                G = grInv(effH)
+                G = grInv(effH) # TODO get diag, top, bottom
             end
             return G
         end
@@ -222,7 +226,6 @@ function siteDOS(p::NamedTuple, genGᴿ::Function, E::Float64=0.1 * eV)
     return DOS
 end
 
-
 function totalT(genT::Function, kindices::Vector{Vector{Int}}, kgrid::Vector{Vector{Float64}}, kweights::Vector{Float64}, Evals::Vector{Float64}, Eslice::Float64, parallel::Bool, Qs::Vector{AbstractMatrix})
     nE = size(Evals)
     nOps = size(Qs)
@@ -339,7 +342,6 @@ function RvalsGen(p)
 end
 
 
-
 function genElectrodes(p, type="weyl")
 
     return Σ
@@ -363,17 +365,3 @@ function oldΣgen(p::NamedTuple, H::Matrix, H_coupling::Matrix, cutoff::Float64=
     end
     return Σ
 end
-
-# Add a bond to the list of bonds, given some list of bonds, coefficient in spin basis, index of both sites, and param list
-function pushHopping!(NNs::Vector, t, ia::Vector{Int}, ib::Vector{Int}, p)
-    a = xyztoi(p, ia)
-    b = xyztoi(p, ib)
-    ra = xyztor(p, ia)
-    rb = xyztor(p, ib)
-    r = rb - ra
-    # for hopping term
-    NN = deepcopy(Hopping(a, b, ia, ib, ra, rb, r, t, false, [0; 0; 0], ""))
-    push!(NNs, NN)
-end
-
-rot(θ) = [cos(θ) -sin(θ); sin(θ) cos(θ)]

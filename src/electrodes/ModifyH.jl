@@ -55,7 +55,7 @@ function HcontactGen(p::Dict, NNs::Vector{Hopping}, ElectrodeInfo::Electrode)
     N = ElectrodeInfo.n * p["nsite"] * p["norb"] * 2
     Rvals = RvalsGen(p, ElectrodeInfo)
     Bfield = ElectrodeInfo.A.(Rvals)
-    #Bfield = ElectrodeInfo.A.(Rvals)
+
     if (p["electrodeMagnetization"] == true)
         Hᵦ = zeeman(Bfield, p, ElectrodeInfo)
     else
@@ -92,7 +92,8 @@ function HcontactGen(p::Dict, NNs::Vector{Hopping}, ElectrodeInfo::Electrode)
         elseif (size(H₀) == (0, 0))
             return Hcenter
         else
-            print(size(Hc(k)), size(H₀))
+            # println(size(Hc(k)), size(H₀))
+            println(size(Hcenter), size(H₀))
             return Hc(k) .+ H₀
         end
     end

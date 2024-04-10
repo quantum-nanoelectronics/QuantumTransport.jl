@@ -1,8 +1,9 @@
 using LinearAlgebra
 using SparseArrays
-include("Utilities.jl")
-include("Hamiltonians.jl")
-include("../hoppings/createHoppings.jl")
+# include("Utilities.jl")
+# include("Hamiltonians.jl")
+# commenting out for now since this is breaking precompilation
+# include("../hoppings/createHoppings.jl")
 
 # return a vector of Σ(k) functions which return Σₖ(E) which return a sparse nsite × nsite matrix at a given energy
 function genΣₖs(p::Dict, ElectrodeInfo::Vector{Electrode})
@@ -35,10 +36,14 @@ function genΣₖs(p::Dict, ElectrodeInfo::Vector{Electrode})
             βₐ = Hs[iCfromD] # away from device
             βₜ = Hs[iCinD] # towards device
         end
+        # if (i == 1)
+        #     println("βₐ1: ", size(βₐ(0.1)))
+        # end
         #kxes, kweights, kindices = genTetBZ(electrodeParams(p,ElectrodeInfo[1]),1000,0,0)
         Σk(k) = TΣgen(p, Hs[1](k), βₐ(k), βₜ(k), V(k), ElectrodeInfo[i], P)
         Σks[i] = Σk
     end
+
     return Σks
 end
 
@@ -50,6 +55,8 @@ function TΣgen(p::Dict, H::SparseMatrixCSC, βₐ::SparseMatrixCSC, βₜ::Spar
     #H_coupling = Hₗ .+ Hᵣ# couples a layer to the infinite on both sides
     #BLAS.set_num_threads(1) # disable linalg multithreading and parallelize over k instead
     function Σ(E::Float64)
+		println("βₐ: ", size(βₐ))
+
         #Gₑ = grInv((E+im*p.η)*I(n) .- H) # guess for the green's functions in the electrodes
         #Σ_guess = H_coupling*grInv((E+im*p.η)*I(n) .- H .- 0.1*I(n))*Hᵥₘ'
         #Σ_guess = H_coupling*grInv((E+im*p.η)*I(n) .- H .- 0.1*I(n))*H_coupling'

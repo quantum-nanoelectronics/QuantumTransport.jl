@@ -64,7 +64,6 @@ function electrodeParams(p::Dict, ElectrodeInfo::Electrode)
     return p
 end
 
-rot(θ) = [cos(θ) -sin(θ); sin(θ) cos(θ)]
 
 function genNNs(p, Electrodes::Electrode)
 	ep = electrodeParams(p, Electrodes)

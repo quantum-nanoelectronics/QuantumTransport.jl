@@ -1,6 +1,9 @@
 module HamiltonianModule
 
 include("ConstructHamiltonian.jl")
-export Hgen
+# Changed from Hgen to genH
+# export Hgen
+export genH
+
 
 end

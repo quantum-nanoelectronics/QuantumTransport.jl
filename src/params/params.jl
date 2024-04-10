@@ -1,3 +1,4 @@
+# set ϵ₁ in params with ε₁ 
 const hoppings = ["n","nx","ny","nz","nsite","norb","t","SLa₂","a₁","a₂","a₃",
 "deviceMaterial","ε₁","A","fieldtype"]
 const hamiltonian = ["μ","μ_disorder", "n", "nx", "ny", "nz", "norb", "nsite", 
@@ -5,6 +6,12 @@ const hamiltonian = ["μ","μ_disorder", "n", "nx", "ny", "nz", "norb", "nsite",
 const hoppingMatrix = ["n", "nsite", "norb", "t", "ε₁"]
 const electrodes = ["electrodeMaterial","nsite","norb","η"]
 
+# ϵ₁
+# t₉ = 0.0, 
+# vf = 1000000, 
+# η = 0.0001, 
+# ε = 0.0, 
+# ϵ₁ = 2.0, 
 function generateParams(params::Dict)
     nested_params = Dict(Dict())
     hopping_params = Dict()
