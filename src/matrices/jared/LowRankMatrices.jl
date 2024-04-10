@@ -9,15 +9,15 @@ module LowRankMatrices
     norm_error(A,B) = norm( A - B ) / norm(A)
     
     #= in -> sparse, square matrix of value type ComplexF64 =#
-    struct LRA #<: AbstractMatrix{ComplexF64}
+    struct LRA <: AbstractMatrix{Complex}
         Rvecs :: Matrix{ComplexF64}
         Lvecs :: Matrix{ComplexF64}
         λs    :: Array{ComplexF64}
         rank  :: Int64
         n     :: Int64
-        eigendecomp :: Bool
-
-        function LRA(A::SparseMatrixCSC{ComplexF64, Int64},
+        eigendecomposed :: Bool
+        # only use this initializer with Hermitian sparse matrices
+        function LRA(A::Union{SparseMatrixCSC{ComplexF64,Int64},SparseMatrixCSC{Float64,Int64}},
                 Emin::𝐑, Emax::𝐑; 
                 initialrank::Int = 64, rankstep::Int = 32,
                 maxiters::Int = 20, errortol::𝐑 = 1e-2) where 𝐑 <: Real
@@ -25,18 +25,20 @@ module LowRankMatrices
                 throw(DomainError(A, "LRA DEFINED FOR SQUARE MATRICES ONLY."))
             end
             #= Only normal matrices are supported s.t. vₗ = vᵣ* =#
+            # TODO: add in a check for hermitian matrices specifically
             #= TODO: For hermitian matrices, implement Lanczos method =#
+            #=
              if norm_error(A * conj(A) , conj(A) * A) > errortol
                 throw(DomainError(A, "LRA NOT DEFINED FOR NON NORMAL MATRIX YET"))
             end
-
+            =# 
             #= Ignore small matrices. Decrease INITIAL_RANK for testing. =#
             #=
             if A.n < initialrank
                 return A
             end
             =#
-            λs = undef; Rvecs = undef; Lvecs = undef
+            λs = undef; Rvecs = undef;
             curr_rank = initialrank
             success = false
             iters = 0
@@ -58,14 +60,14 @@ module LowRankMatrices
                 error = 0
                 #error = norm_error(A, reconstruct(Rvecs, conj(Rvecs), λs)) #NOTE: expensive
                 #println(error)
-                λs, Rvecs = eigs(shiftedA, nev = curr_rank, tol = sqrt(eps()), which=:SM)
-                _, Lvecs = eigs(shiftedA', nev = curr_rank, tol = sqrt(eps()), which=:SM)
+                λs, Rvecs = eigs(shiftedA, maxiter=1000, nev = curr_rank, which=:SM)
+                #λs, Rvecs = eigs(shiftedA, maxiter=1000, nev = curr_rank, tol = sqrt(eps()), which=:SM)
                 minλ = minimum(real.(λs))
                 maxλ = maximum(real.(λs))
                 # increase ARPACK decreases # eigvals
                 curr_rank = length(λs)
                 println("Rank = $curr_rank, Min λ = $minλ, Max λ = $maxλ, Energy window = $energywindow")
-                if minλ < - energywindow/2 && maxλ > energywindow/2
+                if minλ < - energywindow/2 || maxλ > energywindow/2 
                     success = true
                     break
                 end
@@ -78,65 +80,76 @@ module LowRankMatrices
                 end=#
                 iters+=1; curr_rank+=rankstep
             end
-            # normalize the phase on each eigvec
-            for i = 1:curr_rank
-                Rvecs[:,i] = Rvecs[:,i]/Rvecs[1,i]
-                Lvecs[:,i] = Lvecs[:,i]/Lvecs[1,i]
-            end
             #if success return new(Rvecs, conj(Rvecs), λs, curr_rank, A.n) else return A end
-            if success return new(Rvecs, Lvecs, λs.+centralenergy, curr_rank, A.n, true) else return nothing end
-
+            return new(Rvecs, Array(Rvecs'), λs.+centralenergy, curr_rank, A.n, true)
         end
 
         function LRA(Rvecs::Matrix{ComplexF64}, Lvecs::Matrix{ComplexF64},
-                     λs::Array{ComplexF64}, rank::Int64, n::Int64)
-            return new(Rvecs, Lvecs, λs, rank, n, false)
+                     λs::Array{ComplexF64}, rank::Int64, n::Int64, eigendecomp::Bool=false)
+            return new(Rvecs, Lvecs, λs, rank, n, eigendecomp)
         end
 
     end
 
-    function Base.show(io::IO, A′::LRA)
-        n = A′.n
-        println("$n×$n Low Rank Matrix of rank $(A′.rank)")
-        println("Eigenvalues: $(A′.λs)")
-        println("Size of left eigenvector block: $(size(A′.Lvecs))")
-        println("Size of right eigenvector block: $(size(A′.Rvecs))")
+    
+    function Base.show(A::LRA)
+        n = A.n
+        println("$n×$n Low Rank Matrix of rank $(A.rank)")
+        println("Eigenvalues: $(A.λs)")
+        println("Size of left eigenvector block: $(size(A.Lvecs))")
+        println("Size of right eigenvector block: $(size(A.Rvecs))")
+    end
+
+    function Base.show(io::IO, A::LRA)
+        n = A.n
+        println("$n×$n Low Rank Matrix of rank $(A.rank)")
+        println("Eigenvalues: $(A.λs)")
+        println("Size of left eigenvector block: $(size(A.Lvecs))")
+        println("Size of right eigenvector block: $(size(A.Rvecs))")
     end
 
     # world ending critical failure if reconstruct. reconstruct expects normal matrix
-    function reconstruct(A′::LRA)
+    function reconstruct(A::LRA)
         @warn "You probably don't want to reconstruct a dense matrix. Reconsider, and do not use with large matrices."
-        return A′.Rvecs*Diagonal(A′.λs)*transpose(A′.Lvecs)
-        #A = zeros(ComplexF64, A′.n, A′.n)
-        #for k in eachindex(A′.λs)
-        #    A .+= A′.λs[k] * A′.Rvecs[:,k] * transpose( A′.Lvecs[:,k] )
-        #end
-        #return A
+        return A.Rvecs*Diagonal(A.λs)*A.Lvecs
     end
 
     function reconstruct(Rvecs::Matrix{ComplexF64}, Lvecs::Union{Matrix{ComplexF64}, Transpose{ComplexF64}},
                          λs::Array{ComplexF64})
         @warn "You probably don't want to do this. Reconsider, and do not use with large matrices."
-        A = zeros(ComplexF64, size(Rvecs)[1], size(Rvecs)[1])
-        for k in eachindex(λs)
-            A .+= λs[k] * Rvecs[:,k] * transpose( Lvecs[:,k] )
+        return Rvecs*Diagonal(A.λs)*Lvecs
+    end
+
+    function getindex_LRA(A::LRA, i::Int, j::Int)
+        return A.Rvecs[i,:]*Diagonal(A.λs)*A.Lvecs[:,j]
+    end
+
+    function trace(A::LRA)
+        sum = undef
+        if A.eigendecomposed==true
+            return sum(A.λs)
+        else
+            sum = 0 
+            for i = 1:A.n
+                sum += getindex_LRA(A,i,i)
+            end
         end
-        return A
+        return sum
     end
-
-    function getindex_LRA(A′::LRA, i::Int, j::Int)
-        Aᵢⱼ = 0
-        for k in eachindex(A′.λs)
-            Aᵢⱼ += A′.λs[k] * A′.Rvecs[i,k] * A′.Lvecs[j,k]
+    # TODO: fix, not a high priority though. 
+    function LRAbyLRA(A::LRA, B::LRA)
+        if A.n != B.n
+            throw(DomainError(A, "BAD SHAPE IN LRA MATRIX MULTIPLICATION"))
         end
-        return Aᵢⱼ
+        # we wish to get RᴬΛᴬLᴬ*RᴮΛᴮLᴮ into the form RᶜΛᶜLᶜ = Rᴬ*RPᶜ*Λᶜ*LPᶜ*Lᴮ
+        ΛᴬLᴬRᴮΛᴮ = Diagonal(A.λs)*A.Lvecs*B.Rvecs*Diagonal(B.λs)
+        # this is done with inefficient, ill-conditioned jank because julia does not implement a left eigvec calculation. 
+        F = eigen(ΛᴬLᴬRᴮΛᴮ); λsᶜ = F.values; RPᶜ = F.vectors
+        LPᶜ = Base.inv(RPᶜ)   
+        Rᶜ = A.Rvecs*RPᶜ; Lᶜ = LPᶜ*B.Lvecs
+        return LRA(Rᶜ,Lᶜ,λsᶜ,B.rank, B.n, true)
     end
-
-    function trace(A′::LRA)
-        return sum(A′.λs)
-    end
-
-    function LRAbyLRA(A′::LRA, B′::LRA)
+#=    function LRAbyLRA(A′::LRA, B′::LRA)
         if A′.n != B′.n
             throw(DomainError(A′, "BAD SHAPE IN LRA MATRIX MULTIPLICATION"))
         end
@@ -154,16 +167,16 @@ module LowRankMatrices
         end
         C′ = LRA(ω, B′.Lvecs, λs, B′.rank, B′.n)
         return C′
-    end
+    end=#
 
 
-    function LRAbyMatrix(A′::LRA, A::Union{SparseMatrixCSC{ComplexF64, Int64}, Matrix{ComplexF64}})
-        if A′.n != size(A)[2]
-            throw(DomainError(A′, "BAD SHAPE IN LRA MATRIX MULTIPLICATION"))
+    function LRAbyMatrix(A::LRA, B::M) where M <: AbstractMatrix
+        if A.n != size(A)[2]
+            throw(DomainError(A, "BAD SHAPE IN LRA MATRIX MULTIPLICATION"))
         end
         #NOTE: Assumes A is linear
-        C′ = LRA( A * A′.Rvecs, A′.Lvecs, A′.λs, A′.rank, A′.n)
-        return C′
+        C = LRA(B*A.Rvecs, A.Lvecs, A.λs, A.rank, A.n, false)
+        return C
     end
 
     #TODO: maybe a nice operator representation of this?
@@ -171,14 +184,14 @@ module LowRankMatrices
         return A′[i, :] ⋅ B′[:,j]
     end
 
-    function add_scaled_identity(D::Diagonal, A′::LRA)
-        D_1 = D[1]
-        for i in eachindex(D)
-            if D[i] != D_1
-                throw(DomainError(A′, "Perturbative sum not yet implemented for Diagonal matrices"))
+    function add_scaled_identity(D::Diagonal, A::LRA)
+        D_1 = D[1,1]
+        for i in 1:size(D)[1]
+            if D[i,i] != D_1
+                return perturbative_sum(A::LRA, D::Diagonal)
             end
         end
-        A′.λs += D_1
+        return LRA(deepcopy(A.Rvecs), deepcopy(A.Lvecs), deepcopy(A.λs).+D_1, deepcopy(A.rank), deepcopy(A.n), deepcopy(A.eigendecomposed))
     end
 
     function inv(A::LRA)
@@ -186,49 +199,51 @@ module LowRankMatrices
         return LRA(A.Rvecs, A.Lvecs, invλs, A.rank, A.n)
     end
 
-    function perturbative_sum(A::LRA, B::LRA)
-        # figure out which matrix is bigger
-        sumλs_A = sum(abs.(A.λs))
-        sumλs_B = sum(abs.(B.λs))
-        H = undef; δH = undef;
-        if sumλs_A > sumλs_B
-            H = A
-            δH = B
-        else
-            δH = A
-            H = B
-        end
+    function perturbative_sum(A::LRA, B::M) where M <: AbstractMatrix 
         # now do non-hermitian degenerate perturbation theory
-        Heff = zeros(ComplexF64,H.rank,H.rank)
-        Heff += Diagonal(H.λs)
-        for row ∈ 1:H.rank
-            for col ∈ 1:H.rank
-                Heff[row, col] = Matrix(H.Lvecs[:,row]')*δH*H.Rvecs[:,col]
+        return perturbative_sum(A,(B))
+        return LRA(newRvecs, newLvecs, λs, A.rank, A.n, true)
+    end
+
+
+    function perturbative_sum(A::LRA, B::M...) where M <: AbstractMatrix 
+        # now do non-hermitian degenerate perturbation theory
+        Heff = zeros(ComplexF64,A.rank,A.rank)
+        Heff += Diagonal(A.λs)
+        for δH ∈ B 
+            if typeof(δH) == LRA
+                Test = A.Lvecs*δH*A.Rvecs
+                Heff += A.Lvecs*δH.Rvecs*Diagonal(δH.λs)*δH.Lvecs*A.Rvecs
+            else
+                Test = A.Lvecs*δH*A.Rvecs
+                Heff += Test
             end
         end
         # Rcoeffs and Lcoeffs are rank × n matrices
-        λs, Rcoeffs = eigen(Heff)
-        Lcoeffs = eigvecs(Heff')
-        newRvecs = H.Rvecs*Rcoeffs
-        newLvecs = H.Lvecs*Lcoeffs
-        return LRA(newRvecs, newLvecs, λs, H.rank, H.n)
+
+        F = eigen(Heff)
+        λs = F.values; Rcoeffs = F.vectors
+        Lcoeffs = Base.inv(Rcoeffs)
+        newRvecs = A.Rvecs*Rcoeffs
+        newLvecs = Lcoeffs*A.Lvecs
+        return LRA(newRvecs, newLvecs, λs, A.rank, A.n, true)
     end
 
-    function number_multiplication(A′::LRA, C::Number)
-        return LRA(A′.Rvecs, A′.Lvecs, C*A′.λs, A′.rank, A′.n)
+    function number_multiplication(A::LRA, C::Number)
+        return LRA(A.Rvecs, A.Lvecs, C*A.λs, A.rank, A.n)
     end
 
     function LRA_vector_multiplication(A::LRA, V::Vector)
         # assert size of vector same as A
-        return A.Lvecs*(Diagonal(A.λs)*(A.Rvecs*V))
+        return A.Rvecs*(Diagonal(A.λs)*(A.Lvecs*V))
     end
  
     function LRA_vector_multiplication(V::Vector, A::LRA)
         # assert size of vector same as A
-        return ((V*A.Lvecs)*Diagonal(A.λs))*A.Rvecs
+        return ((V*A.Rvecs)*Diagonal(A.λs))*A.Lvecs
     end
     
-    Base.:size(A′::LRA) = A′.n, A′.n
+    Base.:size(A′::LRA) = (A′.n, A′.n)
     Base.:getindex(A′::LRA, i::Int, j::Int) = getindex_LRA(A′::LRA, i::Int, j::Int)
     
     #TODO: define rule for conversion?
@@ -243,10 +258,12 @@ module LowRankMatrices
     #Base.:+(A′::LRA, B′::LRA) = +(reconstruct(A′), reconstruct(B′))
     #Base.:-(A′::LRA, B′::LRA) = -(reconstruct(A′), reconstruct(B′))
     Array(A::LRA) = reconstruct(A)
-    Base.:+(D::Diagonal, A′::LRA) = add_scaled_identity(D,A′)
-    Base.:+(A′::LRA, D::Diagonal) = add_scaled_identity(D,A′)
+    Base.:+(D::Diagonal, A::LRA) = add_scaled_identity(D,A)
+    Base.:+(A::LRA, B::AbstractMatrix...) = perturbative_sum(A, B)
+    Base.:+(A::LRA, D::Diagonal) = add_scaled_identity(D,A)
     Base.:+(A::LRA,B::LRA) = perturbative_sum(A,B)
     Base.:inv(A::LRA) = inv(A)
+    Base.display(A::LRA) = show(A)
 
     Base.:*(V::Vector,A′::LRA) = LRA_vector_multiplication(V, A′)  
     Base.:*(A′::LRA,V::Vector) = LRA_vector_multiplication(A′, V)
