@@ -1,4 +1,4 @@
-function metalHopping(p::NamedTuple,NNs::Vector{Hopping},ia::Vector{Int})
+function metalHopping(p::Dict,NNs::Vector{Hopping},ia::Vector{Int})
 	iorb = ia[5]
 	t = (3*p.t - 1*eV)*(I(2))
 	pushHopping!(NNs, t, ia, ia, p)
@@ -17,7 +17,7 @@ function metalHopping(p::NamedTuple,NNs::Vector{Hopping},ia::Vector{Int})
 	end
 end
 
-function insHopping(p::NamedTuple,NNs::Vector{Hopping},ia::Vector{Int})
+function insHopping(p::Dict,NNs::Vector{Hopping},ia::Vector{Int})
 	iorb = ia[5]
 	t = (p.ϵ₁ + 3*p.t)*(I(2))
 	pushHopping!(NNs, t, ia, ia, p)
@@ -46,7 +46,7 @@ function pushHopping!(NNs::Vector, t, ia::Vector{Int}, ib::Vector{Int}, p)
 	push!(NNs,NN)
 end
 
-function weyl3Hopping(p::NamedTuple,NNs::Vector{Hopping},ia::Vector{Int})
+function weyl3Hopping(p::Dict,NNs::Vector{Hopping},ia::Vector{Int})
         iorb = ia[5]
         ib = ia; 
 	# nearest neighbors
@@ -90,7 +90,7 @@ function weyl3Hopping(p::NamedTuple,NNs::Vector{Hopping},ia::Vector{Int})
 end
 
 
-function weyl2Hopping(p::NamedTuple,NNs::Vector{Hopping},ia::Vector{Int})
+function weyl2Hopping(p::Dict,NNs::Vector{Hopping},ia::Vector{Int})
         iorb = ia[5]
         ib = ia; 
 	# nearest neighbors
@@ -124,7 +124,7 @@ function weyl2Hopping(p::NamedTuple,NNs::Vector{Hopping},ia::Vector{Int})
         end
 end
 
-function chern2DHopping(p::NamedTuple,NNs::Vector{Hopping},ia::Vector{Int})
+function chern2DHopping(p::Dict,NNs::Vector{Hopping},ia::Vector{Int})
         iorb = ia[5]
         ib = ia; 
         #ib[5] += nextsite(iorb)
@@ -156,7 +156,7 @@ function chern2DHopping(p::NamedTuple,NNs::Vector{Hopping},ia::Vector{Int})
 end
 
 
-function weylHopping(p::NamedTuple,NNs::Vector{Hopping},ia::Vector{Int})
+function weylHopping(p::Dict,NNs::Vector{Hopping},ia::Vector{Int})
         iorb = ia[5]
         ib = ia; 
         #ib[5] += nextsite(iorb)
