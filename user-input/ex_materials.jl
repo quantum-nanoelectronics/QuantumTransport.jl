@@ -38,7 +38,7 @@ function nextsite(iorb::Int)
 end
 
 
-function pushHopping!(NNs::Vector, t, ia::Vector{Int}, ib::Vector{Int}, p) 
+function pushHopping!(NNs::Vector, t, ia::Vector{Int}, ib::Vector{Int}, p::Dict) 
 	a = xyztoi(p,ia); b = xyztoi(p,ib);
 	ra = xyztor(p,ia); rb = xyztor(p,ib); r = rb - ra;
 	# for hopping term

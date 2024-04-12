@@ -5,8 +5,8 @@ include("./ex_materials.jl")
 # this is the top level definition of the run parameters
 runparams = Dict(
 	     "path" => "./",
-		 "material_hamiltonian" => material_hamiltonians,
-		 "material_params" => (t = 1.0, ε₀ = 1.0),
+		 #"material_hamiltonian" => material_hamiltonians,
+		 "material_params" => Dict(t = 1.0, ε₀ = 1.0),
 	     # so, for runs looking at the electronic properties of just one unit cell
 	     "unitcell" => Dict("material"="metal", "bands" => true, "bands_project" => [σ[1],γ⁵], "save"=>[:bandstructure, :DOS], "poisson" => false, "DOS" => false),
 	     # and for runs looking at the voltage-dependent transport properties
@@ -31,15 +31,19 @@ function add_more_params!(runparams)
 	runparams["unitcell"]["n"] = n_unitcell
 
 	# now we will add in the H(k) subspace, and then overwrite the nx, ny, nz with the device geometry
-	runparams["transport"] = merge(subspace_sizes,runparams["transport"])
-	runparams["supercell"] = merge(subspace_sizes,runparams["supercell"])
+	merge!(subspace_sizes,runparams["transport"])
+	merge!(subspace_sizes,runparams["supercell"])
 	
 	# overwriting
-	runparams["transport"] = merge(runparams["transport"],geometry_params)
-	runparams["supercell"] = merge(runparams["supercell"],geometry_params)
+	merge!(runparams["transport"],geometry_params)
+	merge!(runparams["supercell"],geometry_params)
 
 	n_device = geometry_params["nx"]*geometry_params["ny"]*geometry_params["nz"]*subspace_sizes["nsite"]*subspace_sizes["norb"]*subspace_sizes["nspin"]
 	runparams["transport"]["n"] = n_device
 	runparams["supercell"]["n"] = n_device
 	append!(runparams["transport"]["prune"],"x")
+
+	merge!(runparams["unitcell"], runparams["material_params"])
+	merge!(runparams["transport"], runparams["material_params"])
+	merge!(runparams["supercell"], runparams["material_params"])
 end
