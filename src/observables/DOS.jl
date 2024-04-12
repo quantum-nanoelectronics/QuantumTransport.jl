@@ -1,16 +1,3 @@
-push!(LOAD_PATH,"./")
-
-module NEGF
-using LinearAlgebra
-using Constants
-using UsefulFunctions
-using SparseArrays
-using Distributed
-
-export NEGF_prep, totalT, DOS, siteDOS, sitePDOS
-
-
-
 #function DOS(genA::Function,kvals::Vector{Vector{Float64}},kpts::Vector{Float64},E_samples::Vector{Float64})
 #    DOS_samples = pmap(E->tr(genA(E))/π,E_samples)
 #
@@ -30,7 +17,7 @@ function genDOS(p::Dict, F::Function, type::Symbol, η::Float64)
             return trace(A)/(2*π)
         end
         return DOS
-    elseif type = :H
+    elseif type == :H
         H = F # we've got the hamiltonian as a function of K
         # implement later
     end

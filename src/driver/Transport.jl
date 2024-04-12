@@ -1,4 +1,5 @@
-function transport(p::Dict, A::Function)
+function NEGF_Transport_1D(p::Dict, A::Function)
+
     nested_params = generateParams(p)
     emptyElectrode = Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
     #electroces needs to call genNNs/genH itself (not really sure if there's a way to do this unless we pass in a nested array)
@@ -6,8 +7,7 @@ function transport(p::Dict, A::Function)
             Electrode([-1,0],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"-x",p["electrodeMaterial"],A);
             Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
     ]
-    p["prune"] = union(["x"], p["prune"])
-    println("prune: ", p["prune"])
+    
     p["verbose"] = false
     p["nelectrodes"] = size(ElectrodesArray)[1]
 

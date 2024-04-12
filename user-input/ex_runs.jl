@@ -1,5 +1,8 @@
-include("./ex_geometry.jl")
-include("./ex_materials.jl")
+using QuantumTransport
+
+
+include("ex_geometry.jl")
+include("ex_materials.jl")
 
 
 # this is the top level definition of the run parameters

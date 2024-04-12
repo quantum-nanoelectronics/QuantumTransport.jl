@@ -14,7 +14,7 @@ export ⊗
 for n in names(@__MODULE__; all=true)
                if Base.isidentifier(n) && n ∉ (Symbol(@__MODULE__), :eval, :include)
                    @eval export $n
-                   println("Exported: ", n)
+                #    println("Exported: ", n)
                end
 end
 

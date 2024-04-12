@@ -2,17 +2,21 @@ using LinearAlgebra
 
 include("Transport.jl")
 
-function main(p::Dict, A::Function)
-    println("p Dictionary: ")
+function main(p::Dict)
+    # println("p Dictionary: ")
     println(p)
-    println()
-    println("A Function: ")
-    println(A)
+    # println()
+    # println("A Function: ")
+    # println(A)
 
-    println(q, ħ)
+    # # println(q, ħ)
 
 
-    transport(p, A)
+    # transport(p, A)
+
+    function A(R::Vector{Float64})
+        return [0.0, 0.0, 0.0]
+    end
 
 
     if haskey(p, "unitcell")
