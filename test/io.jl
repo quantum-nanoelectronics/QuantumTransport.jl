@@ -47,7 +47,7 @@ function testIO(ioDir, filename, positions, meta, header)
     @test isfile(joinpath(ioDir, filename))
 end
 
-function test_formatted_save(ioDir, filename,  meta, header)
+function test_formatted_save(ioDir, filename)
     # generate data
     
     # saving data
@@ -189,7 +189,7 @@ function runIOTests()
     header = copy(unicodeMeta)
     testIO(ioDir, filename1, positions, metadata, [])
     testIO(ioDir, filename2, positions, unicodeMeta, header)
-
+    test_formatted_save(ioDir, "CNTpositions.csv", )
     xvals = LinRange(0.0,1.0,10)
     yvals = rand(10)
 end
