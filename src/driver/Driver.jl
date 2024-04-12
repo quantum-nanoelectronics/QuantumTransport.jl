@@ -1,4 +1,8 @@
-using QuantumTransport
+using LinearAlgebra
+include("../common/Module.jl")
+using .CommonModule: ⊗, τ₁, σ₀, ħ
+
+# using Debugger
 
 function genBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cubic lattice
     # nx, ny, and nz specifically refer to # of points in IBZ
@@ -23,13 +27,15 @@ function genBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cub
     else
         kzs = [0]
     end
+
     function divFixNaN(a::Int,b::Int) # for this particular instance, n/0 represents a Γ-centred sampling @ k = 0. 
-            if(b==0)
-                    return 0
-            else
-                    return a/b
-            end
+        if(b==0)
+            return 0
+        else
+            return a/b
+        end
     end
+
     for ix = -nx:nx
         for iy = -ny:ny
             for iz = -nz:nz
@@ -57,6 +63,9 @@ function genBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cub
 end
 
 function main(p::Dict, A::Function)
+    println("Parameters: ")
+    println(p)
+
     nested_params = generateParams(p)
     emptyElectrode = Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
     #electroces needs to call genNNs/genH itself (not really sure if there's a way to do this unless we pass in a nested array)
@@ -65,6 +74,7 @@ function main(p::Dict, A::Function)
             Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
     ]
     p["prune"] = union(["x"], p["prune"])
+    println("prune: ", p["prune"])
     p["verbose"] = false
     p["nelectrodes"] = size(ElectrodesArray)[1]
 
@@ -72,10 +82,11 @@ function main(p::Dict, A::Function)
     NNs = pruneHoppings(NNs, p["prune"])
     H₀, edge_NNs = nnHoppingMat(NNs, nested_params["matrix"])
     returnvals = []
-    H = genH(nested_params["hamiltonian"], H₀, edge_NNs, returnvals)
+    H = genH(nested_params["hamiltonian"], A, H₀, edge_NNs, returnvals)
 
     Σₖs = genΣₖs(p, ElectrodesArray)
     genGᴿ, genT, genA, genScatteredT = NEGF_prep(p, H, Σₖs)
+
     γ⁵ = I(p["nx"]*p["ny"]*p["nz"])⊗τ₁⊗σ₀
     if(p["mixedDOS"]==true)
         mdE = p["E_samples"][1]*eV; η = 10^-(3.0)
@@ -105,8 +116,11 @@ function main(p::Dict, A::Function)
     println("Sweeping transmission over kgrid: $(nkx*2+1), $(nky*2+1), $(nkz*2+1) ...")
     #TofE, Tmap, TmapList = totalT(genT, kindices, 0.3 .* kgrid, kweights, pE_samples, minimum(pE_samples))
     #TofE, Tmap = totalT(genT, kindices, 0.3 .* kgrid, kweights, pE_samples, minimum(pE_samples))
+
     parallelk = ((nkx+1)*(nky+1)*(nkz+1) > 8)
-    #parallelk = false
+    # setting parallelk to false for local testing
+
+
     if(p["nk"] > 0)
         S = 0.15 # scale for k-map
     else
@@ -114,8 +128,24 @@ function main(p::Dict, A::Function)
     end
     #println("parallelk = $parallelk, negf_params.prune = $(negf_params.prune)")
     Operators = [I(p["nx"]*p["ny"]*p["nz"]*p["norb"]*2), γ⁵]
+
+    # testing (remove)
+    parallelk = false
+    # S = 1
+    # println("genScatteredT: ", genScatteredT)
+    # println("kindices: ", kindices)
+    # println("S kgrid: ", S .* kgrid)
+    # println("kweights: ", kweights)
+    # println("p[E_samples]: ", p["E_samples"])
+    # println("p[E_samples][1]: ", p["E_samples"][1])
+    # println("parallelk: ", parallelk)
+    println("Operators: ", size(Operators))
+    # return
+
     TofE, Tmap = totalT(genScatteredT, kindices, S .* kgrid, kweights, p["E_samples"], p["E_samples"][1], parallelk, Operators)
     TofE = S^2*TofE
+
+    println("TofE: ", TofE)
     #print(Tmap)
     #figh = pyplotHeatmap(S*kys/(π/p["a"]),S*kzs/(π/p["a"]),Tmap',"ky (π/a)","kz (π/a)","T(ky,kz)",:nipy_spectral, p["savedata"], p["path"])
     if("tplot" ∈ p["returnvals"])

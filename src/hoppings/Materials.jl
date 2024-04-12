@@ -91,7 +91,7 @@ mutable struct Electrode
     yrange::Vector{Int}
     zrange::Vector{Int}
     n::Int
-    connectfrom::String # direction connecting fThreads.@threadsrom (i.e, "-x","+x",etc)
+    connectfrom::String # direction connecting from (i.e, "-x","+x",etc)
     type::String # material that the electrode is made of
     A::Function # magnitude of the exchange field
 end

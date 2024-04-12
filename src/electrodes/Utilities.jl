@@ -1,4 +1,4 @@
-include("Structs.jl")
+# include("Structs.jl")
 function xyzElectrodeSiteToI(ElectrodeInfo::Electrode, ivec::Vector{Int})
     nx = Int(abs(ElectrodeInfo.xrange[2] - ElectrodeInfo.xrange[1]))
     ny = Int(abs(ElectrodeInfo.yrange[2] - ElectrodeInfo.yrange[1]))
@@ -66,3 +66,4 @@ end
 function nsite(isite::Int)
     return -2 * isite + 1
 end
+
