@@ -56,20 +56,62 @@ function electrodeParams(p::Dict, ElectrodeInfo::Electrode)
     nx = Int(abs(ElectrodeInfo.xrange[2] - ElectrodeInfo.xrange[1]))
     ny = Int(abs(ElectrodeInfo.yrange[2] - ElectrodeInfo.yrange[1]))
     nz = Int(abs(ElectrodeInfo.zrange[2] - ElectrodeInfo.zrange[1]))
-    p["nx"] = nx
-    p["ny"] = ny
-    p["nz"] = nz
-    p["n"] = nx * ny * nz
-	p["deviceMaterial"] = ElectrodeInfo.type
-    return p
+    ep = deepcopy(p)
+    ep["nx"] = nx
+    ep["ny"] = ny
+    ep["nz"] = nz
+    ep["n"] = nx * ny * nz
+	ep["deviceMaterial"] = ElectrodeInfo.type
+    return ep
 end
 
 
 function genNNs(p, Electrodes::Electrode)
 	ep = electrodeParams(p, Electrodes)
 	ep["nx"] = 1
-	genNNs(ep)
+    ep["prune"] = filter(x -> x ∉ ["x"], p["prune"])
+	return genNNs(ep), ep
 end
+
+#=
+function genNNs(p,ElectrodeInfo::Electrode) # all of the terms in the hamiltonian get added here, get back the relevant bonds
+	n = p["n"]
+	NNs = Hopping[]
+	ep = electrodeParams(p,ElectrodeInfo) # electrodeparams
+	ix = 0
+	nx = 1
+	hopping! = hoppingDict[ElectrodeInfo.type]
+	for iy = 0:(ep.ny-1)
+		for iz = 0:(ep.nz-1)
+		    for isite = 0:(ep.nsite-1)
+				for iorb = 0:(ep.norb-1)
+					ia = (copy(Int.([ix,iy,iz,isite,iorb])));
+					hopping!(ep,NNs,ia)
+					#if(ElectrodeInfo.type=="weyl")
+					#        weylHopping(ep,NNs,ia)
+					#end
+				end
+			end
+		end
+	end
+	# now fix the designation for the vectors that hop out of the lattice
+	# Will connect them around later using bloch's theorem to generate H(k) function
+	for NN in NNs
+		#println("pre hop ($(NN.ia) to $(NN.ib)) = $(NN.a) to $(NN.b)")
+		ib = [NN.ib[1],NN.ib[2],NN.ib[3]]
+		# Δ(ib,ib reflected back into 1st lattice)
+		pib = ib - [mod(ib[1],nx),mod(ib[2],ep.ny),mod(ib[3],ep.nz)]
+		#pib = ib - [mod(ib[1],p.nx),mod(ib[2],p.ny),mod(ib[3],p.nz)]
+		if(pib⋅pib != 0) # if vector is distinctly outside of 1st lattice
+			NN.N = Int.([round(pib[1]/(nx)),round(pib[2]/ep.ny),round(pib[3]/ep.nz)])
+			NN.b = xyztoi(ep,NN.ib, NN.N)
+			NN.edge = true
+			#println("$(NN.N)")
+		end
+	end
+	return NNs
+end
+=#
 
 #p is a dict
 function genNNs(p) # all of the terms in the hamiltonian get added here, get back the relevant bonds

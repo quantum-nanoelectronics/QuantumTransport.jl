@@ -1,6 +1,3 @@
-using LinearAlgebra
-using SparseArrays
-
 function makeElectrodeH(p::Dict, ElectrodeInfo::Electrode, edge_NNs::Vector{Hopping})
     kfilter = [0; 1; 1] # to ensure that self-energy in x is Γ centered
     function H(k::Vector{Float64})
@@ -17,6 +14,7 @@ function makeElectrodeH(p::Dict, ElectrodeInfo::Electrode, edge_NNs::Vector{Hopp
                     push!(rows, 2 * NN.b + i - 2)
                     push!(cols, 2 * NN.a + j - 2)
                     push!(elements, copy(NN.t[i, j] * Δϕ))
+                    println("NN.a: ", NN.a, " NN.b: ", NN.b)
                 end
             end
             #Hₑ[2*NN.b-1, 2*NN.a-1] += NN.t[1,1]*Δϕ
@@ -82,6 +80,7 @@ function HcontactGen(p::Dict, NNs::Vector{Hopping}, ElectrodeInfo::Electrode)
         end
     end
     Hₑ = makeElectrodeH(p, ElectrodeInfo, edgeNNs)
+    println("Making for Hc")
     Hc = makeElectrodeH(p, ElectrodeInfo, CedgeNNs)
     Hₗ = makeElectrodeH(p, ElectrodeInfo, LedgeNNs)
     Hᵣ = makeElectrodeH(p, ElectrodeInfo, RedgeNNs)

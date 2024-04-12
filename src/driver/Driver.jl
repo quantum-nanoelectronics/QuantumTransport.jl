@@ -63,6 +63,9 @@ function genBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cub
 end
 
 function main(p::Dict, A::Function)
+    println("Parameters: ")
+    println(p)
+
     nested_params = generateParams(p)
     emptyElectrode = Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
     #electroces needs to call genNNs/genH itself (not really sure if there's a way to do this unless we pass in a nested array)
@@ -71,6 +74,7 @@ function main(p::Dict, A::Function)
             Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
     ]
     p["prune"] = union(["x"], p["prune"])
+    println("prune: ", p["prune"])
     p["verbose"] = false
     p["nelectrodes"] = size(ElectrodesArray)[1]
 
@@ -115,7 +119,7 @@ function main(p::Dict, A::Function)
 
     parallelk = ((nkx+1)*(nky+1)*(nkz+1) > 8)
     # setting parallelk to false for local testing
-    parallelk = false
+
 
     if(p["nk"] > 0)
         S = 0.15 # scale for k-map
@@ -125,22 +129,23 @@ function main(p::Dict, A::Function)
     #println("parallelk = $parallelk, negf_params.prune = $(negf_params.prune)")
     Operators = [I(p["nx"]*p["ny"]*p["nz"]*p["norb"]*2), γ⁵]
 
-    # testing
-
+    # testing (remove)
+    parallelk = false
     # S = 1
-
-    println("genScatteredT: ", genScatteredT)
-    println("kindices: ", kindices)
-    println("S kgrid: ", S .* kgrid)
-    println("kweights: ", kweights)
-    println("p[E_samples]: ", p["E_samples"])
-    println("p[E_samples][1]: ", p["E_samples"][1])
-    println("parallelk: ", parallelk)
-    # println("Operators: ", size(Operators))
+    # println("genScatteredT: ", genScatteredT)
+    # println("kindices: ", kindices)
+    # println("S kgrid: ", S .* kgrid)
+    # println("kweights: ", kweights)
+    # println("p[E_samples]: ", p["E_samples"])
+    # println("p[E_samples][1]: ", p["E_samples"][1])
+    # println("parallelk: ", parallelk)
+    println("Operators: ", size(Operators))
     # return
 
     TofE, Tmap = totalT(genScatteredT, kindices, S .* kgrid, kweights, p["E_samples"], p["E_samples"][1], parallelk, Operators)
     TofE = S^2*TofE
+
+    println("TofE: ", TofE)
     #print(Tmap)
     #figh = pyplotHeatmap(S*kys/(π/p["a"]),S*kzs/(π/p["a"]),Tmap',"ky (π/a)","kz (π/a)","T(ky,kz)",:nipy_spectral, p["savedata"], p["path"])
     if("tplot" ∈ p["returnvals"])

@@ -1,13 +1,3 @@
-include("../hoppings/createHoppings.jl")
-include("../common/Module.jl")
-using .CommonModule: ⊗, ħ, q, eV
-
-using LinearAlgebra
-using SparseArrays
-using Distributed
-using Random
-
-
 function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     # some recipe for properly hooking up electrodes???
     #then 
@@ -28,17 +18,24 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     # Gamma matrices are useful too...
     function totΣk(E::Float64, k::Vector{Float64})
         println("E = $E")
+		println("Size of Σks: $(size(Σks))")
+		println("k = $k")
+
         Σs = Vector{Function}(undef, size(Σks))
         for iΣ in eachindex(Σks)
             Σk = Σks[iΣ](k)
             Σs[iΣ] = Σk
         end
+		println("Size of Σs: $(size(Σs))")
+
         totalΣ = spzeros(ComplexF64, p["n"] * p["nsite"] * p["norb"] * 2, p["n"] * p["nsite"] * p["norb"] * 2)
         i = 1
         for Σ in Σs
             totalΣ .+= Σ(E)
             i += 1
         end
+		println("i = $i")
+
         return totalΣ
     end
     function genGʳ(k::Vector{Float64})

@@ -1,5 +1,3 @@
-using LinearAlgebra
-
 # from Constants.jl
 ħ = 1.05457E-34
 h = ħ * 2*π

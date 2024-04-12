@@ -5,15 +5,57 @@ using SparseArrays
 # commenting out for now since this is breaking precompilation
 # include("../hoppings/createHoppings.jl")
 
+function genTetBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cubic lattice
+    # nx, ny, and nz specifically refer to # of points in IBZ
+    kpoints = Vector{Float64}[]
+    kindices = Vector{Int}[]
+    kweights = Float64[]
+    X1 = p["kdict"]["X₁"];
+    X2 = p["kdict"]["X₂"];
+    X3 = p["kdict"]["X₃"];
+    
+    function divFixNaN(a::Int,b::Int) # for this particular instance, n/0 represents a Γ-centred sampling @ k = 0. 
+            if(b==0)
+                    return 0
+            else
+                    return a/b
+            end
+    end
+    for ix = -nx:nx
+        for iy = -ny:ny
+            for iz = -nz:nz
+                kindex = [iy + ny + 1; iz + nz + 1]
+                k = divFixNaN(ix,nx)*X1 + divFixNaN(iy,ny)*X2 + divFixNaN(iz,nz)*X3
+                kweight = 1
+                if(abs(ix) == nx)
+                    kweight *= 1/2
+                end
+                if(abs(iy) == ny)
+                    kweight *= 1/2
+                end
+                if(abs(iz) == nz)
+                    kweight *= 1/2
+                end
+                push!(kpoints,k)
+                push!(kindices,kindex)
+                push!(kweights,kweight)
+            end
+        end
+    end
+    ksum = sum([w for w in kweights])
+    kweights = (1/ksum).*kweights
+    return kpoints, kweights, kindices
+end
+
 # return a vector of Σ(k) functions which return Σₖ(E) which return a sparse nsite × nsite matrix at a given energy
 function genΣₖs(p::Dict, ElectrodeInfo::Vector{Electrode})
     nE = size(ElectrodeInfo)[1]
     Σks = Vector{Function}(undef, nE)
     for i = 1:nE # define a self-energy function for every electrode attached to device
-        NNs = genNNs(p, ElectrodeInfo[i])
+        NNs, electrode_params = genNNs(p, ElectrodeInfo[i])
         P = changeBasis(p, ElectrodeInfo[i])
         #(Hslab, Hₗ, Hᵣ) = HcontactGen(p,NNs,ElectrodeInfo[i]) # returns in-electrode matrix, then H_inelectrode(k), H_contact(k) for transverse k
-        Hs = HcontactGen(p, NNs, ElectrodeInfo[i])
+        Hs = HcontactGen(electrode_params, NNs, ElectrodeInfo[i])
         #println(Hs[1](k))
         # Thus, Hs = (Hslab(k), Hₗ(k), Hᵣ(k))
         # ∃ one contact on left, (nE-1) Contacts on right
@@ -23,11 +65,11 @@ function genΣₖs(p::Dict, ElectrodeInfo::Vector{Electrode})
             # doing some jank to get the coupling matrices right
             insElectrode = deepcopy(ElectrodeInfo[i])
             insElectrode.type = "wins"
-            insNNs = genNNs(p, insElectrode)
+            insNNs, ep = genNNs(p, insElectrode)
             #println("InsNNs: \n")
             #display(insNNs)
             #insHslab, insHₗ, insHᵣ = HcontactGen(p,NNs,insElectrode) # returns in-electrode matrix, then H_inelectrode(k), H_contact(k) for transverse k
-            HsWMTJ = HcontactGen(p, insNNs, insElectrode)
+            HsWMTJ = HcontactGen(ep, insNNs, insElectrode)
             V = HsWMTJ[iCinD]
             βₐ = Hs[iCfromD] # away from device
             βₜ = Hs[iCinD] # towards device
@@ -36,10 +78,11 @@ function genΣₖs(p::Dict, ElectrodeInfo::Vector{Electrode})
             βₐ = Hs[iCfromD] # away from device
             βₜ = Hs[iCinD] # towards device
         end
-        # if (i == 1)
-        #     println("βₐ1: ", size(βₐ(0.1)))
-        # end
-        #kxes, kweights, kindices = genTetBZ(electrodeParams(p,ElectrodeInfo[1]),1000,0,0)
+
+        println("βₐ11: ", βₐ([0.0]))
+        kxes, kweights, kindices = genTetBZ(electrodeParams(p,ElectrodeInfo[1]),1000,0,0)
+		# println("βₐ in genΣₖs: ", size(βₐ))
+
         Σk(k) = TΣgen(p, Hs[1](k), βₐ(k), βₜ(k), V(k), ElectrodeInfo[i], P)
         Σks[i] = Σk
     end

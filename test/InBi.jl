@@ -221,7 +221,7 @@ params = (
 	  ε = ε, ε₁ = 2*eV, 
 	  a₁ = a₁, a₂ = a₂, a₃ = a₃, A = A, a=a, b=a, c=c,
 	  SLa₁ = a₁, SLa₂ = a₂, SLa₃ = a₃,
-	  norb = 1, nsite = 1,
+	  norb = 2, nsite = 1,
 	  kdict = kdictGen(A), prune = [], μ_disorder = 0.0*eV
 	  )
 
@@ -275,7 +275,7 @@ function genSL(p,nx::Int,ny::Int,nz::Int,SL1::Vector{Int},SL2::Vector{Int},SL3::
 		electrodeMaterial="weyl",
 		electrodeMagnetization = true,
 		mixedDOS = false,
-		nk = 50,
+		nk = 0,
 		E_samples = [0.1],
 		l_scattering = 0,
 		δV = 0.01,
@@ -321,6 +321,9 @@ function generateParams()
 			A = p.A, t = p.t, ε₁ = p.ε₁)
 	pHopMat = (n = p.n, nsite = p.nsite, norb = p.norb, t = p.t, ε₁ = p.ε₁)
 	A = βgen(p,p.runtype,p.β,p.θ,p.startDWs)
+
+	println("Generated parameters in InBi")
+	println(p)
     return p, pNNs, pH, pHopMat, A
 end
 
