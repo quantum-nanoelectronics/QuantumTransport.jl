@@ -22,13 +22,13 @@ runparams = Dict(
 # or calculated in the beginning. 
 function add_more_params!(runparams)
 	# size of the H(k) hamiltonian for one unit cell
- 	n_unitcell = subspace_sizes["nsite"]*subspace_size["norb"]*subspace_sizes["nspin"]
+ 	n_unitcell = subspace_sizes["nsite"]subspace_sizes["nsite"]*subspace_size["norb"]*subspace_sizes["nspin"]
 	runparams["unitcell"] = merge(subspace_sizes,runparams["unitcell"])
 	runparams["unitcell"]["n"] = n_unitcell
 
 	# now we will add in the H(k) subspace, and then overwrite the nx, ny, nz with the device geometry
-	merge!(subspace_sizes,runparams["transport"])
-	merge!(subspace_sizes,runparams["supercell"])
+	merge!(runparams["transport"],subspace_sizes)
+	merge!(runparams["supercell"],subspace_sizes)
 	
 	# overwriting
 	merge!(runparams["transport"],geometry_params)
