@@ -1,3 +1,5 @@
+
+
 ⊗(A, B) = kron(A, B)
 ×(u, v) = cross(u, v)
 

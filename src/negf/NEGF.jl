@@ -1,7 +1,6 @@
 function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     # some recipe for properly hooking up electrodes???
     #then 
-    ntot = p["n"] * p["nsite"] * p["norb"] * 2
     Γks = Vector{Function}(undef, size(Σks))
     for i = 1:p["nelectrodes"]
         function Γ(k::Vector{Float64})
@@ -28,7 +27,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
         end
 		println("Size of Σs: $(size(Σs))")
 
-        totalΣ = spzeros(ComplexF64, p["n"] * p["nsite"] * p["norb"] * 2, p["n"] * p["nsite"] * p["norb"] * 2)
+        totalΣ = spzeros(ComplexF64, p["n"], p["n"])
         i = 1
         for Σ in Σs
             totalΣ .+= Σ(E)
@@ -41,7 +40,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     function genGʳ(k::Vector{Float64})
         function Gʳ(E::Float64)
             Σ = totΣk(E, k)
-            effH = (E + im * p["η"]) * I(ntot) .- H(k) .- Σ
+            effH = (E + im * p["η"]) * I(p["n"]) .- H(k) .- Σ
             #G = grInv(effH)
             #G = pGrInv(effH,4,"transport")
             if (p["l_scattering"] > 0)
@@ -51,8 +50,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
                 mixing = 0.5
                 while (error > 10^-6)
                     Gprev = copy(G)
-                    #effH = Array((E + im*p.η)*I(ntot) .- H(k) .- Σ .- p.η_scattering*G)
-                    effH = (E + im * p["η"]) * I(ntot) .- H(k) .- Σ .- η_scattering * (I(p["n"] * p["norb"]) ⊗ [1 1; 1 1]) .* G
+                    effH = (E + im * p["η"]) * I(p["n"]) .- H(k) .- Σ .- η_scattering * (I(p["n"] * p["norb"]) ⊗ [1 1; 1 1]) .* G
                     G = mixing * pGrInv(effH, 4, false) .+ (1 - mixing) * G #TODO get diag only
                     #G = grInv(effH)
                     error = norm((G .- Gprev), 1) / norm(G, 1)
@@ -93,16 +91,15 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     end
     function genScatteredT(k::Vector{Float64}, contact::Int=2)
         Dm = (ħ / q) * p["vf"] / (2 * p["l_scattering"])
-        Dₘ = Dm * I(p["n"]) ⊗ (ones(p["norb"], p["norb"]) ⊗ ones(2, 2))
+        Dₘ = Dm * I(p["nx"]*p["ny"]*p["nz"])⊗(ones(p["norb"]*p["nspin"], p["norb"]*p["nspin"]))
         if (p["l_scattering"] ≈ 0)
             return genT(k)
-            #Dₘ = zeros(ntot,ntot)
         end
         fL = fermi(-p["δV"] / 2, p["T"])
         fR = fermi(p["δV"] / 2, p["T"])
         function linearConductance(E::Float64)
             Σ = totΣk(E, k)
-            Gʳ = inv(Array((E + im * p.η) * I(ntot) .- H(k) .- Σ))
+            Gʳ = inv(Array((E + im * p.η) * I(p["n"]) .- H(k) .- Σ))
             Γ₁E = sparse(Γks[1](k)(E))
             ΓᵢE = sparse(Γks[contact](k)(E))
             # loop to converge Gʳ
@@ -117,7 +114,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
                 #display(Array(Hofk))
                 #display(Array(Σ))
                 #display(Array(Dₘ.*Gʳ))
-                Gʳ = inv(Array((E + im * p.η) * I(ntot) .- Hofk .- Σ .- Dₘ .* Gʳ))
+                Gʳ = inv(Array((E + im * p.η) * I(p["n"]) .- Hofk .- Σ .- Dₘ .* Gʳ))
                 Gʳ = mixing * Gʳ .+ (1 - mixing) * Gʳ0
                 error = norm((Gʳ .- Gʳ0), 1) / norm(Gʳ, 1)
                 println("Gʳ error = $error")
@@ -316,7 +313,7 @@ function DOS(E::Float64, A::Function, Q::Vector=I(size(A(0))[1]))
 end
 
 function RvalsGen(p)
-    N = p["n"] * p["nsite"]
+    N = p["nx"] * p["ny"] * p["nz"] * p["nsite"]
     R = Vector{Vector{Float64}}(undef, N)
     for ix = 0:(p["nx"]-1)
         for iy = 0:(p["ny"]-1)

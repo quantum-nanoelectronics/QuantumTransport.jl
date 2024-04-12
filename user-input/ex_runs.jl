@@ -15,11 +15,7 @@ runparams = Dict(
 	     # and for runs where we want to slap a bunch of unit cells together and get the scattering-corrected electronic properties
 	     "supercell" => Dict("geometry" => devicegeometry, "bands_project" => [σ[1],σ[2]], "poisson"=>true, "μ" => 0.1*eV, "T" => 300, "η" => 1E-4*eV, "save" => [:unfoldedbands], "density_project" => [I(2),[σ[1],σ[2],σ[3]]],
 			  "Gʳinv_method" => :RGF, "D_dephasing" => 0.1*eV, "D_spin" => 0.01*eV, "D_momentum" => 0.5*eV)
-	     )
-
-runparams = add_more_params!(runparams)
-
-main(runparams)
+		)
 
 
 # all parameters of the simulation must be passed in through the runparams, and now we will ensure they are added
@@ -47,3 +43,9 @@ function add_more_params!(runparams)
 	merge!(runparams["transport"], runparams["material_params"])
 	merge!(runparams["supercell"], runparams["material_params"])
 end
+
+runparams = add_more_params!(runparams)
+
+main(runparams)
+
+

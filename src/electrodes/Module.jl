@@ -3,12 +3,7 @@ module ElectrodesModule
 export Electrode, genΣₖs
 
 include("../common/Module.jl")
-
-# import .CommonModule: ⊗
-
-# fix the imports and using statements, the rest are in Materials
-
-using .CommonModule: ħ, m₀, eV# , σ
+using .CommonModule
 
 using LinearAlgebra
 using SparseArrays

@@ -36,7 +36,7 @@ function changeBasis(p::Dict, ElectrodeInfo::Electrode)
     #nE = ElectrodeInfo.n*p.nsite
     #nD = p.n*p.nsite
     nE = ElectrodeInfo.n
-    nD = p["n"]
+    nD = p["nx"] * p["ny"] * p["nz"]
     #println("nE = $nE; nD = $nD")
     Psite = spzeros(nD, nE)
     nx = Int(abs(ElectrodeInfo.xrange[2] - ElectrodeInfo.xrange[1]))

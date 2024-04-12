@@ -2,9 +2,10 @@ module NEGFModule
 
 export NEGF_prep, totalT, DOS, siteDOS, sitePDOS
 
-include("../hoppings/createHoppings.jl")
 include("../common/Module.jl")
-using .CommonModule: ⊗, ħ, q, eV
+using .CommonModule
+
+include("../hoppings/createHoppings.jl")
 
 using LinearAlgebra
 using SparseArrays

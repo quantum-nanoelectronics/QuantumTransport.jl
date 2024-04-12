@@ -1,5 +1,5 @@
-using LinearAlgebra
 include("Materials.jl")
+
 
 # Takes in the parameters p, index vector (ix,iy,iz,isite (in unit cell), and iorb)
 # returns the site-index in the full hamiltonian
@@ -33,8 +33,7 @@ end
 
 # Generate H₀ and make a list of edge bonds for generating H(k)
 function nnHoppingMat(NNs, p)
-    N = p["n"] * p["nsite"] * p["norb"]
-    H = zeros(ComplexF64, 2 * N, 2 * N)
+    H = zeros(ComplexF64, p["n"], p["n"])
     edgeNNs = Any[]
     for NN in NNs
         if (NN.edge == true)
@@ -72,46 +71,6 @@ function genNNs(p, Electrodes::Electrode)
     ep["prune"] = filter(x -> x ∉ ["x"], p["prune"])
 	return genNNs(ep), ep
 end
-
-#=
-function genNNs(p,ElectrodeInfo::Electrode) # all of the terms in the hamiltonian get added here, get back the relevant bonds
-	n = p["n"]
-	NNs = Hopping[]
-	ep = electrodeParams(p,ElectrodeInfo) # electrodeparams
-	ix = 0
-	nx = 1
-	hopping! = hoppingDict[ElectrodeInfo.type]
-	for iy = 0:(ep.ny-1)
-		for iz = 0:(ep.nz-1)
-		    for isite = 0:(ep.nsite-1)
-				for iorb = 0:(ep.norb-1)
-					ia = (copy(Int.([ix,iy,iz,isite,iorb])));
-					hopping!(ep,NNs,ia)
-					#if(ElectrodeInfo.type=="weyl")
-					#        weylHopping(ep,NNs,ia)
-					#end
-				end
-			end
-		end
-	end
-	# now fix the designation for the vectors that hop out of the lattice
-	# Will connect them around later using bloch's theorem to generate H(k) function
-	for NN in NNs
-		#println("pre hop ($(NN.ia) to $(NN.ib)) = $(NN.a) to $(NN.b)")
-		ib = [NN.ib[1],NN.ib[2],NN.ib[3]]
-		# Δ(ib,ib reflected back into 1st lattice)
-		pib = ib - [mod(ib[1],nx),mod(ib[2],ep.ny),mod(ib[3],ep.nz)]
-		#pib = ib - [mod(ib[1],p.nx),mod(ib[2],p.ny),mod(ib[3],p.nz)]
-		if(pib⋅pib != 0) # if vector is distinctly outside of 1st lattice
-			NN.N = Int.([round(pib[1]/(nx)),round(pib[2]/ep.ny),round(pib[3]/ep.nz)])
-			NN.b = xyztoi(ep,NN.ib, NN.N)
-			NN.edge = true
-			#println("$(NN.N)")
-		end
-	end
-	return NNs
-end
-=#
 
 #p is a dict
 function genNNs(p) # all of the terms in the hamiltonian get added here, get back the relevant bonds

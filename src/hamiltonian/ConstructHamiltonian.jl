@@ -22,24 +22,17 @@ end
 function genH(p, A, H₀, edge_NNs, returnvals)
     ⊗(A, B) = kron(A, B)
     NormalDist = Normal(0, p["μ_disorder"])
-    H_onsite = Diagonal(rand(NormalDist, p["n"] * p["nsite"])) ⊗ I(p["norb"] * 2) .+ p["μ"] * I(p["n"] * p["nsite"] * p["norb"] * 2)
-    Hᵦ = 0I(p["n"] * p["nsite"] * p["norb"] * 2)
-    ntot = p["n"] * p["nsite"] * p["norb"] * 2
+    H_onsite = Diagonal(rand(NormalDist, p["nx"] * p["ny"] * p["nz"] * p["nsite"])) ⊗ I(p["norb"] * p["nspin"]) .+ p["μ"] * I(p["n"])
+    Hᵦ = 0I(p["n"])
     H₀ = sparse(H₀ .+ H_onsite .+ Hᵦ)
     Rvals = RvalsGen(p)
     Rsurf = Vector{Float64}[]
-
-    for Rval in Rvals
-        if (Rval[3] ≈ (p["nz"] - 1) * p["a₃"][3])
-            push!(Rsurf, Rval)
-        end
-    end
 
     if (p["deviceMagnetization"] == true)
         (Bfield, Bsurf, avgB) = fieldUtils(p, A, Rsurf, Rvals, returnvals)
         Hᵦ = zeeman(map(B -> Float64.(B), Bfield), p)
     else
-        Hᵦ = 0I(p["n"] * p["nsite"] * p["norb"] * 2)
+        Hᵦ = 0I(p["n"])
     end
 
     function H(k)
@@ -64,7 +57,7 @@ function genH(p, A, H₀, edge_NNs, returnvals)
         end
         Hₑ = sparse(rows, cols, elements)
         if (size(Hₑ) == (0, 0))
-            Hₑ = spzeros(ComplexF64, ntot, ntot)
+            Hₑ = spzeros(ComplexF64, p["n"], p["n"])
         end
         #println("Hedges = $(size(Hₑ)), H₀ = $(size(H₀))")
         Htot = H₀ .+ Hₑ
@@ -102,7 +95,7 @@ function zeeman(Bvals::Vector{Vector{Float64}}, p::Dict)
 
 
     # only defined for S-like orbitals with lz = 0
-    N = p["n"] * p["nsite"] * p["norb"] * 2
+    N = p["n"]
     zeeman = spzeros(ComplexF64, N, N)
     C = ħ / (2 * m₀) #sans q factor -> eV
     for ax = 1:3
@@ -113,7 +106,7 @@ function zeeman(Bvals::Vector{Vector{Float64}}, p::Dict)
 end
 
 function RvalsGen(p)
-    N = p["n"] * p["nsite"]
+    N = p["nx"] * p["ny"] * p["nz"] * p["nsite"]
     R = Vector{Vector{Float64}}(undef, N)
     for ix = 0:(p["nx"]-1)
         for iy = 0:(p["ny"]-1)
@@ -140,7 +133,7 @@ function fieldUtils(p, A::Function, Rsurf::Vector{Vector{Float64}}, Rvals::Vecto
     if (p["fieldtype"] == "A")
         println("Field type = vector potential, applying onsite zeeman and peierls term")
         Bfield = Bvals(A, Rvals)
-        Nsites = p["n"] * p["nsite"]
+        Nsites = p["nx"] * p["ny"] * p["nz"] * p["nsite"]
         avgB = sum(Bfield) * Nsites^-1
         #avgB = [0;0;0]
         Bfield = [Bfield[i] .- avgB for i = 1:Nsites]
