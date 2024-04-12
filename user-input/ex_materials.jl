@@ -189,12 +189,12 @@ end
 
 
 subspace_sizes = Dict{String, Number}(
-        nx => 1,
-        ny => 1,
-        nz => 1,
-        norb => 2,
-        nsite => 1,
-        nspin => 2
+        "nx" => 1,
+        "ny" => 1,
+        "nz" => 1,
+        "norb" => 2,
+        "nsite" => 1,
+        "nspin" => 2
 )
 
 material_hamiltonians = Dict{String,Function}(

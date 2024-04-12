@@ -7,6 +7,6 @@ using .CommonModule: ħ, m₀, eV# , σ
 using LinearAlgebra
 
 include("createHoppings.jl")
-export genNNs, nnHoppingMat, pruneHoppings
+export genNNs, nnHoppingMat, pruneHoppings, Hopping
 
 end

@@ -1,5 +1,5 @@
 using QuantumTransport
-
+using LinearAlgebra
 
 include("ex_geometry.jl")
 include("ex_materials.jl")
@@ -9,15 +9,15 @@ include("ex_materials.jl")
 runparams = Dict(
 	     "path" => "./",
 		 #"material_hamiltonian" => material_hamiltonians,
-		 "material_params" => Dict(t => 1.0, ε₀ => 1.0),
+		 "material_params" => Dict("t" => 1.0, "ε₀" => 1.0),
 	     # so, for runs looking at the electronic properties of just one unit cell
-	     "unitcell" => Dict("material"=> "metal", "bands" => true, "bands_project" => [σ[1],γ⁵], "save"=>[:bandstructure, :DOS], "poisson" => false, "DOS" => false),
+	    #  "unitcell" => Dict("material"=> "metal", "bands" => true, "bands_project" => [σ[1],γ⁵], "save"=>[:bandstructure, :DOS], "poisson" => false, "DOS" => false),
 	     # and for runs looking at the voltage-dependent transport properties
 	     "transport" => Dict("geometry" => devicegeometry, "ΔV" => 0.01, "μ" => 0.1*eV, "T" => 300, "η" => 1E-4*eV, "save" => [:transmission, :conductance],
 			  "Gʳinv_method" => :RGF, "D_spin" => 0.01*eV, "D_momentum" => 0.5*eV, "kspace"=>false),
 	     # and for runs where we want to slap a bunch of unit cells together and get the scattering-corrected electronic properties
-	     "supercell" => Dict("geometry" => devicegeometry, "bands_project" => [σ[1],σ[2]], "poisson"=>true, "μ" => 0.1*eV, "T" => 300, "η" => 1E-4*eV, "save" => [:unfoldedbands], "density_project" => [I(2),[σ[1],σ[2],σ[3]]],
-			  "Gʳinv_method" => :RGF, "D_dephasing" => 0.1*eV, "D_spin" => 0.01*eV, "D_momentum" => 0.5*eV)
+	    #  "supercell" => Dict("geometry" => devicegeometry, "bands_project" => [σ[1],σ[2]], "poisson"=>true, "μ" => 0.1*eV, "T" => 300, "η" => 1E-4*eV, "save" => [:unfoldedbands], "density_project" => [I(2),[σ[1],σ[2],σ[3]]],
+			#   "Gʳinv_method" => :RGF, "D_dephasing" => 0.1*eV, "D_spin" => 0.01*eV, "D_momentum" => 0.5*eV)
 		)
 
 
@@ -25,26 +25,27 @@ runparams = Dict(
 # or calculated in the beginning. 
 function add_more_params!(runparams)
 	# size of the H(k) hamiltonian for one unit cell
- 	n_unitcell = subspace_sizes["nsite"]*subspace_size["norb"]*subspace_sizes["nspin"]
-	runparams["unitcell"] = merge(subspace_sizes,runparams["unitcell"])
-	runparams["unitcell"]["n"] = n_unitcell
+ 	# n_unitcell = subspace_sizes["nsite"]*subspace_sizes["norb"]*subspace_sizes["nspin"]
+
+	# runparams["unitcell"] = merge(subspace_sizes,runparams["unitcell"])
+	# runparams["unitcell"]["n"] = n_unitcell
 
 	# now we will add in the H(k) subspace, and then overwrite the nx, ny, nz with the device geometry
-	merge!(subspace_sizes,runparams["transport"])
-	merge!(subspace_sizes,runparams["supercell"])
+	runparams["transport"] = merge(subspace_sizes,runparams["transport"])
+	# runparams["transport"] = merge(subspace_sizes,runparams["supercell"])
 	
 	# overwriting
 	merge!(runparams["transport"],geometry_params)
-	merge!(runparams["supercell"],geometry_params)
+	# merge!(runparams["supercell"],geometry_params)
 
 	n_device = geometry_params["nx"]*geometry_params["ny"]*geometry_params["nz"]*subspace_sizes["nsite"]*subspace_sizes["norb"]*subspace_sizes["nspin"]
 	runparams["transport"]["n"] = n_device
-	runparams["supercell"]["n"] = n_device
-	append!(runparams["transport"]["prune"],"x")
+	# runparams["supercell"]["n"] = n_device
+	push!(runparams["transport"]["prune"],"x")
 
-	merge!(runparams["unitcell"], runparams["material_params"])
+	# merge!(runparams["unitcell"], runparams["material_params"])
 	merge!(runparams["transport"], runparams["material_params"])
-	merge!(runparams["supercell"], runparams["material_params"])
+	# merge!(runparams["supercell"], runparams["material_params"])
 end
 
 runparams = add_more_params!(runparams)

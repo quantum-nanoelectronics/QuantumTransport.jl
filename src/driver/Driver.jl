@@ -14,9 +14,12 @@ function main(p::Dict)
 
     # transport(p, A)
 
+
     function A(R::Vector{Float64})
         return [0.0, 0.0, 0.0]
     end
+    NEGF_Transport_1D(p, A)
+
 
 
     if haskey(p, "unitcell")
@@ -25,7 +28,7 @@ function main(p::Dict)
     end
     if haskey(p, "transport")
         println("=============== Running transport ===============")
-        transport(p, A)
+        NEGF_Transport_1D(p["transport"], A)
        
     end
     if haskey(p, "supercell")

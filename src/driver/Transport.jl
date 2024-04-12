@@ -1,21 +1,20 @@
+electrodeMaterial
 function NEGF_Transport_1D(p::Dict, A::Function)
 
-    nested_params = generateParams(p)
     emptyElectrode = Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
-    #electroces needs to call genNNs/genH itself (not really sure if there's a way to do this unless we pass in a nested array)
+
     ElectrodesArray = [
             Electrode([-1,0],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"-x",p["electrodeMaterial"],A);
             Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
     ]
-    
-    p["verbose"] = false
+
     p["nelectrodes"] = size(ElectrodesArray)[1]
 
-    NNs = genNNs(nested_params["hoppings"])
+    NNs = genNNs(p)
     NNs = pruneHoppings(NNs, p["prune"])
-    H₀, edge_NNs = nnHoppingMat(NNs, nested_params["matrix"])
+    H₀, edge_NNs = nnHoppingMat(NNs, p)
     returnvals = []
-    H = genH(nested_params["hamiltonian"], A, H₀, edge_NNs, returnvals)
+    H = genH(p, A, H₀, edge_NNs, returnvals)
 
     Σₖs = genΣₖs(p, ElectrodesArray)
     genGᴿ, genT, genA, genScatteredT = NEGF_prep(p, H, Σₖs)
