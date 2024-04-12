@@ -47,6 +47,30 @@ function testIO(ioDir, filename, positions, meta, header)
     @test isfile(joinpath(ioDir, filename))
 end
 
+function test_formatted_save(ioDir, filename,  meta, header)
+    # generate data
+    
+    # saving data
+    @test save_data_formatted(ioDir, filename, df, meta)
+    println("-Writing-")
+    println("DataFrame: ")
+    println(first(df, 5))
+    println("Metadata: ")
+    println(meta)
+    @test isfile(joinpath(ioDir, filename))
+
+
+    # reading data
+    vals = get_data(ioDir, filename)
+    @test !isnothing(vals[1])
+    println("-Reading-")
+    println("DataFrame: ")
+    println(first(vals[1], 5))
+    println("Metadata: ")
+    println(vals[2])
+    @test isfile(joinpath(ioDir, filename))
+end
+
 
 """
 	make_metallic_CNT_positions(nx::Int, radius::Float64=3.0, a::Float64=0.246 * 1E-9, δ₀::Float64 = 0.142 * 1E-9)::Vector{Vector{Float64}}
@@ -150,7 +174,9 @@ sample_positions = [
 # set data and call test functions
 function runIOTests()
     println("\033[1mGenerating CNT positions\033[0m")
-    CNT_positions = make_metallic_CNT_positions(20)
+    N = 20
+    CNT_positions = make_metallic_CNT_positions(N)
+
     println("\033[1mGenerated CNT positions\033[0m")
 
     baseDir = abspath(joinpath(@__DIR__, ".."))
@@ -163,6 +189,9 @@ function runIOTests()
     header = copy(unicodeMeta)
     testIO(ioDir, filename1, positions, metadata, [])
     testIO(ioDir, filename2, positions, unicodeMeta, header)
+
+    xvals = LinRange(0.0,1.0,10)
+    yvals = rand(10)
 end
 
 runIOTests()
