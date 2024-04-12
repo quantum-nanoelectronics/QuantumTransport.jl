@@ -18,21 +18,21 @@ function genBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cub
     kpoints = Vector{Float64}[]
     kindices = Vector{Int}[]
     kweights = Float64[]
-    X1 = p["kdict"]["X₁"];
-    X2 = p["kdict"]["X₂"];
-    X3 = p["kdict"]["X₃"];
+    G1 = p["G"][:,1];
+    G2 = p["G"][:,2];
+    G3 = p["G"][:,3];
     if(nx != 0)
-        kxs = collect(LinRange(-X1[1],X1[1],2*nx+1));
+        kxs = collect(LinRange(-G1[1],G1[1],2*nx+1));
     else
         kxs = [0]
     end
     if(ny != 0)
-        kys = collect(LinRange(-X2[2],X2[2],2*ny+1));
+        kys = collect(LinRange(-G2[2],G2[2],2*ny+1));
     else
         kys = [0]
     end
     if(nz != 0)
-        kzs = collect(LinRange(-X3[3],X3[3],2*nz+1));
+        kzs = collect(LinRange(-G3[3],G3[3],2*nz+1));
     else
         kzs = [0]
     end
@@ -49,7 +49,7 @@ function genBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cub
         for iy = -ny:ny
             for iz = -nz:nz
                 kindex = [iy + ny + 1; iz + nz + 1]
-                k = divFixNaN(ix,nx)*X1 + divFixNaN(iy,ny)*X2 + divFixNaN(iz,nz)*X3
+                k = divFixNaN(ix,nx)*G1/2 + divFixNaN(iy,ny)*G2/2 + divFixNaN(iz,nz)*G3
                 kweight = 1
                 if(abs(ix) == nx)
                     kweight *= 1/2
