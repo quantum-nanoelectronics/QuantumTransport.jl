@@ -44,7 +44,7 @@ function genDOS(p::Dict, H::SparseMatrixCSC, η::Float64, neigs::Int, centerE::F
     return DOS
 end
 
-function genDOS(p::Dict, H::Matrix{ComplexF64}, η::Float64, neigs::Int, centerE::Float64)
+function genDOS(p::Dict, H::Matrix{ComplexF64}, η::Float64)
     eigvals = eigvals(H)
     function DOS(E::Float64)
         return (-1/π)*sum(imag.((eigvals.+(η-E)).^-1))
