@@ -13,13 +13,13 @@ runparams = Dict(
 	     "transport" => Dict("geometry" => devicegeometry, "ΔV" => 0.01, "μ" => 0.1*eV, "T" => 300, "η" => 1E-4*eV, "save" => [:transmission, :conductance],
 			  "Gʳinv_method" => :RGF, "D_spin" => 0.01*eV, "D_momentum" => 0.5*eV, "kspace"=>false),
 	     # and for runs where we want to slap a bunch of unit cells together and get the scattering-corrected electronic properties
-	     "supercell" => Dict( "geometry" => devicegeometry, "bands_project" = [σ[1],σ[2]], "poisson"=>true, "μ" => 0.1*eV, "T" => 300, "η" => 1E-4*eV, "save" => [:unfoldedbands], "density_project" => [I(2),[σ[1],σ[2],σ[3]]],
+	     "supercell" => Dict("geometry" => devicegeometry, "bands_project" = [σ[1],σ[2]], "poisson"=>true, "μ" => 0.1*eV, "T" => 300, "η" => 1E-4*eV, "save" => [:unfoldedbands], "density_project" => [I(2),[σ[1],σ[2],σ[3]]],
 			  "Gʳinv_method" => :RGF, "D_dephasing" => 0.1*eV, "D_spin" => 0.01*eV, "D_momentum" => 0.5*eV)
 	     )
 
 runparams = add_more_params!(runparams)
 
-calculate(runparams)
+main(runparams)
 
 
 # all parameters of the simulation must be passed in through the runparams, and now we will ensure they are added
@@ -41,4 +41,5 @@ function add_more_params!(runparams)
 	n_device = geometry_params["nx"]*geometry_params["ny"]*geometry_params["nz"]*subspace_sizes["nsite"]*subspace_sizes["norb"]*subspace_sizes["nspin"]
 	runparams["transport"]["n"] = n_device
 	runparams["supercell"]["n"] = n_device
+	append!(runparams["transport"]["prune"],"x")
 end
