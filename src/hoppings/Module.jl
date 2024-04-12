@@ -1,12 +1,11 @@
 module HoppingsModule
 
 include("../common/Module.jl")
-
-using .CommonModule: ħ, m₀, eV# , σ
+using .CommonModule
 
 using LinearAlgebra
 
 include("createHoppings.jl")
-export genNNs, nnHoppingMat, pruneHoppings, Hopping
+export genNNs, nnHoppingMat, pruneHoppings
 
 end

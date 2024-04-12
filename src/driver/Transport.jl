@@ -1,4 +1,5 @@
-# electrodeMaterial, E_samples, nk, returnvals
+# electrodeMaterial, E_samples, nk, returnvals, kdict, A, electrodeMagnetization, p["a₁"], p["a₂"], p["a₃"], p["μ_disorder"], deviceMagnetization, fieldtype, devicematerial, p["SLa₂"][1], p["a₁"][1]), p["m2"] + p["γ"]), l_scattering, vf, n_BLAS, p["δV"],  p["T"], ε₁
+
 function NEGF_Transport_1D(p::Dict, A::Function)
 
     emptyElectrode = Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
@@ -11,7 +12,6 @@ function NEGF_Transport_1D(p::Dict, A::Function)
     p["nelectrodes"] = size(ElectrodesArray)[1]
 
     
-
     NNs = genNNs(p)
     NNs = pruneHoppings(NNs, p["prune"])
     H₀, edge_NNs = nnHoppingMat(NNs, p)

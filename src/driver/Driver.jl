@@ -3,23 +3,15 @@ using LinearAlgebra
 include("Transport.jl")
 
 function main(p::Dict)
-    # println("p Dictionary: ")
+    println("p Dictionary: ")
     println(p)
-    # println()
-    # println("A Function: ")
-    # println(A)
-
-    # # println(q, ħ)
-
-
-    # transport(p, A)
-
 
     function A(R::Vector{Float64})
         return [0.0, 0.0, 0.0]
     end
-    NEGF_Transport_1D(p, A)
 
+    
+    NEGF_Transport_1D(p, A)
 
 
     if haskey(p, "unitcell")

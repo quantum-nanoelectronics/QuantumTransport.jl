@@ -79,10 +79,6 @@ function genΣₖs(p::Dict, ElectrodeInfo::Vector{Electrode})
             βₜ = Hs[iCinD] # towards device
         end
 
-        println("βₐ11: ", βₐ([0.0]))
-        kxes, kweights, kindices = genTetBZ(electrodeParams(p,ElectrodeInfo[1]),1000,0,0)
-		# println("βₐ in genΣₖs: ", size(βₐ))
-
         Σk(k) = TΣgen(p, Hs[1](k), βₐ(k), βₜ(k), V(k), ElectrodeInfo[i], P)
         Σks[i] = Σk
     end

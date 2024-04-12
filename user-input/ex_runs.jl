@@ -14,7 +14,7 @@ runparams = Dict(
 	    #  "unitcell" => Dict("material"=> "metal", "bands" => true, "bands_project" => [σ[1],γ⁵], "save"=>[:bandstructure, :DOS], "poisson" => false, "DOS" => false),
 	     # and for runs looking at the voltage-dependent transport properties
 	     "transport" => Dict("geometry" => devicegeometry, "ΔV" => 0.01, "μ" => 0.1*eV, "T" => 300, "η" => 1E-4*eV, "save" => [:transmission, :conductance],
-			  "Gʳinv_method" => :RGF, "D_spin" => 0.01*eV, "D_momentum" => 0.5*eV, "kspace"=>false, E_samples = [E for E = 0.0:0.1:2.0], electrodeMaterial="metal"),
+			  "Gʳinv_method" => :RGF, "D_spin" => 0.01*eV, "D_momentum" => 0.5*eV, "kspace"=>false, "E_samples" => [E for E = 0.0:0.1:2.0], "electrodeMaterial" => "metal"),
 	     # and for runs where we want to slap a bunch of unit cells together and get the scattering-corrected electronic properties
 	    #  "supercell" => Dict("geometry" => devicegeometry, "bands_project" => [σ[1],σ[2]], "poisson"=>true, "μ" => 0.1*eV, "T" => 300, "η" => 1E-4*eV, "save" => [:unfoldedbands], "density_project" => [I(2),[σ[1],σ[2],σ[3]]],
 			#   "Gʳinv_method" => :RGF, "D_dephasing" => 0.1*eV, "D_spin" => 0.01*eV, "D_momentum" => 0.5*eV)
@@ -33,7 +33,6 @@ function add_more_params!(runparams)
 	# now we will add in the H(k) subspace, and then overwrite the nx, ny, nz with the device geometry
 	runparams["transport"] = merge(subspace_sizes,runparams["transport"])
 	# runparams["transport"] = merge(subspace_sizes,runparams["supercell"])
-	runparams["transport"]["G"] = 2*π*inv(A)
 	# overwriting
 	merge!(runparams["transport"],geometry_params)
 	# merge!(runparams["supercell"],geometry_params)
@@ -46,6 +45,8 @@ function add_more_params!(runparams)
 	# merge!(runparams["unitcell"], runparams["material_params"])
 	merge!(runparams["transport"], runparams["material_params"])
 	# merge!(runparams["supercell"], runparams["material_params"])
+	# runparams["transport"]["G"] = 2*π*inv(runparams["transport"]["A"])
+
 end
 
 runparams = add_more_params!(runparams)

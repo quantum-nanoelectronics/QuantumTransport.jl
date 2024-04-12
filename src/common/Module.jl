@@ -7,7 +7,9 @@ using LinearAlgebra
 
 include("Functions.jl")
 include("Data.jl")
+include("Structs.jl")
 
+# for some reason, this needs its own export
 export ⊗
 
 #exports all units
@@ -19,5 +21,7 @@ for n in names(@__MODULE__; all=true)
 end
 
 end
+
+
 
 

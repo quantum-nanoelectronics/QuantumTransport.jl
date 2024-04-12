@@ -1,4 +1,4 @@
-include("Materials.jl")
+# include("Materials.jl")
 
 
 # Takes in the parameters p, index vector (ix,iy,iz,isite (in unit cell), and iorb)
