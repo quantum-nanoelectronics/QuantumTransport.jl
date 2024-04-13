@@ -1,7 +1,4 @@
-#A, deviceMagnetization, fieldtype, devicematerial, ε₁
-
-
-function NEGF_Transport_1D(p::Dict, A::Function)
+function NEGF_Transport_1D(p::Dict, A::Function = A_Function)
     emptyElectrode = Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
 
     Electrodes = [
@@ -20,7 +17,7 @@ function NEGF_Transport_1D(p::Dict, A::Function)
     Σₖs = genΣₖs(p, Electrodes)
     genGᴿ, genT, genA, genscatteredT = NEGF_prep(p, H, Σₖs)
 
-    #γ⁵ = I(p["nx"]*p["ny"]*p["nz"])⊗τ₁⊗σ₀
+    # γ⁵ = I(p["nx"]*p["ny"]*p["nz"])⊗τ₁⊗σ₀
 
     # if(p["mixedDOS"]==true)
     #     mdE = p["E_samples"][1]*eV; η = 10^-(3.0)
@@ -43,11 +40,19 @@ function NEGF_Transport_1D(p::Dict, A::Function)
     #         push!(returnvals,fsfig)
     #     end
     # end
-    if kspace 
-        nk = kspace
-    else
-        nk = 1
-    end
+
+    
+
+    # TODO Vivian - if p["kspace"] is true, nk isnt set to an int, instead a bool, breaks future code
+    nk = 1
+    S = 1
+    # if p["kspace"]
+    #     nk = p["kspace"]
+    # else
+    #     nk = 1
+    # end
+
+
     if haskey(p,"scattering")
         println("Running 1D NEGF transport with incoherent scattering.")
         TofE = genscatteredT.(p["E_samples"])
@@ -59,19 +64,19 @@ function NEGF_Transport_1D(p::Dict, A::Function)
         #TofE, Tmap, TmapList = totalT(genT, kindices, 0.3 .* kgrid, kweights, pE_samples, minimum(pE_samples))
         #TofE, Tmap = totalT(genT, kindices, 0.3 .* kgrid, kweights, pE_samples, minimum(pE_samples))
 
-        parallelk = ((nkx+1)*(nky+1)*(nkz+1) > 8)
-        # setting parallelk to false for local testing
+        parallelk = (nkx+1)*(nky+1)*(nkz+1) > 8
+
+        # TODO fix this
+        parallelk = false
 
         #println("parallelk = $parallelk, negf_params.prune = $(negf_params.prune)")
         Operators = [I(p["nx"]*p["ny"]*p["nz"]*p["norb"]*2)]
-
-        # testing (remove)
-        parallelk = false
 
         TofE, Tmap = totalT(genT, kindices, S .* kgrid, kweights, p["E_samples"], p["E_samples"][1], parallelk, Operators)
     end
     save_data_formatted("ℝ→ℝ", p["path"], "transmission.csv", ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission")
     println("TofE: ", TofE)
+
     #print(Tmap)
     #figh = pyplotHeatmap(S*kys/(π/p["a"]),S*kzs/(π/p["a"]),Tmap',"ky (π/a)","kz (π/a)","T(ky,kz)",:nipy_spectral, p["savedata"], p["path"])
 

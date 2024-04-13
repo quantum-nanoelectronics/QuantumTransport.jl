@@ -1,6 +1,8 @@
 module InBi
 export params, kdictGen, genSL
 
+
+
 # constants
 
 ħ = 1 #hbar
@@ -55,7 +57,7 @@ function kdictGen(A)
 		"X₃" => B*[   0;    0; 1/2],
 		"-X₃" => B*[  0;    0;-1/2],
 		
-				"-X₃" => B*[  0;    0;-1/2],
+		"-X₃" => B*[  0;    0;-1/2],
 		"-X₃" => B*[  0;    0;-1/2],
 		"-X₃" => B*[  0;    0;-1/2],
 		"-X₃" => B*[  0;    0;-1/2],

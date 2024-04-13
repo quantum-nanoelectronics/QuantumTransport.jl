@@ -1,8 +1,6 @@
 module HoppingsModule
 
-include("../common/Module.jl")
-using .CommonModule
-
+using ..CommonModule
 using LinearAlgebra
 
 include("createHoppings.jl")

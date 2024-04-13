@@ -4,24 +4,52 @@
 #    return DOS_samples
 #end
 
+
 function genDOS(p::Dict, F::Function, type::Symbol, η::Float64)
     if type == :Gʳ
         Gᴿ = F    
-        function DOS(E::Float64)
-            return (-1/π)*trace(imag.(Gᴿ))
+        function DOS_Gᴿ(E::Float64)
+            return (-1/π) * trace(imag.(Gᴿ))
         end
-        return DOS
+        return DOS_Gᴿ
     elseif type == :A
         A = F
-        function DOS(E::Float64)
-            return trace(A)/(2*π)
+        function DOS_A(E::Float64)
+            return trace(A) / (2*π)
         end
-        return DOS
+        return DOS_A
     elseif type == :H
         H = F # we've got the hamiltonian as a function of K
         # implement later
+        function DOS_H(E::Float64)
+            # implementation for DOS using H
+            return trace(H(E)) / (2*π) # This is a placeholder
+        end
+        return DOS_H
     end
 end
+
+# This function needed to be re-written above.
+# WARNING: Method definition DOS(Float64) in module Observables at e:\WindowsSSD\ECE 464K Senior Design\QuantumTransport\src\observables\DOS.jl:10 overwritten at e:\WindowsSSD\ECE 464K Senior Design\QuantumTransport\src\observables\DOS.jl:16.
+#   ** incremental compilation may be fatally broken for this module **
+# function genDOS(p::Dict, F::Function, type::Symbol, η::Float64)
+#     if type == :Gʳ
+#         Gᴿ = F    
+#         function DOS(E::Float64)
+#             return (-1/π)*trace(imag.(Gᴿ))
+#         end
+#         return DOS
+#     elseif type == :A
+#         A = F
+#         function DOS(E::Float64)
+#             return trace(A)/(2*π)
+#         end
+#         return DOS
+#     elseif type == :H
+#         H = F # we've got the hamiltonian as a function of K
+#         # implement later
+#     end
+# end
 
 function genDOS(p::Dict, H::SparseMatrixCSC, η::Float64, neigs::Int, centerE::Float64)
     eigvals = eigs(H, nev = neigs, sigma=centerE)

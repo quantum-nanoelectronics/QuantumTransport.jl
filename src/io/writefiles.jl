@@ -5,7 +5,6 @@ using Random
 using Base.Filesystem: mktemp  # For creating a temporary file
 
 
-
 function save_data_formatted(typeofdata::String, path::String, filename::String, axis_labels::Vector{String}, data::Vector{V}; row_input::Bool=false, flip_axes::Bool=false, title::String="") where V <: AbstractVector
     if row_input
         preproc = reduce(vcat,transpose.(positions))

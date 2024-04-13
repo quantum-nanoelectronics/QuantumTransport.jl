@@ -1,35 +1,6 @@
 # include("Materials.jl")
 
-
-# Takes in the parameters p, index vector (ix,iy,iz,isite (in unit cell), and iorb)
-# returns the site-index in the full hamiltonian
-function xyztoi(p, ivec, N::Vector{Int}=[0; 0; 0])
-    # indexing 0 to N-1
-    # in case the A₂ lattice vector != C*[0;1;0]
-    diy = Int(round(p["SLa₂"][1] / p["a₁"][1])) * N[2]
-    ix = mod(ivec[1], p["nx"])
-    iy = mod(ivec[2] + diy, p["ny"])
-    iz = mod(ivec[3], p["nz"])
-    isite = ivec[4]
-    iorb = ivec[5]
-    return iorb + p["norb"] * isite + p["nsite"] * p["norb"] * ix + p["nsite"] * p["norb"] * p["nx"] * iy + p["nsite"] * p["norb"] * p["nx"] * p["ny"] * iz + 1
-end
-
-# Same as above, except returns the corresponding atomic position of each index vector 
-# useful for calculating ∫A⋅δR peierls phase
-function xyztor(p, ivec)
-    ix = ivec[1]
-    iy = ivec[2]
-    iz = ivec[3]
-    isite = ivec[4]
-    δdict = Dict(0 => p["A"] * [0.0; 0.0; 0.0], #In 1 
-        1 => p["A"] * [0.5; 0.5; 0.5]) #In 2
-    #2 => pA*[0.0; 0.5; 0.8975-0.5], #Bi 1
-    #3 => pA*[0.5; 0.0; 1.10248-0.5]) #Bi 2
-    δ = δdict[isite]
-    R = p["a₁"] * ix + p["a₂"] * iy + p["a₃"] * iz + δ
-    return R
-end
+# moved xyztoi and xyztor to CommonModule because !pushHoppings uses them
 
 # Generate H₀ and make a list of edge bonds for generating H(k)
 function nnHoppingMat(NNs, p)
@@ -78,7 +49,7 @@ function genNNs(p::Dict) # all of the terms in the hamiltonian get added here, g
     nx = p["nx"]
 	ny = p["ny"]
 	nz = p["nz"]
-    hoppingType! = hoppingDict[p["deviceMaterial"]]
+    hoppingType! = material_hamiltonians[p["deviceMaterial"]]
     # loop over each unit cell site in the superlattice
     for iy = 0:(ny-1)
         for iz = 0:(nz-1)

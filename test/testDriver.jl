@@ -1,5 +1,9 @@
 module testDriver
+
 using QuantumTransport
+using LinearAlgebra
+include("../data-input/runs.jl")
+
 using Test
 
 include("InBi.jl")
@@ -21,14 +25,15 @@ function DriverTest(pNNs::NamedTuple, A::Function)
     return true
 end
 
-p, p1, p2, p3, A = InBi.generateParams()
+function newDriverTest(params)
+    main(params)
+    return true
+end
 
-
-
-
-@test DriverTest(p, A)
-# @run DriverTest(anotherP1, A)
-
+# p, p1, p2, p3, A = InBi.generateParams()
 # @test DriverTest(p, A)
+
+@test newDriverTest(runparams)
+
 
 end

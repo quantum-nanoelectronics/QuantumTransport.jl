@@ -16,16 +16,12 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     
     # Gamma matrices are useful too...
     function totΣk(E::Float64, k::Vector{Float64})
-        println("E = $E")
-		println("Size of Σks: $(size(Σks))")
-		println("k = $k")
 
         Σs = Vector{Function}(undef, size(Σks))
         for iΣ in eachindex(Σks)
             Σk = Σks[iΣ](k)
             Σs[iΣ] = Σk
         end
-		println("Size of Σs: $(size(Σs))")
 
         totalΣ = spzeros(ComplexF64, p["n"], p["n"])
         i = 1
@@ -33,18 +29,16 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
             totalΣ .+= Σ(E)
             i += 1
         end
-		println("i = $i")
-
         return totalΣ
     end
     function genGʳ(k::Vector{Float64})
         # define the inverse function here, depending on the size of H, and the number of threads. 
 
         blocksize = p["ny"]*p["nz"]*p["nsite"]*p["norb"]*p["nspin"]
-        inv(A, topandbottomrows::Bool=false) = RGFinv(A,blocksize)
+        # inv(A, topandbottomrows::Bool=false) = RGFinv(A,blocksize) # TODO 
         function Gʳ(E::Float64)
             Σ_contacts = totΣk(E, k)
-            H_eff = H(k) + Σ
+            H_eff = H(k) + Σ_contacts # TODO Vivian this was adding + Σ, changed to Σ_contacts
             #G = grInv(effH)
             #G = pGrInv(effH,4,"transport")
             if haskey(p, "scattering")
@@ -63,7 +57,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
             end
             if (p["n_BLAS"] > 1) 
             # TODO also check for inversion = true / type of inversion
-                G = inv(Array(effH))
+                G = inv(Array(H_eff)) # TODO Vivian changed from effH to H_eff
             else
                 G = grInv(H_eff) # TODO get diag, top, bottom
             end
@@ -223,14 +217,14 @@ function siteDOS(p::NamedTuple, genGᴿ::Function, E::Float64=0.1 * eV)
     return DOS
 end
 
-function totalT(genT::Function, kindices::Vector{Vector{Int}}, kgrid::Vector{Vector{Float64}}, kweights::Vector{Float64}, Evals::Vector{Float64}, Eslice::Float64, parallel::Bool, Qs::Vector{AbstractMatrix})
+# TODO Vivian - had to remove Qs type check due to removing the γ⁵ term, typecheck needs to be added back correctly
+function totalT(genT::Function, kindices::Vector{Vector{Int}}, kgrid::Vector{Vector{Float64}}, kweights::Vector{Float64}, Evals::Vector{Float64}, Eslice::Float64, parallel::Bool, Qs)
     nE = size(Evals)
     nOps = size(Qs)
     nkz = maximum([kindex[2] for kindex in kindices])
     nky = maximum([kindex[1] for kindex in kindices])
     #special slice to map BZ
     nk = size(kweights)[1]
-	print(nk)
     #Eslice = findnearest(Evals,Eslice) #make it so that we do not have to do a whole nother k loop
     Tmap = zeros(nky, nkz)
     imTmap = zeros(nky, nkz)
@@ -305,8 +299,6 @@ function totalT(genT::Function, kindices::Vector{Vector{Int}}, kgrid::Vector{Vec
             end
         end
     end
-    #end
-	print("done with this")
     return TofE, Tmap
 end
 

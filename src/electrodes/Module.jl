@@ -1,9 +1,8 @@
 module ElectrodesModule
 
-export Electrode, genΣₖs
+export genΣₖs
 
-include("../common/Module.jl")
-using .CommonModule
+using ..CommonModule
 
 using LinearAlgebra
 using SparseArrays

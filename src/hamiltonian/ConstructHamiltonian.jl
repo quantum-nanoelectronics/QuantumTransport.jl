@@ -3,17 +3,6 @@ using SparseArrays
 using Arpack
 using Distributions
 
-# For some reason, needed to add this for driver to work correctly after fixing other errors
-function xyztor(p, ivec)
-    ix = ivec[1]
-    iy = ivec[2]
-    iz = ivec[3]
-    isite = ivec[4]
-    δ = p["A"]*p["site_positions"][isite]
-    R = p["A"][:,1] * ix + p["A"][:,2] * iy + p["A"][:,3] * iz + δ
-    return R
-end
-
 # Takes in the parameter list and the vector potential
 function genH(p, A, H₀, edge_NNs)
     if haskey(p, "μ_disorder")

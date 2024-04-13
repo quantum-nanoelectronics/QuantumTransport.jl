@@ -1,7 +1,6 @@
 module DriverModule
 
-include("../common/Module.jl")
-using .CommonModule
+using ..CommonModule
 
 include("Driver.jl")
 export main

@@ -79,7 +79,6 @@ function HcontactGen(p::Dict, NNs::Vector{Hopping}, ElectrodeInfo::Electrode)
         end
     end
     Hₑ = makeElectrodeH(p, ElectrodeInfo, edgeNNs)
-    println("Making for Hc")
     Hc = makeElectrodeH(p, ElectrodeInfo, CedgeNNs)
     Hₗ = makeElectrodeH(p, ElectrodeInfo, LedgeNNs)
     Hᵣ = makeElectrodeH(p, ElectrodeInfo, RedgeNNs)
@@ -90,8 +89,6 @@ function HcontactGen(p::Dict, NNs::Vector{Hopping}, ElectrodeInfo::Electrode)
         elseif (size(H₀) == (0, 0))
             return Hcenter
         else
-            # println(size(Hc(k)), size(H₀))
-            println(size(Hcenter), size(H₀))
             return Hc(k) .+ H₀
         end
     end

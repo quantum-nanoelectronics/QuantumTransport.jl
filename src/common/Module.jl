@@ -1,13 +1,15 @@
+# currently, QuantumTransport will export all symbols from common here. Fix this later.
+
 module CommonModule
-# Do not perform exports here as this may cause compilation issues and clutter the namespace
-# Instead, perform exports in the module that imports this module by doing:
-# using .CommonModule: ⊗, τ₁, ...
 
 using LinearAlgebra
 
 include("Functions.jl")
 include("Data.jl")
 include("Structs.jl")
+
+
+include("../../data-input/materials.jl")
 
 # for some reason, this needs its own export
 export ⊗

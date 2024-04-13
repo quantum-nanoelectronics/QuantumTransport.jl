@@ -2,8 +2,7 @@ module NEGFModule
 
 export NEGF_prep, totalT, DOS, siteDOS, sitePDOS
 
-include("../common/Module.jl")
-using .CommonModule
+using ..CommonModule
 
 include("../hoppings/createHoppings.jl")
 

@@ -3,9 +3,11 @@ module testHoppings
 using Test
 
 include("InBi.jl")
-include("../src/hoppings/createHoppings.jl")
-include("../src/hoppings/Materials.jl")
-include("../src/hamiltonian/ConstructHamiltonian.jl")
+
+# TODO fix unit tests without including the src files directly
+# include("../src/hoppings/createHoppings.jl")
+# include("../src/hoppings/Materials.jl")
+# include("../src/hamiltonian/ConstructHamiltonian.jl")
 
 function HoppingsTest() 
     p, p1, p2, p3, A  = InBi.generateParams()

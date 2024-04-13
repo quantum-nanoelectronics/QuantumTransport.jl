@@ -1,5 +1,3 @@
-# using FANCY_TRANSPORT_PACKAGE # import the constants
-
 function devicegeometry(R::Vector{Float64})
 	x = R[1]; y = R[2]; z = R[3];
 	if (x<10*nm || x>50*nm)
