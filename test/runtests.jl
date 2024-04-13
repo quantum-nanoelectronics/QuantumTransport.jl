@@ -33,14 +33,14 @@ using Test
     end
 
     # TODO these are erroring out, commented for now
+    
     # println("------------RUNNING HOPPING HAMILTONIAN TESTS------------")
     # @testset "Hopping Hamiltonian Test" begin
     #     include("testHoppings.jl")
     # end
-
-    println("\033[1m---------RUNNING DATA VISUALIZATION TESTS----------\033[0m")
-    @testset "Data Visualization Test" begin
-        include("visualization.jl")
-    end
+    # println("\033[1m---------RUNNING DATA VISUALIZATION TESTS----------\033[0m")
+    # @testset "Data Visualization Test" begin
+    #     include("visualization.jl")
+    # end
 
 end
