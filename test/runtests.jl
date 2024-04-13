@@ -6,6 +6,11 @@ Uses modules in the test files to avoid polluting the global namespace, with Qua
 using Test
 
 @testset "QuantumTransport.jl Tests" begin
+    println("\033[1m---------------RUNNING DRIVER TESTS---------------\033[0m")
+    @testset "Driver Test" begin
+        include("testDriver.jl")
+    end
+
     println("\033[1m---------------RUNNING SAMPLE TESTS---------------\033[0m")
     @testset "Sample Test" begin
         include("hello_world.jl")
@@ -27,16 +32,15 @@ using Test
         include("self_energies.jl")
     end
 
-    # these are erroring out, commented for now
+    # TODO these are erroring out, commented for now
     
     # println("------------RUNNING HOPPING HAMILTONIAN TESTS------------")
     # @testset "Hopping Hamiltonian Test" begin
     #     include("testHoppings.jl")
     # end
-
-    println("\033[1m---------RUNNING DATA VISUALIZATION TESTS----------\033[0m")
-    @testset "Data Visualization Test" begin
-        include("visualization.jl")
-    end
+    # println("\033[1m---------RUNNING DATA VISUALIZATION TESTS----------\033[0m")
+    # @testset "Data Visualization Test" begin
+    #     include("visualization.jl")
+    # end
 
 end

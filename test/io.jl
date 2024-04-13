@@ -47,6 +47,27 @@ function testIO(ioDir, filename, positions, meta, header)
     @test isfile(joinpath(ioDir, filename))
 end
 
+function test_formatted_save(ioDir, filename)
+    # generate data
+    
+    # saving data
+    xvals = LinRange(0,1.0,10)
+    yvals = rand(10)
+    @test save_data_formatted("ℝ→ℝ", ioDir, filename, ["X (nm)", "Y (nm)"], [xvals,yvals], true)
+    @test isfile(joinpath(ioDir, filename))
+
+
+    # reading data
+    #=vals = get_data(ioDir, filename)
+    @test !isnothing(vals[1])
+    println("-Reading-")
+    println("DataFrame: ")
+    println(first(vals[1], 5))
+    println("Metadata: ")
+    println(vals[2])
+    @test isfile(joinpath(ioDir, filename))=#
+end
+
 
 """
 	make_metallic_CNT_positions(nx::Int, radius::Float64=3.0, a::Float64=0.246 * 1E-9, δ₀::Float64 = 0.142 * 1E-9)::Vector{Vector{Float64}}
@@ -96,7 +117,8 @@ function make_metallic_CNT_positions(nx::Int, radius::Float64=3.0 * 1E-9, a::Flo
             append!(positions, [atom1, atom2, atom3, atom4])
         end
     end
-    return positions
+    posmatrix = reduce(vcat,transpose.(positions))
+    return [posmatrix[:,1],posmatrix[:,2],posmatrix[:,3]]
 end
 
 
@@ -150,19 +172,34 @@ sample_positions = [
 # set data and call test functions
 function runIOTests()
     println("\033[1mGenerating CNT positions\033[0m")
-    CNT_positions = make_metallic_CNT_positions(20)
+    N = 20
+    CNT_positions = make_metallic_CNT_positions(N)
+
     println("\033[1mGenerated CNT positions\033[0m")
 
     baseDir = abspath(joinpath(@__DIR__, ".."))
     ioDir = joinpath(baseDir, "data-output")
-    positions = CNT_positions
+    #=positions = CNT_positions
     filename1 = "scatterplot.csv"
     filename2 = "scatterplot-unicode.csv"
     metadata = ["metadata1", "metadata2"]
     unicodeMeta = ["ħ", "ψ" , "σₓ", "ϕ"]
     header = copy(unicodeMeta)
     testIO(ioDir, filename1, positions, metadata, [])
-    testIO(ioDir, filename2, positions, unicodeMeta, header)
+    testIO(ioDir, filename2, positions, unicodeMeta, header)=#
+    xvals = LinRange(0,1,12)
+    yvals = rand(12)
+
+    @test save_data_formatted("ℝ→ℝ", ioDir, "testvals.csv", ["X (nm)", "Y (nm)"], [xvals,yvals])
+    @test isfile(joinpath(ioDir, "testvals.csv"))
+
+
+    @test save_data_formatted("ℝ³→ℝ", ioDir, "CNTpositions.csv", 
+    ["X (nm)", "Y (nm)", "Z (nm)", "n (# electrons)"], [CNT_positions[1],CNT_positions[2],CNT_positions[3], rand(size(CNT_positions[1])[1])])
+    @test isfile(joinpath(ioDir, "CNTpositions.csv"))
+    #test_formatted_save(ioDir, "testvals.csv", [xvals, yvals])
+    #test_formatted_save(ioDir, "CNT_positions.csv", [CNT_positions[1],CNT_positions[2],CNT_positions[3],])
+
 end
 
 runIOTests()

@@ -1,7 +1,6 @@
 function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     # some recipe for properly hooking up electrodes???
     #then 
-    ntot = p["n"] * p["nsite"] * p["norb"] * 2
     Γks = Vector{Function}(undef, size(Σks))
     for i = 1:p["nelectrodes"]
         function Γ(k::Vector{Float64})
@@ -17,43 +16,40 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     
     # Gamma matrices are useful too...
     function totΣk(E::Float64, k::Vector{Float64})
-        println("E = $E")
-		println("Size of Σks: $(size(Σks))")
-		println("k = $k")
 
         Σs = Vector{Function}(undef, size(Σks))
         for iΣ in eachindex(Σks)
             Σk = Σks[iΣ](k)
             Σs[iΣ] = Σk
         end
-		println("Size of Σs: $(size(Σs))")
 
-        totalΣ = spzeros(ComplexF64, p["n"] * p["nsite"] * p["norb"] * 2, p["n"] * p["nsite"] * p["norb"] * 2)
+        totalΣ = spzeros(ComplexF64, p["n"], p["n"])
         i = 1
         for Σ in Σs
             totalΣ .+= Σ(E)
             i += 1
         end
-		println("i = $i")
-
         return totalΣ
     end
     function genGʳ(k::Vector{Float64})
+        # define the inverse function here, depending on the size of H, and the number of threads. 
+
+        blocksize = p["ny"]*p["nz"]*p["nsite"]*p["norb"]*p["nspin"]
+        # inv(A, topandbottomrows::Bool=false) = RGFinv(A,blocksize) # TODO 
         function Gʳ(E::Float64)
-            Σ = totΣk(E, k)
-            effH = (E + im * p["η"]) * I(ntot) .- H(k) .- Σ
+            Σ_contacts = totΣk(E, k)
+            H_eff = H(k) + Σ_contacts # TODO Vivian this was adding + Σ, changed to Σ_contacts
             #G = grInv(effH)
             #G = pGrInv(effH,4,"transport")
-            if (p["l_scattering"] > 0)
-                G = pGrInv(effH, 4, false) # TODO get top, bottom, diag
-                η_scattering = (ħ / q) * p["vf"] / (2 * p["l_scattering"])
+            if haskey(p, "scattering")
+                G = pGrInv((E + im * p["η"]) * I(p["n"])- H_eff, blocksize, false) # TODO get top, bottom, diag
                 error = 1
                 mixing = 0.5
+                Dₘ = p["scattering"]["Dₘ"] * I(p["nx"]*p["ny"]*p["nz"])⊗(ones(p["norb"]*p["nspin"], p["norb"]*p["nspin"]))
                 while (error > 10^-6)
                     Gprev = copy(G)
-                    #effH = Array((E + im*p.η)*I(ntot) .- H(k) .- Σ .- p.η_scattering*G)
-                    effH = (E + im * p["η"]) * I(ntot) .- H(k) .- Σ .- η_scattering * (I(p["n"] * p["norb"]) ⊗ [1 1; 1 1]) .* G
-                    G = mixing * pGrInv(effH, 4, false) .+ (1 - mixing) * G #TODO get diag only
+                    H_eff =  H(k) + Σ_contacts + Dₘ .* G
+                    G = mixing * pGrInv((E + im * p["η"]) * I(p["n"]) - H_eff, blocksize, false) .+ (1 - mixing) * G #TODO get diag only
                     #G = grInv(effH)
                     error = norm((G .- Gprev), 1) / norm(G, 1)
                     println("Error = $error")
@@ -61,9 +57,9 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
             end
             if (p["n_BLAS"] > 1) 
             # TODO also check for inversion = true / type of inversion
-                G = inv(Array(effH))
+                G = inv(Array(H_eff)) # TODO Vivian changed from effH to H_eff
             else
-                G = grInv(effH) # TODO get diag, top, bottom
+                G = grInv(H_eff) # TODO get diag, top, bottom
             end
             return G
         end
@@ -92,17 +88,15 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
         return A
     end
     function genScatteredT(k::Vector{Float64}, contact::Int=2)
-        Dm = (ħ / q) * p["vf"] / (2 * p["l_scattering"])
-        Dₘ = Dm * I(p["n"]) ⊗ (ones(p["norb"], p["norb"]) ⊗ ones(2, 2))
-        if (p["l_scattering"] ≈ 0)
+        Dₘ = p["scattering"]["Dₘ"] * I(p["nx"]*p["ny"]*p["nz"])⊗(ones(p["norb"]*p["nspin"], p["norb"]*p["nspin"]))
+        if haskey(p,"scattering")
             return genT(k)
-            #Dₘ = zeros(ntot,ntot)
         end
-        fL = fermi(-p["δV"] / 2, p["T"])
-        fR = fermi(p["δV"] / 2, p["T"])
+        fL = fermi(-p["ΔV"] / 2, p["T"])
+        fR = fermi(p["ΔV"] / 2, p["T"])
         function linearConductance(E::Float64)
             Σ = totΣk(E, k)
-            Gʳ = inv(Array((E + im * p.η) * I(ntot) .- H(k) .- Σ))
+            Gʳ = inv(Array((E + im * p["η"]) * I(p["n"]) .- H(k) .- Σ))
             Γ₁E = sparse(Γks[1](k)(E))
             ΓᵢE = sparse(Γks[contact](k)(E))
             # loop to converge Gʳ
@@ -112,12 +106,12 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
             while (error > cutoff)
                 Gʳ0 = copy(Gʳ)
                 Hofk = H(k)
-                println("Dm = $(Dm), size H = $(size(Hofk)), size Σ = $(size(Σ)), size Σ_m = $(size(Dₘ.*Gʳ))")
+                #println("Dm = $(Dm), size H = $(size(Hofk)), size Σ = $(size(Σ)), size Σ_m = $(size(Dₘ.*Gʳ))")
                 #display(Array(Gʳ))
                 #display(Array(Hofk))
                 #display(Array(Σ))
                 #display(Array(Dₘ.*Gʳ))
-                Gʳ = inv(Array((E + im * p.η) * I(ntot) .- Hofk .- Σ .- Dₘ .* Gʳ))
+                Gʳ = inv(Array((E + im * p.η) * I(p["n"]) .- Hofk .- Σ .- Dₘ .* Gʳ))
                 Gʳ = mixing * Gʳ .+ (1 - mixing) * Gʳ0
                 error = norm((Gʳ .- Gʳ0), 1) / norm(Gʳ, 1)
                 println("Gʳ error = $error")
@@ -223,14 +217,14 @@ function siteDOS(p::NamedTuple, genGᴿ::Function, E::Float64=0.1 * eV)
     return DOS
 end
 
-function totalT(genT::Function, kindices::Vector{Vector{Int}}, kgrid::Vector{Vector{Float64}}, kweights::Vector{Float64}, Evals::Vector{Float64}, Eslice::Float64, parallel::Bool, Qs::Vector{AbstractMatrix})
+# TODO Vivian - had to remove Qs type check due to removing the γ⁵ term, typecheck needs to be added back correctly
+function totalT(genT::Function, kindices::Vector{Vector{Int}}, kgrid::Vector{Vector{Float64}}, kweights::Vector{Float64}, Evals::Vector{Float64}, Eslice::Float64, parallel::Bool, Qs)
     nE = size(Evals)
     nOps = size(Qs)
     nkz = maximum([kindex[2] for kindex in kindices])
     nky = maximum([kindex[1] for kindex in kindices])
     #special slice to map BZ
     nk = size(kweights)[1]
-	print(nk)
     #Eslice = findnearest(Evals,Eslice) #make it so that we do not have to do a whole nother k loop
     Tmap = zeros(nky, nkz)
     imTmap = zeros(nky, nkz)
@@ -305,8 +299,6 @@ function totalT(genT::Function, kindices::Vector{Vector{Int}}, kgrid::Vector{Vec
             end
         end
     end
-    #end
-	print("done with this")
     return TofE, Tmap
 end
 
@@ -316,7 +308,7 @@ function DOS(E::Float64, A::Function, Q::Vector=I(size(A(0))[1]))
 end
 
 function RvalsGen(p)
-    N = p["n"] * p["nsite"]
+    N = p["nx"] * p["ny"] * p["nz"] * p["nsite"]
     R = Vector{Vector{Float64}}(undef, N)
     for ix = 0:(p["nx"]-1)
         for iy = 0:(p["ny"]-1)

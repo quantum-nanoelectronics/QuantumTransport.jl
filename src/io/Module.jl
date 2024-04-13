@@ -5,8 +5,8 @@
 
 module InputOutputModule
 
-include("read-positions.jl")
-include("write-positions.jl")
-export get_data, save_csv
+include("readfiles.jl")
+include("writefiles.jl")
+export get_data, save_csv, save_data_formatted
 
 end

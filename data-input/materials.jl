@@ -52,6 +52,8 @@ function insHopping(p::Dict, NNs::Vector{Hopping}, ia::Vector{Int})
     end
 end
 
+
+
 function weyl3Hopping(p::Dict, NNs::Vector{Hopping}, ia::Vector{Int})
     iorb = ia[5]
     ib = ia
@@ -226,8 +228,5 @@ material_hamiltonians = Dict{String,Function}(
     "insulator" => insHopping,
     "metal" => metalHopping
 )
-
-
-
 
 

@@ -17,6 +17,14 @@ Ry = m₀*q^4 / (8*h^2*ϵ₀^2)
 μB = 5.788838E-5 # bohr magneton in eV/T
 kB = 8.617E-5 # boltzmann constant in eV/K
 
+#unit conversions
+μₑ = 9.28*10^-24 # electron magnetic moment in A*m^2
+#Å = 1.8897 * r0 	#angstrom, in hartree units
+nm = 10 * Å 		#angstrom, in hartree units
+kT_RT = 0.02585*eV
+#metre = 10^10 * Å
+
+
 τ₀ = [
     1 0
     0 1
@@ -87,3 +95,6 @@ S₁ = (1 / 2) * σ₁;
 S₂ = (1 / 2) * σ₂;
 S₃ = (1 / 2) * σ₃;
 S = cat(S₁, S₂, S₃, dims=3);
+
+
+

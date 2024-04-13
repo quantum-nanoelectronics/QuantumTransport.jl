@@ -3,43 +3,28 @@ using SparseArrays
 using Arpack
 using Distributions
 
-# For some reason, needed to add this for driver to work correctly after fixing other errors
-function xyztor(p, ivec)
-    ix = ivec[1]
-    iy = ivec[2]
-    iz = ivec[3]
-    isite = ivec[4]
-    δdict = Dict(0 => p["A"] * [0.0; 0.0; 0.0], #In 1 
-        1 => p["A"] * [0.5; 0.5; 0.5]) #In 2
-    #2 => pA*[0.0; 0.5; 0.8975-0.5], #Bi 1
-    #3 => pA*[0.5; 0.0; 1.10248-0.5]) #Bi 2
-    δ = δdict[isite]
-    R = p["a₁"] * ix + p["a₂"] * iy + p["a₃"] * iz + δ
-    return R
-end
-
 # Takes in the parameter list and the vector potential
-function genH(p, A, H₀, edge_NNs, returnvals)
-    ⊗(A, B) = kron(A, B)
-    NormalDist = Normal(0, p["μ_disorder"])
-    H_onsite = Diagonal(rand(NormalDist, p["n"] * p["nsite"])) ⊗ I(p["norb"] * 2) .+ p["μ"] * I(p["n"] * p["nsite"] * p["norb"] * 2)
-    Hᵦ = 0I(p["n"] * p["nsite"] * p["norb"] * 2)
-    ntot = p["n"] * p["nsite"] * p["norb"] * 2
+function genH(p, A, H₀, edge_NNs)
+    if haskey(p, "μ_disorder")
+        NormalDist = Normal(0, p["μ_disorder"])
+        H_onsite = Diagonal(rand(NormalDist, p["nx"] * p["ny"] * p["nz"] * p["nsite"])) ⊗ I(p["norb"] * p["nspin"]) + p["μ"] * I(p["n"])
+    else
+        H_onsite = p["μ"] * I(p["n"])
+    end
+    Hᵦ = 0I(p["n"])
     H₀ = sparse(H₀ .+ H_onsite .+ Hᵦ)
     Rvals = RvalsGen(p)
     Rsurf = Vector{Float64}[]
-
-    for Rval in Rvals
-        if (Rval[3] ≈ (p["nz"] - 1) * p["a₃"][3])
-            push!(Rsurf, Rval)
+    if haskey(p, "A")
+        if (p["deviceMagnetization"] == true)
+            (Bfield, Bsurf, avgB) = fieldUtils(p, A, Rsurf, Rvals)
+            Hᵦ = zeeman(map(B -> Float64.(B), Bfield), p)
+        else
+            Hᵦ = 0I(p["n"])
         end
     end
-
-    if (p["deviceMagnetization"] == true)
-        (Bfield, Bsurf, avgB) = fieldUtils(p, A, Rsurf, Rvals, returnvals)
-        Hᵦ = zeeman(map(B -> Float64.(B), Bfield), p)
-    else
-        Hᵦ = 0I(p["n"] * p["nsite"] * p["norb"] * 2)
+    if haskey(p, "M")
+        # TODO: add in the thing for if the magnetization field is nonzero
     end
 
     function H(k)
@@ -64,7 +49,7 @@ function genH(p, A, H₀, edge_NNs, returnvals)
         end
         Hₑ = sparse(rows, cols, elements)
         if (size(Hₑ) == (0, 0))
-            Hₑ = spzeros(ComplexF64, ntot, ntot)
+            Hₑ = spzeros(ComplexF64, p["n"], p["n"])
         end
         #println("Hedges = $(size(Hₑ)), H₀ = $(size(H₀))")
         Htot = H₀ .+ Hₑ
@@ -102,7 +87,7 @@ function zeeman(Bvals::Vector{Vector{Float64}}, p::Dict)
 
 
     # only defined for S-like orbitals with lz = 0
-    N = p["n"] * p["nsite"] * p["norb"] * 2
+    N = p["n"]
     zeeman = spzeros(ComplexF64, N, N)
     C = ħ / (2 * m₀) #sans q factor -> eV
     for ax = 1:3
@@ -113,7 +98,7 @@ function zeeman(Bvals::Vector{Vector{Float64}}, p::Dict)
 end
 
 function RvalsGen(p)
-    N = p["n"] * p["nsite"]
+    N = p["nx"] * p["ny"] * p["nz"] * p["nsite"]
     R = Vector{Vector{Float64}}(undef, N)
     for ix = 0:(p["nx"]-1)
         for iy = 0:(p["ny"]-1)
@@ -130,7 +115,7 @@ function RvalsGen(p)
     return R # needs ⊗I(pnorb)⊗I(2) for full (spinful) hilbert space
 end
 
-function fieldUtils(p, A::Function, Rsurf::Vector{Vector{Float64}}, Rvals::Vector{Vector{Float64}}, returnvals)
+function fieldUtils(p, A::Function, Rsurf::Vector{Vector{Float64}}, Rvals::Vector{Vector{Float64}})
 
     ħ = 1.05457E-34
     m₀ = 9.10938E-31
@@ -140,7 +125,7 @@ function fieldUtils(p, A::Function, Rsurf::Vector{Vector{Float64}}, Rvals::Vecto
     if (p["fieldtype"] == "A")
         println("Field type = vector potential, applying onsite zeeman and peierls term")
         Bfield = Bvals(A, Rvals)
-        Nsites = p["n"] * p["nsite"]
+        Nsites = p["nx"] * p["ny"] * p["nz"] * p["nsite"]
         avgB = sum(Bfield) * Nsites^-1
         #avgB = [0;0;0]
         Bfield = [Bfield[i] .- avgB for i = 1:Nsites]

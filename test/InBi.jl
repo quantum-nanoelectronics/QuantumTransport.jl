@@ -1,6 +1,8 @@
 module InBi
 export params, kdictGen, genSL
 
+
+
 # constants
 
 ħ = 1 #hbar
@@ -55,7 +57,7 @@ function kdictGen(A)
 		"X₃" => B*[   0;    0; 1/2],
 		"-X₃" => B*[  0;    0;-1/2],
 		
-				"-X₃" => B*[  0;    0;-1/2],
+		"-X₃" => B*[  0;    0;-1/2],
 		"-X₃" => B*[  0;    0;-1/2],
 		"-X₃" => B*[  0;    0;-1/2],
 		"-X₃" => B*[  0;    0;-1/2],
@@ -256,12 +258,7 @@ function genSL(p,nx::Int,ny::Int,nz::Int,SL1::Vector{Int},SL2::Vector{Int},SL3::
 	else
 		arpack = false
 	end
-        pruning = String[]
-        if(p.prune == [])
-            pruning = pruneHoppingType(runtype)
-        else
-            pruning = p.prune
-        end
+        pruning = String["y","z"]
         SLparams = (
 		SLa₁ = newA[:,1], SLa₂ = newA[:,2], SLa₃ = newA[:,3],
 		A = newA, B = 2*π*transpose(inv(newA)),
@@ -272,11 +269,11 @@ function genSL(p,nx::Int,ny::Int,nz::Int,SL1::Vector{Int},SL2::Vector{Int},SL3::
 		prune=pruning,
 		klist = ["M","Γ","X₁","M","X₂","Γ", "X₃"],
 		fieldtype=fieldtype,
-		electrodeMaterial="weyl",
+		electrodeMaterial="metal",
 		electrodeMagnetization = true,
 		mixedDOS = false,
 		nk = 0,
-		E_samples = [0.1],
+		E_samples = [i for i=-2.0:0.2:2.0],
 		l_scattering = 0,
 		δV = 0.01,
 		T = 300,
@@ -307,7 +304,7 @@ function generateParams()
         # things to return 
         returnvals = ["transmission"],
         prune=[],
-		deviceMaterial = "weyl",
+		deviceMaterial = "metal",
 		deviceMagnetization = true
     )
 
@@ -315,7 +312,7 @@ function generateParams()
     p = InBi.genSL(parms, nx, ny, nz, SL1, SL2, SL3, parms.runtype, parms.fieldtype) # generate SL params
     # supercell consisting of one unit cell
     pNNs = (n = p.n, nx = p.nx, ny = p.ny, nz = p.nz, nsite = p.nsite, norb = p.norb,
-            t = 1, SLa₂ = p.SLa₂, a₁ = p.a₁, a₂ = p.a₂, a₃ = p.a₃, deviceMaterial = "ins", 
+            t = 1, SLa₂ = p.SLa₂, a₁ = p.a₁, a₂ = p.a₂, a₃ = p.a₃, deviceMaterial = "metal", 
             ε₁ = p.ε₁, A = p.A, fieldtype = "A")
 	pH = (μ = p.μ, μ_disorder = p.μ_disorder, n = p.n, norb = p.norb, nsite = p.nsite, 
 			A = p.A, t = p.t, ε₁ = p.ε₁)

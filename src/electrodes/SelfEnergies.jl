@@ -5,47 +5,6 @@ using SparseArrays
 # commenting out for now since this is breaking precompilation
 # include("../hoppings/createHoppings.jl")
 
-function genTetBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cubic lattice
-    # nx, ny, and nz specifically refer to # of points in IBZ
-    kpoints = Vector{Float64}[]
-    kindices = Vector{Int}[]
-    kweights = Float64[]
-    X1 = p["kdict"]["X₁"];
-    X2 = p["kdict"]["X₂"];
-    X3 = p["kdict"]["X₃"];
-    
-    function divFixNaN(a::Int,b::Int) # for this particular instance, n/0 represents a Γ-centred sampling @ k = 0. 
-            if(b==0)
-                    return 0
-            else
-                    return a/b
-            end
-    end
-    for ix = -nx:nx
-        for iy = -ny:ny
-            for iz = -nz:nz
-                kindex = [iy + ny + 1; iz + nz + 1]
-                k = divFixNaN(ix,nx)*X1 + divFixNaN(iy,ny)*X2 + divFixNaN(iz,nz)*X3
-                kweight = 1
-                if(abs(ix) == nx)
-                    kweight *= 1/2
-                end
-                if(abs(iy) == ny)
-                    kweight *= 1/2
-                end
-                if(abs(iz) == nz)
-                    kweight *= 1/2
-                end
-                push!(kpoints,k)
-                push!(kindices,kindex)
-                push!(kweights,kweight)
-            end
-        end
-    end
-    ksum = sum([w for w in kweights])
-    kweights = (1/ksum).*kweights
-    return kpoints, kweights, kindices
-end
 
 # return a vector of Σ(k) functions which return Σₖ(E) which return a sparse nsite × nsite matrix at a given energy
 function genΣₖs(p::Dict, ElectrodeInfo::Vector{Electrode})
@@ -79,10 +38,6 @@ function genΣₖs(p::Dict, ElectrodeInfo::Vector{Electrode})
             βₜ = Hs[iCinD] # towards device
         end
 
-        println("βₐ11: ", βₐ([0.0]))
-        kxes, kweights, kindices = genTetBZ(electrodeParams(p,ElectrodeInfo[1]),1000,0,0)
-		# println("βₐ in genΣₖs: ", size(βₐ))
-
         Σk(k) = TΣgen(p, Hs[1](k), βₐ(k), βₜ(k), V(k), ElectrodeInfo[i], P)
         Σks[i] = Σk
     end
@@ -98,8 +53,6 @@ function TΣgen(p::Dict, H::SparseMatrixCSC, βₐ::SparseMatrixCSC, βₜ::Spar
     #H_coupling = Hₗ .+ Hᵣ# couples a layer to the infinite on both sides
     #BLAS.set_num_threads(1) # disable linalg multithreading and parallelize over k instead
     function Σ(E::Float64)
-		println("βₐ: ", size(βₐ))
-
         #Gₑ = grInv((E+im*p.η)*I(n) .- H) # guess for the green's functions in the electrodes
         #Σ_guess = H_coupling*grInv((E+im*p.η)*I(n) .- H .- 0.1*I(n))*Hᵥₘ'
         #Σ_guess = H_coupling*grInv((E+im*p.η)*I(n) .- H .- 0.1*I(n))*H_coupling'

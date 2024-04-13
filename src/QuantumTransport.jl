@@ -85,12 +85,20 @@ function _importAndExportModules(verbose::Bool=false)
     end
 end
 
-println("--------LOADING QuantumTransport MODULES----------")
+println("--------LOADING QuantumTransport----------")
 
 # Call functions in this module
 _includeModulesInSubdirs()
 _importAndExportModules(true)
 
-println("---------LOADED QuantumTransport MODULES----------")
+BASE_DIR = abspath(joinpath(@__DIR__, ".."))
+INPUT_DIR = joinpath(BASE_DIR, "data-input")
+OUTPUT_DIR = joinpath(BASE_DIR, "data-output")
+export BASE_DIR, INPUT_DIR, OUTPUT_DIR
+println("BASE_DIR: ", BASE_DIR)
+println("INPUT_DIR: ", INPUT_DIR)
+println("OUTPUT_DIR: ", OUTPUT_DIR)
+
+println("---------QuantumTransport LOADED----------")
 
 end # module
