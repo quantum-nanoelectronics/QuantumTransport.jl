@@ -6,31 +6,30 @@ using Base.Filesystem: mktemp  # For creating a temporary file
 
 
 
-function save_data_formatted(typeofdata::String, path::String, filename::String, axis_labels::Vector{String}, flip_axes::Bool=false, title::String="", data::Vector{Vector})
+function save_data_formatted(typeofdata::String, path::String, filename::String, axis_labels::Vector{String}, data::Vector{V}; row_input::Bool=false, flip_axes::Bool=false, title::String="") where V <: AbstractVector
+    if row_input
+        preproc = reduce(vcat,transpose.(positions))
+        data = [preproc[:,i] for i = 1:size(preproc)[2]]
+    end
     if typeofdata == "ℝ→ℝ"
-        x = data[1]
-        y = data[2]
         # metadata is in the format ["type of plot", n_entries, n_codomain (dimensionality of codomain), title, flip_axes]
-        metadata = [typeofdata, String(size(x)[1]), String(1), title, String(flip_axes)]
-        df = DataFrame(
-            Symbol(axis_labels[1]) = x,
-            Symbol(axis_labels[2]) = y
-        )
-        save_csv(path, filename, df, metadata)
-    elseif typeofdata == "ℝ³→R"
+        metadata = [typeofdata, string(size(data[1])[1]), string(1), title, string(flip_axes)]
+        df = DataFrame(x = data[1], y = data[2])
+    elseif typeofdata == "ℝ³→ℝ"
         x = data[1]
         y = data[2]
         z = data[3]
         C = data[4]
         # metadata is in the format ["type of plot", n_entries, n_codomain (dimensionality of codomain), title, flip_axes]
-        metadata = [typeofdata, String(size(x)[1]), String(1), title, String(flip_axes)]
-        df = DataFrame(
-            Symbol(axis_labels[1]) = x,
-            Symbol(axis_labels[2]) = y,
-            Symbol(axis_labels[3]) = z,
-            Symbol(axis_labels[4]) = C
-        )
+        metadata = [typeofdata, string(size(x)[1]), string(1), title, string(flip_axes)]
+        df = DataFrame(x = x, y = y, z=z, C=C)
+    end
+    if(@isdefined df)
+        rename!(df, Symbol.(axis_labels))
         save_csv(path, filename, df, metadata)
+    else
+        println("Saving failed")
+    end
 end
 
 function save_csv(output_dir::String, filename::String, df::DataFrame, metadata::Vector{String})

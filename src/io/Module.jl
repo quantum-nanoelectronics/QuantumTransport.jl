@@ -7,6 +7,6 @@ module InputOutputModule
 
 include("readfiles.jl")
 include("writefiles.jl")
-export get_data, save_csv
+export get_data, save_csv, save_data_formatted
 
 end

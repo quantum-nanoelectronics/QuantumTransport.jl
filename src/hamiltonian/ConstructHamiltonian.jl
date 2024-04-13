@@ -9,30 +9,33 @@ function xyztor(p, ivec)
     iy = ivec[2]
     iz = ivec[3]
     isite = ivec[4]
-    δdict = Dict(0 => p["A"] * [0.0; 0.0; 0.0], #In 1 
-        1 => p["A"] * [0.5; 0.5; 0.5]) #In 2
-    #2 => pA*[0.0; 0.5; 0.8975-0.5], #Bi 1
-    #3 => pA*[0.5; 0.0; 1.10248-0.5]) #Bi 2
-    δ = δdict[isite]
-    R = p["a₁"] * ix + p["a₂"] * iy + p["a₃"] * iz + δ
+    δ = p["A"]*p["site_positions"][isite]
+    R = p["A"][:,1] * ix + p["A"][:,2] * iy + p["A"][:,3] * iz + δ
     return R
 end
 
 # Takes in the parameter list and the vector potential
-function genH(p, A, H₀, edge_NNs, returnvals)
-    ⊗(A, B) = kron(A, B)
-    NormalDist = Normal(0, p["μ_disorder"])
-    H_onsite = Diagonal(rand(NormalDist, p["nx"] * p["ny"] * p["nz"] * p["nsite"])) ⊗ I(p["norb"] * p["nspin"]) .+ p["μ"] * I(p["n"])
+function genH(p, A, H₀, edge_NNs)
+    if haskey(p, "μ_disorder")
+        NormalDist = Normal(0, p["μ_disorder"])
+        H_onsite = Diagonal(rand(NormalDist, p["nx"] * p["ny"] * p["nz"] * p["nsite"])) ⊗ I(p["norb"] * p["nspin"]) + p["μ"] * I(p["n"])
+    else
+        H_onsite = p["μ"] * I(p["n"])
+    end
     Hᵦ = 0I(p["n"])
     H₀ = sparse(H₀ .+ H_onsite .+ Hᵦ)
     Rvals = RvalsGen(p)
     Rsurf = Vector{Float64}[]
-
-    if (p["deviceMagnetization"] == true)
-        (Bfield, Bsurf, avgB) = fieldUtils(p, A, Rsurf, Rvals, returnvals)
-        Hᵦ = zeeman(map(B -> Float64.(B), Bfield), p)
-    else
-        Hᵦ = 0I(p["n"])
+    if haskey(p, "A")
+        if (p["deviceMagnetization"] == true)
+            (Bfield, Bsurf, avgB) = fieldUtils(p, A, Rsurf, Rvals)
+            Hᵦ = zeeman(map(B -> Float64.(B), Bfield), p)
+        else
+            Hᵦ = 0I(p["n"])
+        end
+    end
+    if haskey(p, "M")
+        # TODO: add in the thing for if the magnetization field is nonzero
     end
 
     function H(k)
@@ -123,7 +126,7 @@ function RvalsGen(p)
     return R # needs ⊗I(pnorb)⊗I(2) for full (spinful) hilbert space
 end
 
-function fieldUtils(p, A::Function, Rsurf::Vector{Vector{Float64}}, Rvals::Vector{Vector{Float64}}, returnvals)
+function fieldUtils(p, A::Function, Rsurf::Vector{Vector{Float64}}, Rvals::Vector{Vector{Float64}})
 
     ħ = 1.05457E-34
     m₀ = 9.10938E-31

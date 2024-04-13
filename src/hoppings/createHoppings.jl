@@ -65,7 +65,7 @@ function electrodeParams(p::Dict, ElectrodeInfo::Electrode)
 end
 
 
-function genNNs(p, Electrodes::Electrode)
+function genNNs(p::Dict, Electrodes::Electrode)
 	ep = electrodeParams(p, Electrodes)
 	ep["nx"] = 1
     ep["prune"] = filter(x -> x ∉ ["x"], p["prune"])
@@ -73,7 +73,7 @@ function genNNs(p, Electrodes::Electrode)
 end
 
 #p is a dict
-function genNNs(p) # all of the terms in the hamiltonian get added here, get back the relevant bonds
+function genNNs(p::Dict) # all of the terms in the hamiltonian get added here, get back the relevant bonds
     NNs = Hopping[]
     nx = p["nx"]
 	ny = p["ny"]

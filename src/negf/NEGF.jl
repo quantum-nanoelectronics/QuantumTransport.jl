@@ -38,20 +38,24 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
         return totalΣ
     end
     function genGʳ(k::Vector{Float64})
+        # define the inverse function here, depending on the size of H, and the number of threads. 
+
+        blocksize = p["ny"]*p["nz"]*p["nsite"]*p["norb"]*p["nspin"]
+        inv(A, topandbottomrows::Bool=false) = RGFinv(A,blocksize)
         function Gʳ(E::Float64)
-            Σ = totΣk(E, k)
-            effH = (E + im * p["η"]) * I(p["n"]) .- H(k) .- Σ
+            Σ_contacts = totΣk(E, k)
+            H_eff = H(k) + Σ
             #G = grInv(effH)
             #G = pGrInv(effH,4,"transport")
-            if (p["l_scattering"] > 0)
-                G = pGrInv(effH, 4, false) # TODO get top, bottom, diag
-                η_scattering = (ħ / q) * p["vf"] / (2 * p["l_scattering"])
+            if haskey(p, "scattering")
+                G = pGrInv((E + im * p["η"]) * I(p["n"])- H_eff, blocksize, false) # TODO get top, bottom, diag
                 error = 1
                 mixing = 0.5
+                Dₘ = p["scattering"]["Dₘ"] * I(p["nx"]*p["ny"]*p["nz"])⊗(ones(p["norb"]*p["nspin"], p["norb"]*p["nspin"]))
                 while (error > 10^-6)
                     Gprev = copy(G)
-                    effH = (E + im * p["η"]) * I(p["n"]) .- H(k) .- Σ .- η_scattering * (I(p["n"] * p["norb"]) ⊗ [1 1; 1 1]) .* G
-                    G = mixing * pGrInv(effH, 4, false) .+ (1 - mixing) * G #TODO get diag only
+                    H_eff =  H(k) + Σ_contacts + Dₘ .* G
+                    G = mixing * pGrInv((E + im * p["η"]) * I(p["n"]) - H_eff, blocksize, false) .+ (1 - mixing) * G #TODO get diag only
                     #G = grInv(effH)
                     error = norm((G .- Gprev), 1) / norm(G, 1)
                     println("Error = $error")
@@ -61,7 +65,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
             # TODO also check for inversion = true / type of inversion
                 G = inv(Array(effH))
             else
-                G = grInv(effH) # TODO get diag, top, bottom
+                G = grInv(H_eff) # TODO get diag, top, bottom
             end
             return G
         end
@@ -90,16 +94,15 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
         return A
     end
     function genScatteredT(k::Vector{Float64}, contact::Int=2)
-        Dm = (ħ / q) * p["vf"] / (2 * p["l_scattering"])
-        Dₘ = Dm * I(p["nx"]*p["ny"]*p["nz"])⊗(ones(p["norb"]*p["nspin"], p["norb"]*p["nspin"]))
-        if (p["l_scattering"] ≈ 0)
+        Dₘ = p["scattering"]["Dₘ"] * I(p["nx"]*p["ny"]*p["nz"])⊗(ones(p["norb"]*p["nspin"], p["norb"]*p["nspin"]))
+        if haskey(p,"scattering")
             return genT(k)
         end
-        fL = fermi(-p["δV"] / 2, p["T"])
-        fR = fermi(p["δV"] / 2, p["T"])
+        fL = fermi(-p["ΔV"] / 2, p["T"])
+        fR = fermi(p["ΔV"] / 2, p["T"])
         function linearConductance(E::Float64)
             Σ = totΣk(E, k)
-            Gʳ = inv(Array((E + im * p.η) * I(p["n"]) .- H(k) .- Σ))
+            Gʳ = inv(Array((E + im * p["η"]) * I(p["n"]) .- H(k) .- Σ))
             Γ₁E = sparse(Γks[1](k)(E))
             ΓᵢE = sparse(Γks[contact](k)(E))
             # loop to converge Gʳ
@@ -109,7 +112,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
             while (error > cutoff)
                 Gʳ0 = copy(Gʳ)
                 Hofk = H(k)
-                println("Dm = $(Dm), size H = $(size(Hofk)), size Σ = $(size(Σ)), size Σ_m = $(size(Dₘ.*Gʳ))")
+                #println("Dm = $(Dm), size H = $(size(Hofk)), size Σ = $(size(Σ)), size Σ_m = $(size(Dₘ.*Gʳ))")
                 #display(Array(Gʳ))
                 #display(Array(Hofk))
                 #display(Array(Σ))

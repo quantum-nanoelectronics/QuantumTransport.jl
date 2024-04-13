@@ -215,6 +215,8 @@ subspace_sizes = Dict{String,Number}(
     "nspin" => 2
 )
 
+site_positions = [[0.0; 0.0; 0.0]] # positions of each site in the unit cell such that position of atom i = Rᵢ = A*site_position[i]
+
 material_hamiltonians = Dict{String,Function}(
     "mtjweyl" => weylHopping,
     "2Dchern" => chern2DHopping,
