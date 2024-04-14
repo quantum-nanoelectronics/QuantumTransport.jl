@@ -18,7 +18,7 @@ for n in names(@__MODULE__; all=true)
     end
 end
 
-include("../../data-input/AllInputs.jl")
-export runparams
+# include("../../data-input/AllInputs.jl")
+# export runparams
 
 end
