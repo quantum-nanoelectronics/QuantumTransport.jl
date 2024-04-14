@@ -6,7 +6,6 @@ include("InBi.jl")
 
 # TODO fix unit tests without including the src files directly
 # include("../src/hoppings/createHoppings.jl")
-# include("../src/hoppings/Materials.jl")
 # include("../src/hamiltonian/ConstructHamiltonian.jl")
 
 function HoppingsTest() 

@@ -1,5 +1,3 @@
-# include("Materials.jl")
-
 # moved xyztoi and xyztor to CommonModule because !pushHoppings uses them
 
 # Generate H₀ and make a list of edge bonds for generating H(k)

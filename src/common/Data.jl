@@ -49,7 +49,6 @@ kT_RT = 0.02585*eV
     0 -1
 ]
 
-# From materials.jl
 σ₀ = [
     1 0
     0 1
