@@ -1,31 +1,27 @@
 using LinearAlgebra
 
-
-# TODO temp
-function A_Function(R::Vector{Float64})
-    return [0.0, 0.0, 0.0]
-end 
+# this statement may cause issues because it is using the package that this file is being included in
+# not sure if including the package here is good practice but the alternative is to include it in the testDriver.jl file like so: include("../src/driver/Driver.jl")
+using QuantumTransport
 
 include("Transport.jl")
+include("Unitcell.jl")
+include("Supercell.jl")
+
+A_Function(R::Vector{Float64}) = [0.0, 0.0, 0.0]
 
 function main(p::Dict, A::Function = A_Function)
-    # println("p Dictionary: ")
-    # println(p)
-    
-    # TODO move this in the if statements
-    NEGF_Transport_1D(p, A)
-
     if haskey(p, "unitcell")
         println("=============== Running unitcell ===============")
-
+        unitcell(p["unitcell"], A)
     end
     if haskey(p, "transport")
         println("=============== Running transport ===============")
-        # NEGF_Transport_1D(p["transport"], A) # TODO fix this
-       
+        NEGF_Transport_1D(p["transport"], A)
     end
     if haskey(p, "supercell")
         println("=============== Running supercell ===============")
+        supercell(p["supercell"], A)
     end
 
 end

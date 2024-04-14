@@ -1,4 +1,4 @@
-function NEGF_Transport_1D(p::Dict, A::Function = A_Function)
+function NEGF_Transport_1D(p::Dict, A::Function)
     emptyElectrode = Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
 
     Electrodes = [

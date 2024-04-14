@@ -1,3 +1,7 @@
+BASE_DIR = abspath(joinpath(@__DIR__, "../.."))
+INPUT_DIR = joinpath(BASE_DIR, "data-input")
+OUTPUT_DIR = joinpath(BASE_DIR, "data-output")
+
 # from Constants.jl
 ħ = 1.05457E-34
 h = ħ * 2*π

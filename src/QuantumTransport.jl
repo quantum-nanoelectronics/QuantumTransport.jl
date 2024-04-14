@@ -91,10 +91,6 @@ println("--------LOADING QuantumTransport----------")
 _includeModulesInSubdirs()
 _importAndExportModules(true)
 
-BASE_DIR = abspath(joinpath(@__DIR__, ".."))
-INPUT_DIR = joinpath(BASE_DIR, "data-input")
-OUTPUT_DIR = joinpath(BASE_DIR, "data-output")
-export BASE_DIR, INPUT_DIR, OUTPUT_DIR
 println("BASE_DIR: ", BASE_DIR)
 println("INPUT_DIR: ", INPUT_DIR)
 println("OUTPUT_DIR: ", OUTPUT_DIR)

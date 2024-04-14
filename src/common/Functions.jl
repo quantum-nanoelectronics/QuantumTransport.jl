@@ -1,7 +1,5 @@
 # The functions in this file are common functions that are used in multiple files.
 
-f(x) = x^2
-
 function ⊗(A, B)
     return kron(A, B)
 end

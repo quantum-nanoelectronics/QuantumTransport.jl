@@ -49,7 +49,7 @@ function genNNs(p::Dict) # all of the terms in the hamiltonian get added here, g
     nx = p["nx"]
 	ny = p["ny"]
 	nz = p["nz"]
-    hoppingType! = material_hamiltonians[p["deviceMaterial"]]
+    hoppingType! = p["material_hamiltonian"][p["deviceMaterial"]]
     # loop over each unit cell site in the superlattice
     for iy = 0:(ny-1)
         for iz = 0:(nz-1)
