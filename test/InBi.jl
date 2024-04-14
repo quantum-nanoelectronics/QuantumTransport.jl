@@ -65,7 +65,7 @@ function kdictGen(A)
 	return kdict
 end
 
-function βgen(p,runtype::String,β₀::Float64=0.2*eV, θ::Float64=360, startDWs::Float64=-5*nm)
+function βgen(p,runtype::String,β₀::Float64=0.2*eV, θ::Float64=360.0, startDWs::Float64=-5*nm)
 	C = ħ/m₀
         β₀ = C^-1 * β₀
 	if(runtype=="fmdotsP")
@@ -228,7 +228,7 @@ params = (
 	  )
 
 function pruneHoppingType(runtype::String="")
-	println("runtype = $runtype")
+	# println("runtype = $runtype")
 	if(runtype ∈ ["nanopillars", "eggcarton", "afmthinfilm", "fmthinfilm", "fmdotsP", "fmdotsAP", "neelwall", "blochwall" ])
 		return []
 		#return ["z"]
@@ -319,8 +319,8 @@ function generateParams()
 	pHopMat = (n = p.n, nsite = p.nsite, norb = p.norb, t = p.t, ε₁ = p.ε₁)
 	A = βgen(p,p.runtype,p.β,p.θ,p.startDWs)
 
-	println("Generated parameters in InBi")
-	println(p)
+	# println("Generated parameters in InBi")
+	# println(p)
     return p, pNNs, pH, pHopMat, A
 end
 

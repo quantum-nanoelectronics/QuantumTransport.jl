@@ -12,6 +12,7 @@ Non-interactive image plots generated, for now.
 
 """
 function runVisualizationTests()
+    # this expects the scatterplot.csv file to be in the data-output directory (from IO tests)
     nm = 1E-9
     margin = 0.0
     filename = "scatterplot.csv"

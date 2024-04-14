@@ -2,15 +2,9 @@ module testDriver
 
 using QuantumTransport
 using LinearAlgebra
-include("../data-input/runs.jl")
-
 using Test
 
 include("InBi.jl")
-
-# TODO Remove include statements from /src folder in test files like this one (except do it for all test files)
-include("../src/driver/Driver.jl")
-
 
 function DriverTest(pNNs::NamedTuple, A::Function)
     dict = Dict()
@@ -25,15 +19,29 @@ function DriverTest(pNNs::NamedTuple, A::Function)
     return true
 end
 
+function printDict(runparams, type)
+    println("\033[1m$(type):\033[0m")
+    for (key, value) in runparams
+        println("  \033[1m$(key):\033[0m $(value)")
+    end
+end
+
 function newDriverTest(params)
     main(params)
     return true
 end
 
-# p, p1, p2, p3, A = InBi.generateParams()
-# @test DriverTest(p, A)
+printDict(runparams["transport"], "Transport Parameters")
+# printDict(runparams["unitcell"], "Unitcell Parameters")
+# printDict(runparams["supercell"], "Supercell Parameters")
 
 @test newDriverTest(runparams)
+
+
+
+# old implementation (can use for debugging)
+# p, p1, p2, p3, A = InBi.generateParams()
+# @test DriverTest(p, A)
 
 
 end
