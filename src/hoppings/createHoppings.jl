@@ -42,19 +42,33 @@ function genNNs(p::Dict, Electrodes::Electrode)
 end
 
 #p is a dict
+function position(p::Dict, ivec::Vector{Int})
+    ix = ivec[1]; iy = ivec[2]; iz = ivec[3]; isite = ivec[4]
+    return p["A"]*[ix;iy;iz] + p["A"]*p["site_positions"][isite+1]
+end
+
 function genNNs(p::Dict) # all of the terms in the hamiltonian get added here, get back the relevant bonds
     NNs = Hopping[]
     nx = p["nx"]
 	ny = p["ny"]
 	nz = p["nz"]
-    hoppingType! = p["material_hamiltonian"][p["deviceMaterial"]]
     # loop over each unit cell site in the superlattice
+    geometry = p["geometry"]
+    material = geometry(0.0*[0;0;0])
+    hoppingType! = p["material_hamiltonian"][material]
     for iy = 0:(ny-1)
         for iz = 0:(nz-1)
 			for ix = 0:(nx-1)
 				for isite = 0:(p["nsite"]-1)
 					for iorb = 0:(p["norb"]-1)
-						ia = copy(Int.([ix, iy, iz, isite, iorb]))
+                        ivec = [ix; iy; iz; isite; iorb]
+                        R = position(p,ivec)
+                        current_material = geometry(R)
+                        if material != current_material
+                            material = current_material
+                            hoppingType! = copy(p["material_hamiltonian"][geometry(R)])
+                        end
+                        ia = copy(Int.([ix, iy, iz, isite, iorb]))
 						hoppingType!(p, NNs, ia)
 					end
 				end

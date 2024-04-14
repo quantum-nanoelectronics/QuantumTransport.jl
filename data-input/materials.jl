@@ -210,8 +210,8 @@ subspace_sizes = Dict{String,Number}(
     "nx" => 1,
     "ny" => 1,
     "nz" => 1,
-    "norb" => 2,
     "nsite" => 1,
+    "norb" => 2,
     "nspin" => 2
 )
 
