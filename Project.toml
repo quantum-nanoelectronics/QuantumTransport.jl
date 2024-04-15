@@ -1,7 +1,7 @@
 name = "QuantumTransport"
 uuid = "411772af-e49e-49ed-af28-686d52595cd1"
 authors = ["som-wakdikar"]
-version = "1.0.0-DEV"
+version = "1.0.0"
 
 [deps]
 Arpack = "7d9fca2a-8960-54d3-9f78-7d1dccf2cb97"
