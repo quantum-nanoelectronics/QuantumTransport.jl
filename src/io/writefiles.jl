@@ -6,6 +6,14 @@ using Base.Filesystem: mktemp  # For creating a temporary file
 
 
 function save_data_formatted(typeofdata::String, path::String, filename::String, axis_labels::Vector{String}, data::Vector{V}; row_input::Bool=false, flip_axes::Bool=false, title::String="") where V <: AbstractVector
+    # this code will save data in the following format, where the first line of a CSV is the metadata
+    # the second line would be a header file
+    # and the third row onwards would be data
+    # Ex:
+    # |typeofdata::String (Ex: ℝ→ℝ)| npts::Int | dims_codomain::Int (n as in ℝ→ℝⁿ) | title_of_plot::String | flip x and y axes?
+    # | xlabel  | ylabel|zlabel | etc | etc|
+    # |data     | data  | data  | data|data|
+    
     if row_input
         preproc = reduce(vcat,transpose.(positions))
         data = [preproc[:,i] for i = 1:size(preproc)[2]]
