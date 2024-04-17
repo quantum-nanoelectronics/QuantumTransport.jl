@@ -7,6 +7,7 @@ using LinearAlgebra
 using SparseArrays
 
 include("DOS.jl")
+include("Bands.jl")
 
 end
 
