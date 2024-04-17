@@ -30,6 +30,42 @@ function save_data_formatted(typeofdata::String, path::String, filename::String,
         # metadata is in the format ["type of plot", n_entries, n_codomain (dimensionality of codomain), title, flip_axes]
         metadata = [typeofdata, string(size(x)[1]), string(1), title, string(flip_axes)]
         df = DataFrame(x = x, y = y, z=z, C=C)
+    elseif typeofdata == "bandstructure"
+        # total number of kpts that hamiltonian has been sampled over
+        nkpts = size(data[2])[1]
+        # total number of labels that will go on the x axis
+        nklabels = size(klabels)[1] 
+        # number of interpolation points between kpts
+        ninterpolate = Int((nkpts-1)/(nklabels-1))
+        kxs = Float64[]
+        kys = Float64[]
+        kzs = Float64[]
+        # okay, we will now make column 1 which will hold the k point list
+        bands_labels = String[] 
+        for ik = 1:(nklabels-1)
+            push!(bands_labels,klabel[ik])
+            for ik = 2:nk
+                push!(bands_labels,"")
+            end
+        end
+        push!(bands_labels,klabel[end])
+        # make columns 2-4
+        for k ∈ data[2] #loop over all of the k vectors
+            push!(kxs,k[1])
+            push!(kys,k[2])
+            push!(kzs,k[3])
+        end
+        Evals = data[3]
+        nbands = size(Evals)[2]
+        # now make the labels and columns 5-N
+        labels = ["k point", "kx (1/m)", "ky (1/m)", "kz (1/m)"]
+        for iE = 1:nbands
+            push!(labels,"E_"*string(iE))
+        end
+        # okay, now figure out the code to get this stuff into the data DataFrame
+        # each column for the energy_values = Evals[ik, :]
+        # each row should correspond to one k-point 
+        
     end
     if(@isdefined df)
         rename!(df, Symbol.(axis_labels))
