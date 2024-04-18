@@ -5,18 +5,20 @@ using Distributions
 
 # Takes in the parameter list and the vector potential
 function genH(p, A, H₀, edge_NNs)
+    H₀ = 0I(p["n"])
     if haskey(p, "μ_disorder")
         NormalDist = Normal(0, p["μ_disorder"])
-        H_onsite = Diagonal(rand(NormalDist, p["nx"] * p["ny"] * p["nz"] * p["nsite"])) ⊗ I(p["norb"] * p["nspin"]) + p["μ"] * I(p["n"])
-    else
-        H_onsite = p["μ"] * I(p["n"])
+        H₀ += Diagonal(rand(NormalDist, p["nx"] * p["ny"] * p["nz"] * p["nsite"])) ⊗ I(p["norb"] * p["nspin"]) + p["μ"] * I(p["n"])
+    elseif haskey(p, "μ")
+        H₀ += p["μ"] * I(p["n"])
     end
-    Hᵦ = 0I(p["n"])
-    H₀ = sparse(H₀ .+ H_onsite .+ Hᵦ)
+    #Hᵦ = 0I(p["n"])
+    H₀ = sparse(H₀)
     Rvals = RvalsGen(p)
     Rsurf = Vector{Float64}[]
     if haskey(p, "A")
-        if (p["deviceMagnetization"] == true)
+        # check if p["deviceMagnetization"] exists and is true
+        if (haskey(p, ["deviceMagnetization"]) && p["deviceMagnetization"] == true)
             (Bfield, Bsurf, avgB) = fieldUtils(p, A, Rsurf, Rvals)
             Hᵦ = zeeman(map(B -> Float64.(B), Bfield), p)
         else

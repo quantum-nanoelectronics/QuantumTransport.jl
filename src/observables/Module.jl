@@ -6,6 +6,8 @@ export genDOS, getbands
 using LinearAlgebra
 using SparseArrays
 
+using ..InputOutputModule
+
 include("DOS.jl")
 include("Bands.jl")
 
