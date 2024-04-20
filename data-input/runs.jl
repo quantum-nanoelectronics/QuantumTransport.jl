@@ -3,7 +3,7 @@
 
 γ⁵ = 0 # ?? not sure. this can go in constants? # TODO Vivian
 runparams = Dict(
-	"path" => "./data-output/",
+	"path" => OUTPUT_DIR,
 	"material_hamiltonian" => material_hamiltonians,
 	"material_params" => Dict("t" => 1.0, "ε₀" => 1.0, "site_positions"=>site_positions),
 

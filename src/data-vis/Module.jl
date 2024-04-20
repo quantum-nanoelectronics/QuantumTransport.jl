@@ -3,6 +3,7 @@
 module DataVisualizationModule
 
 include("plot.jl")
-export generate_plot_makie, plot_pos
+include("plotstuff.jl")
+export generate_plot_makie, plot_pos, call_function_based_on_header
 
 end
