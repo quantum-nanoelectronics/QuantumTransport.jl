@@ -33,7 +33,7 @@ end
 
 
 printDict(runparams["transport"], "Transport Parameters")
-# printDict(runparams["unitcell"], "Unitcell Parameters")
+printDict(runparams["unitcell"], "Unitcell Parameters")
 # printDict(runparams["supercell"], "Supercell Parameters")
 
 @test newDriverTest(runparams)

@@ -66,9 +66,6 @@ function NEGF_Transport_1D(p::Dict, A::Function)
 
         parallelk = (nkx+1)*(nky+1)*(nkz+1) > 8
 
-        # TODO fix this
-        parallelk = false
-
         #println("parallelk = $parallelk, negf_params.prune = $(negf_params.prune)")
         Operators = [I(p["nx"]*p["ny"]*p["nz"]*p["norb"]*p["nspin"])]
 
