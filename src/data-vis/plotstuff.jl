@@ -1,17 +1,15 @@
 using CSV
 using DataFrames
 # using Plots
-using Makie
+# using Makie # Cannot do this 
+#using Makie #If this line is uncommented or if Makie is added to this package, github tests will fail
+
 using GLMakie
 using ColorSchemes
 using Colors
+
+# Do not include from other packages, need to fix this # TODO
 include("../io/readfiles.jl")
-
-BASE_DIR = abspath(joinpath(@__DIR__, "../.."))
-INPUT_DIR = joinpath(BASE_DIR, "data-input")
-OUTPUT_DIR = joinpath(BASE_DIR, "data-output")
-
-#output_dir = joinpath("..", "..", "data-output")
 
 # Function to call the appropriate function based on header value
 function call_function_based_on_header(readDir::String, filename::String)

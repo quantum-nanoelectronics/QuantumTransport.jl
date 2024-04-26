@@ -6,6 +6,8 @@ using QuantumTransport
 using Test
 using DataFrames
 using Random
+#using Makie #If this line is uncommented or if Makie is added to this package, github tests will fail
+
 
 """
 	testIO(ioDir, filename, positions, meta, header)

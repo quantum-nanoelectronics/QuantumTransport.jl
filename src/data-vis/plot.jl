@@ -1,9 +1,10 @@
 using CSV
 using DataFrames
 
-# Adding GLMakie, Makie, etc. to the dependencies will not work on github
+# Adding Makie, etc. to the dependencies will not work on github
+#using Makie #If this line is uncommented or if Makie is added to this package, github tests will fail
+
 using CairoMakie
-# using Makie, DataFrames
 
 
 
