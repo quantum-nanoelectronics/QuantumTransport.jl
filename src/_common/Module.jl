@@ -2,7 +2,7 @@
 
 # Include all functions and data in this module if it needs to be used in another submodule in this package.
 
-module CommonModule
+module CommonModule # the _ in the directory is needed because this needs to be compiled first to be used within other package modules
 
 using LinearAlgebra
 

@@ -1,15 +1,7 @@
-using CSV
-using DataFrames
-# using Plots
-# using Makie # Cannot do this 
+#New plotting file
+
+# Adding Makie, etc. to the dependencies will not work on github
 #using Makie #If this line is uncommented or if Makie is added to this package, github tests will fail
-
-using GLMakie
-using ColorSchemes
-using Colors
-
-# Do not include from other packages, need to fix this # TODO
-include("../io/readfiles.jl")
 
 # Function to call the appropriate function based on header value
 function call_function_based_on_header(readDir::String, filename::String)
