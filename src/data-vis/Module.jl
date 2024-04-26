@@ -15,7 +15,7 @@ using DataFrames
 using ColorSchemes
 using Colors
 
-using GLMakie
+# using GLMakie
 using CairoMakie
 # Adding Makie, etc. to the dependencies will not work on github
 #using Makie #If this line is uncommented or if Makie is added to this package, github tests will fail

@@ -22,7 +22,7 @@ end
 
 function ℝtoℝ(df::DataFrame, n::Int, axisflag::Bool, title::String, plot_size=(600, 400), line_scale=2)
     # Read the CSV file
-    GLMakie.activate!()  
+      
 
     # Extract the domain and codomains
     domain = df[!, 1]  # first column for the domain R
@@ -53,7 +53,7 @@ function ℝtoℝ(df::DataFrame, n::Int, axisflag::Bool, title::String, plot_siz
 end
 
 function R_to_C(csv_file, plot_size=(600, 400), line_scale=1)
-    GLMakie.activate!()
+    
     df = CSV.File(csv_file) |> DataFrame
 
     # Function to map phase to inferno colormap
@@ -98,7 +98,7 @@ function R_to_C(csv_file, plot_size=(600, 400), line_scale=1)
 end
 
 function R3_to_Rplus(csv_file, plot_size=(600, 400), marker_scale=1)
-    GLMakie.activate!()  
+      
 
     # Extract the coordinates and complex number values
     x = df[!, 1]  # First column for the x coordinate
@@ -120,14 +120,14 @@ function R3_to_Rplus(csv_file, plot_size=(600, 400), marker_scale=1)
     normalized_values = (real_part .- minimum(real_part)) ./ (maximum(real_part) - minimum(real_part))
 
     # Add the scatter points to the plot, using the seismic colormap for colors based on the normalized real part values
-    GLMakie.scatter!(ax, x, y, z, markersize=normalized_sizes, color=normalized_values, colormap=:viridis, marker_z=normalized_values, strokewidth = 0)
+    scatter!(ax, x, y, z, markersize=normalized_sizes, color=normalized_values, colormap=:viridis, marker_z=normalized_values, strokewidth = 0)
     output_file_path = joinpath(OUTPUT_DIR, "R3_to_R.png")
     save(output_file_path, fig)
 end
 
 function ℝ³toℝ(df::DataFrame, n::Int, axisflag::Bool, title::String, plot_size=(1400, 800), marker_scale=20)
     # Read the CSV file
-    GLMakie.activate!()  
+      
 
     # Extract the coordinates and complex number values
     x = df[!, 1]  # First column for the x coordinate
@@ -147,8 +147,8 @@ function ℝ³toℝ(df::DataFrame, n::Int, axisflag::Bool, title::String, plot_s
 
 
     # Add the scatter points to the plot, using the seismic colormap for colors based on the normalized real part values
-    scatter_plot = GLMakie.scatter!(ax, x, y, z, markersize=normalized_sizes, color=normalized_sizes, colormap=:viridis, strokewidth = 0)
-    cb = GLMakie.Colorbar(fig[1, 2], limits = (0, maximum(marker_sizes)), label=string(names(df)[4]), )
+    scatter_plot = scatter!(ax, x, y, z, markersize=normalized_sizes, color=normalized_sizes, colormap=:viridis, strokewidth = 0)
+    cb = Colorbar(fig[1, 2], limits = (0, maximum(marker_sizes)), label=string(names(df)[4]), )
     output_file_path = joinpath(OUTPUT_DIR, "R3_to_R.png")
     save(output_file_path, fig)
     
@@ -156,7 +156,7 @@ function ℝ³toℝ(df::DataFrame, n::Int, axisflag::Bool, title::String, plot_s
 end
 
 function R3_to_C(csv_file, plot_size=(600, 400), marker_scale=1)
-    GLMakie.activate!()
+    
     df = CSV.File(csv_file) |> DataFrame
 
     # Extract the coordinates and complex number components
@@ -183,7 +183,7 @@ function R3_to_C(csv_file, plot_size=(600, 400), marker_scale=1)
     ax = fig[1, 1] = Axis3(fig, title="3D Complex Function Visualization", xlabel="X", ylabel="Y", zlabel="Z")
 
     # Add the scatter points to the plot, using the inferno colormap for colors based on the phase
-    GLMakie.scatter!(ax, x, y, z, color=normalized_phases, colormap=:inferno, markersize=normalized_sizes)
+    scatter!(ax, x, y, z, color=normalized_phases, colormap=:inferno, markersize=normalized_sizes)
 
     # Display the figure
     #display(fig)
@@ -208,7 +208,7 @@ function codomain_to_HSL(codomain_y1, codomain_y2, codomain_y3, R_max)
 end
 
 function R3_to_R3(csv_file, plot_size=(600, 400), marker_scale=1)
-    GLMakie.activate!()
+    
     df = CSV.File(csv_file) |> DataFrame
 
     # Extract the domain and codomain
@@ -228,7 +228,7 @@ function R3_to_R3(csv_file, plot_size=(600, 400), marker_scale=1)
 
     # Add the scatter points to the plot, with size and color
     colors = [codomain_to_HSL(codomain_x[i], codomain_y[i], codomain_z[i], max_marker_size) for i in 1:length(codomain_x)]
-    GLMakie.scatter!(ax, domain_x, domain_y, domain_z, color=colors, markersize=normalized_marker_sizes)
+    scatter!(ax, domain_x, domain_y, domain_z, color=colors, markersize=normalized_marker_sizes)
 
     # Display the figure
     #display(fig)
@@ -250,7 +250,7 @@ function R3(csv_file, hex_color, plot_size=(600, 400), marker_scale=1)
     ax = fig[1, 1] = Axis3(fig, title="3D Scatter Plot with Uniform Color", xlabel="X", ylabel="Y", zlabel="Z")
 
     # Add the scatter points to the plot with the specified hex color and scaled marker size
-    GLMakie.scatter!(ax, x, y, z, color=hex_color, markersize=marker_scale)
+    scatter!(ax, x, y, z, color=hex_color, markersize=marker_scale)
     #display(fig)
     # Display the figure
     output_file_path = joinpath(output_dir, "R3.png")
@@ -258,7 +258,7 @@ function R3(csv_file, hex_color, plot_size=(600, 400), marker_scale=1)
 end
 
 function R2_to_Rplus(csv_file, plot_size=(600, 400))
-    GLMakie.activate!()
+    
     # Read the CSV file into a DataFrame
     df = CSV.File(csv_file) |> DataFrame
 
@@ -272,7 +272,7 @@ function R2_to_Rplus(csv_file, plot_size=(600, 400))
     ax = fig[1, 1] = Axis(fig, title="2D Heatmap using Inferno Colormap")
 
     # Add the heatmap to the plot
-    GLMakie.heatmap!(ax, x_coords, y_coords, values_matrix, colormap=:inferno)
+    heatmap!(ax, x_coords, y_coords, values_matrix, colormap=:inferno)
 
     # Display the figure
     #display(fig)
@@ -281,7 +281,7 @@ function R2_to_Rplus(csv_file, plot_size=(600, 400))
 end
 
 function R2_to_R3(csv_file, plot_size=(600, 400), marker_scale=1)
-    GLMakie.activate!()
+    
     # Read the CSV file into a DataFrame
     df = CSV.File(csv_file) |> DataFrame
 
@@ -304,7 +304,7 @@ function R2_to_R3(csv_file, plot_size=(600, 400), marker_scale=1)
     colors = [codomain_to_HSL(codomain_x[i], codomain_y[i], codomain_z[i], max_marker_size) for i in 1:length(codomain_x)]
 
     # Add a scatter plot to the plot, scaling the marker size
-    GLMakie.scatter!(ax, x, y, color=colors, marker=:circle, markersize=20 * marker_scale)
+    scatter!(ax, x, y, color=colors, marker=:circle, markersize=20 * marker_scale)
 
     # Display the figure
     #display(fig)
