@@ -12,9 +12,9 @@ end
 function xyztoi(p, ivec, N::Vector{Int}=[0; 0; 0])
     # indexing 0 to N-1
     # in case the A₂ lattice vector != C*[0;1;0]
-    diy = Int(round(p["SLa₂"][1] / p["a₁"][1])) * N[2]
+    #diy = Int(round(p["SLa₂"][1] / p["a₁"][1])) * N[2]
     ix = mod(ivec[1], p["nx"])
-    iy = mod(ivec[2] + diy, p["ny"])
+    iy = mod(ivec[2], p["ny"])
     iz = mod(ivec[3], p["nz"])
     isite = ivec[4]
     iorb = ivec[5]
@@ -28,12 +28,7 @@ function xyztor(p, ivec)
     iy = ivec[2]
     iz = ivec[3]
     isite = ivec[4]
-    δdict = Dict(0 => p["A"] * [0.0; 0.0; 0.0], #In 1 
-        1 => p["A"] * [0.5; 0.5; 0.5]) #In 2
-    #2 => pA*[0.0; 0.5; 0.8975-0.5], #Bi 1
-    #3 => pA*[0.5; 0.0; 1.10248-0.5]) #Bi 2
-    δ = δdict[isite]
-    R = p["a₁"] * ix + p["a₂"] * iy + p["a₃"] * iz + δ
+    R = p["A"]*ivec[1:3] + p["site_positions"][isite+1]
     return R
 end
 

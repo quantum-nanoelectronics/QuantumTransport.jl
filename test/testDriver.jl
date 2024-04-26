@@ -4,7 +4,7 @@ using QuantumTransport
 using LinearAlgebra
 using Test
 
-include("InBi.jl")
+#include("InBi.jl")
 
 function DriverTest(pNNs::NamedTuple, A::Function)
     dict = Dict()
@@ -31,8 +31,9 @@ function newDriverTest(params)
     return true
 end
 
+
 printDict(runparams["transport"], "Transport Parameters")
-# printDict(runparams["unitcell"], "Unitcell Parameters")
+printDict(runparams["unitcell"], "Unitcell Parameters")
 # printDict(runparams["supercell"], "Supercell Parameters")
 
 @test newDriverTest(runparams)
