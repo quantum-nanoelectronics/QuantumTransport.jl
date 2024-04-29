@@ -4,7 +4,7 @@
 #using Makie #If this line is uncommented or if Makie is added to this package, github tests will fail
 
 # Function to call the appropriate function based on header value
-function call_function_based_on_header(readDir::String, filename::String, GLMakie::Bool = false)
+function call_function_based_on_header(readDir::String, filename::String, useGLMakie::Bool = false)
     # Read the CSV file header
     df, metadata = get_data(readDir, filename)
 
@@ -17,7 +17,7 @@ function call_function_based_on_header(readDir::String, filename::String, GLMaki
         print("no match")
     end
 
-    if GLMakie
+    if useGLMakie
         GLMakie.activate!()
         display(fig)
     end
