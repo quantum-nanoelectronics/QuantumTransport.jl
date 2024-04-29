@@ -9,9 +9,9 @@ function runVisualizationTests()
     filename = "transmission.csv"  # specify the CSV file name
 
     file_path = joinpath(readDir, filename)
-    call_function_based_on_header(readDir, filename)
+    call_function_based_on_header(readDir, filename, true)
     filename = "CNTpositions.csv"
-    call_function_based_on_header(readDir, filename)
+    call_function_based_on_header(readDir, filename, true)
     # Save the figure
     @test isfile(file_path)
     
