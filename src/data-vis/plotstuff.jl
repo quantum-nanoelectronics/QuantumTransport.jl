@@ -18,9 +18,12 @@ function call_function_based_on_header(readDir::String, filename::String, useGLM
     end
 
     if useGLMakie
+        using GLMakie
         GLMakie.activate!()
         display(fig)
     end
+
+    return fig
 end
 
 
