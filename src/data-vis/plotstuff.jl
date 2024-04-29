@@ -18,6 +18,7 @@ function call_function_based_on_header(readDir::String, filename::String, GLMaki
     end
 
     if GLMakie
+        GLMakie.activate!()
         display(fig)
     end
 end
