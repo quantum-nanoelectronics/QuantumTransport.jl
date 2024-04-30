@@ -6,17 +6,18 @@
 # Function to call the appropriate function based on header value
 function call_function_based_on_header(readDir::String, filename::String)
     # Read the CSV file header
-
     df, metadata = get_data(readDir, filename)
 
     # Get the header of the DataFrame
     if metadata[1] == "ℝ→ℝ"
-        ℝtoℝ(df, parse(Int, metadata[3]), parse(Bool, metadata[5]), String(metadata[4]::SubString))
+        fig = ℝtoℝ(df, parse(Int, metadata[3]), parse(Bool, metadata[5]), String(metadata[4]::SubString))
     elseif metadata[1] == "ℝ³→ℝ"
-        ℝ³toℝ(df, parse(Int, metadata[3]), parse(Bool, metadata[5]), String(metadata[4]::SubString))
+        fig = ℝ³toℝ(df, parse(Int, metadata[3]), parse(Bool, metadata[5]), String(metadata[4]::SubString))
     else
         print("no match")
     end
+
+    return fig
 end
 
 
@@ -50,6 +51,8 @@ function ℝtoℝ(df::DataFrame, n::Int, axisflag::Bool, title::String, plot_siz
     #display(fig)
     output_file_path = joinpath(OUTPUT_DIR, "R_to_R.png")
     save(output_file_path, fig)
+
+    return fig
 end
 
 function R_to_C(csv_file, plot_size=(600, 400), line_scale=1)
@@ -95,6 +98,8 @@ function R_to_C(csv_file, plot_size=(600, 400), line_scale=1)
     #display(fig)
     output_file_path = joinpath(output_dir, "R_to_C.png")
     save(output_file_path, fig)
+
+    return fig
 end
 
 function R3_to_Rplus(csv_file, plot_size=(600, 400), marker_scale=1)
@@ -123,6 +128,8 @@ function R3_to_Rplus(csv_file, plot_size=(600, 400), marker_scale=1)
     scatter!(ax, x, y, z, markersize=normalized_sizes, color=normalized_values, colormap=:viridis, marker_z=normalized_values, strokewidth = 0)
     output_file_path = joinpath(OUTPUT_DIR, "R3_to_R.png")
     save(output_file_path, fig)
+
+    return fig
 end
 
 function ℝ³toℝ(df::DataFrame, n::Int, axisflag::Bool, title::String, plot_size=(1400, 800), marker_scale=20)
@@ -152,7 +159,7 @@ function ℝ³toℝ(df::DataFrame, n::Int, axisflag::Bool, title::String, plot_s
     output_file_path = joinpath(OUTPUT_DIR, "R3_to_R.png")
     save(output_file_path, fig)
     
-
+    return fig
 end
 
 function R3_to_C(csv_file, plot_size=(600, 400), marker_scale=1)
@@ -189,6 +196,8 @@ function R3_to_C(csv_file, plot_size=(600, 400), marker_scale=1)
     #display(fig)
     output_file_path = joinpath(output_dir, "R3_to_C.png")
     save(output_file_path, fig)
+
+    return fig
 end
 
 function codomain_to_HSL(codomain_y1, codomain_y2, codomain_y3, R_max)
@@ -234,6 +243,8 @@ function R3_to_R3(csv_file, plot_size=(600, 400), marker_scale=1)
     #display(fig)
     output_file_path = joinpath(output_dir, "R3_to_R3.png")
     save(output_file_path, fig)
+
+    return fig
 end
 
 function R3(csv_file, hex_color, plot_size=(600, 400), marker_scale=1)
@@ -278,6 +289,8 @@ function R2_to_Rplus(csv_file, plot_size=(600, 400))
     #display(fig)
     output_file_path = joinpath(output_dir, "R2_to_Rplus.png")
     save(output_file_path, fig)
+
+    return fig
 end
 
 function R2_to_R3(csv_file, plot_size=(600, 400), marker_scale=1)
@@ -310,5 +323,7 @@ function R2_to_R3(csv_file, plot_size=(600, 400), marker_scale=1)
     #display(fig)
     output_file_path = joinpath(output_dir, "R2_to_R3.png")
     save(output_file_path, fig)
+
+    return fig
 end
 

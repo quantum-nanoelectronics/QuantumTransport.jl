@@ -1,23 +1,10 @@
-module testHoppings
+module testHoppings # TODO fix this unit test
 
+using QuantumTransport
+using LinearAlgebra
 using Test
 
-include("InBi.jl")
-
-# TODO fix unit tests without including the src files directly
-# include("../src/hoppings/createHoppings.jl")
-# include("../src/hamiltonian/ConstructHamiltonian.jl")
-
-function HoppingsTest() 
-    p, p1, p2, p3, A  = InBi.generateParams()
-    dict = Dict()
-        
-        for (key,value) in zip(keys(p), p)
-            dict[string(key)] = value
-        end
-    dict["deviceMaterial"] = "ins"
-    # dict["deviceMagnetization"] = false
-    dict["deviceMagnetization"] = true
+function HoppingsTest(dict) 
     NNs = genNN(dict)
     checkNNs(NNs, dict)
     NNs = pruneHoppings(NNs, []) #p needs a prune value
@@ -61,5 +48,8 @@ function testHGen(p, A, H₀, edge_NNs)
 end
 
 ⊗(A,B) = kron(A,B)
-HoppingsTest()
+
+# runparams defined in QuantumTransport
+HoppingsTest(runparams)
 end
+
