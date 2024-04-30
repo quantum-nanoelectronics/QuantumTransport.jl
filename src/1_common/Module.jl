@@ -18,7 +18,8 @@ for n in names(@__MODULE__; all=true)
     end
 end
 
-# include("../../data-input/AllInputs.jl")
+# commented out so that updates to input files propogate immediately for visualization on frontend
+# include(joinpath(INPUT_DIR, AllInputs.jl))
 # export runparams
 
 end

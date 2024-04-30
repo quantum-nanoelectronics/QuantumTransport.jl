@@ -28,6 +28,18 @@ function runVisualizationTestsGLMakie()
     @test isfile(file_path)
 end
 
+
+function recordVisualization()
+    readDir = OUTPUT_DIR
+    filename = "CNTpositions.csv"
+    fig, ax, plt = call_function_based_on_header(readDir, filename)
+    
+    record(fig, "visualization.mp4", 1:120) do frame
+        ax.azimuth[] = 1.7pi + 0.3 * sin(2pi * frame / 120) # Camera tilt effect
+        # Update other necessary components if required
+    end
+end
+
 runVisualizationTests()
 
 end # module TestDataVisualization

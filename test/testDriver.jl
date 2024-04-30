@@ -4,6 +4,9 @@ using QuantumTransport
 using LinearAlgebra
 using Test
 
+# basically, we only want the "runparams" variable from AllInputs.jl.
+include(joinpath(INPUT_DIR, "AllInputs.jl"))
+
 function printDict(runparams, type)
     println("\033[1m$(type):\033[0m")
     for (key, value) in runparams
@@ -16,10 +19,9 @@ function driverTest(params)
     return true
 end
 
-
 printDict(runparams["transport"], "Transport Parameters")
 printDict(runparams["unitcell"], "Unitcell Parameters")
-# printDict(runparams["supercell"], "Supercell Parameters")
+printDict(runparams["supercell"], "Supercell Parameters")
 
 @test driverTest(runparams)
 
