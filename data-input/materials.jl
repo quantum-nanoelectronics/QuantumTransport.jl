@@ -1,3 +1,17 @@
+### A Pluto.jl notebook ###
+# v0.19.40
+
+using Markdown
+using InteractiveUtils
+
+# ╔═╡ 5c17c605-8bee-436a-8e9d-220e92c82e7e
+
+
+# ╔═╡ ea227a19-a44e-479d-bfbe-650134d5d315
+
+
+# ╔═╡ c9a1ae7a-faa3-11ee-1e5f-8b31657af949
+
 function nextsite(iorb::Int)
     return (1 - 2 * iorb)
 end
@@ -231,3 +245,8 @@ material_hamiltonians = Dict{String,Function}(
 )
 
 
+
+# ╔═╡ Cell order:
+# ╠═5c17c605-8bee-436a-8e9d-220e92c82e7e
+# ╠═ea227a19-a44e-479d-bfbe-650134d5d315
+# ╠═c9a1ae7a-faa3-11ee-1e5f-8b31657af949
