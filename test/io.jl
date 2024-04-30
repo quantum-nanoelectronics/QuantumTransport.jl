@@ -179,8 +179,6 @@ function runIOTests()
 
     println("\033[1mGenerated CNT positions\033[0m")
 
-    baseDir = abspath(joinpath(@__DIR__, ".."))
-    ioDir = joinpath(baseDir, "data-output")
     #=positions = CNT_positions
     filename1 = "scatterplot.csv"
     filename2 = "scatterplot-unicode.csv"
@@ -192,13 +190,13 @@ function runIOTests()
     xvals = LinRange(0,1,12)
     yvals = rand(12)
 
-    @test save_data_formatted("ℝ→ℝ", ioDir, "testvals.csv", ["X (nm)", "Y (nm)"], [xvals,yvals])
-    @test isfile(joinpath(ioDir, "testvals.csv"))
+    @test save_data_formatted("ℝ→ℝ", OUTPUT_DIR, "testvals.csv", ["X (nm)", "Y (nm)"], [xvals,yvals])
+    @test isfile(joinpath(OUTPUT_DIR, "testvals.csv"))
 
 
-    @test save_data_formatted("ℝ³→ℝ", ioDir, "CNTpositions.csv", 
+    @test save_data_formatted("ℝ³→ℝ", OUTPUT_DIR, "CNTpositions.csv", 
     ["X (nm)", "Y (nm)", "Z (nm)", "n (# electrons)"], [CNT_positions[1],CNT_positions[2],CNT_positions[3], rand(size(CNT_positions[1])[1])])
-    @test isfile(joinpath(ioDir, "CNTpositions.csv"))
+    @test isfile(joinpath(OUTPUT_DIR, "CNTpositions.csv"))
     #test_formatted_save(ioDir, "testvals.csv", [xvals, yvals])
     #test_formatted_save(ioDir, "CNT_positions.csv", [CNT_positions[1],CNT_positions[2],CNT_positions[3],])
 
