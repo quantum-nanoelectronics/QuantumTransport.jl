@@ -55,11 +55,11 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
                     println("Error = $error")
                 end
             end
-            if (p["n_BLAS"] > 1) 
+            if true
             # TODO also check for inversion = true / type of inversion
                 G = inv(Array(H_eff)) # TODO Vivian changed from effH to H_eff (just check if this is ok)
             else
-                G = grInv(H_eff) # TODO get diag, top, bottom
+                G = pGrInv((E + im * p["η"]) * I(p["n"]) - H_eff, blocksize, false) # TODO get diag, top, bottom
             end
             return G
         end

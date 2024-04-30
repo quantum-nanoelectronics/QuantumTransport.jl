@@ -3,7 +3,7 @@
 # The second row of the file should contain the column headings.
 # The third row onwards should contain the data.
 
-module InputOutputModule
+module InputOutputModule # the _ in the directory is needed because this needs to be compiled first to be used within other package modules
 
 include("readfiles.jl")
 include("writefiles.jl")

@@ -29,7 +29,7 @@ end
 # Defines a cᵦ†cₐ term 
 function zeeman(Bvals::Vector{Vector{Float64}}, p::Dict, ElectrodeInfo::Electrode)
     # only defined for S-like orbitals with lz = 0
-    N = ElectrodeInfo.n * p["nsite"] * p["norb"] * 2
+    N = ElectrodeInfo.n * p["nsite"] * p["norb"] * p["nspin"]
     #N = p.n*p.nsite*p.norb*2
     #for i = 1:N
     zeeman = spzeros(ComplexF64, N, N)

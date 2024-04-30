@@ -1,49 +1,20 @@
 module TestDataVisualization
 using QuantumTransport
 using Test
-using CairoMakie
+#using Makie #If this line is uncommented or if Makie is added to this package, github tests will fail
 
-"""
-    runVisualizationTests()
-
-Run the visualization tests for the QuantumTransport package.
-Cannot fully test Data Visualization on GitHub, as no GPU is available.
-Non-interactive image plots generated, for now.
-
-"""
 function runVisualizationTests()
-    # this expects the scatterplot.csv file to be in the data-output directory (from IO tests)
-    nm = 1E-9
-    margin = 0.0
-    filename = "scatterplot.csv"
-    baseDir = abspath(joinpath(@__DIR__, ".."))
-    ioDir = joinpath(baseDir, "data-output")
-    vals = get_data(ioDir, filename)
-    df = vals[1]
-    metaData = vals[2]
     
-    println("-Reading-")
-    println("DataFrame: ")
-    println(first(df, 5))
-    println("Metadata: ")
-    println(metaData)
-    
-    
-    # Obtain the figure object
-    figure = generate_plot_makie(df, margin)
-    @test figure isa Figure
+    readDir = OUTPUT_DIR 
+    filename = "transmission.csv"  # specify the CSV file name
+
+    file_path = joinpath(readDir, filename)
+    call_function_based_on_header(readDir, filename)
+    filename = "CNTpositions.csv"
+    call_function_based_on_header(readDir, filename)
     # Save the figure
-    file_path = joinpath(ioDir, "figure_from_generate_plot_makie.png")
-    save(file_path, figure)
     @test isfile(file_path)
     
-    # Obtain the figure object
-    figure = plot_pos(df, nm)
-    @test !isnothing(figure)
-    # Save the figure
-    file_path = joinpath(ioDir, "figure_from_plot_pos.png")
-    save(file_path, figure)
-    @test isfile(file_path)
     
 end
 

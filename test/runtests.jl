@@ -27,8 +27,12 @@ using Test
         include("io.jl")
     end
 
-    # TODO these are erroring out after integration, commented for now
+    println("\033[1m---------RUNNING DATA VISUALIZATION TESTS----------\033[0m")
+    @testset "Data Visualization Test" begin
+        include("visualization.jl")
+    end
 
+    # TODO these are erroring out after integration, commented for now
     # println("\033[1m------------RUNNING SELF ENERGIES TESTS------------\033[0m")
     # @testset "Self Energies Test" begin
     #     include("self_energies.jl")
@@ -37,9 +41,5 @@ using Test
     # @testset "Hopping Hamiltonian Test" begin
     #     include("testHoppings.jl")
     # end
-    # println("\033[1m---------RUNNING DATA VISUALIZATION TESTS----------\033[0m")
-    # @testset "Data Visualization Test" begin
-    #     include("visualization.jl")
-    # end
-
+    
 end

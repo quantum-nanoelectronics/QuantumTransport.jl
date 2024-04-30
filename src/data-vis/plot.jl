@@ -1,10 +1,7 @@
-using CSV
-using DataFrames
+# Old plotting file
 
-# Adding GLMakie, Makie, etc. to the dependencies will not work on github
-using CairoMakie
-# using Makie, DataFrames
-
+# Adding Makie, etc. to the dependencies will not work on github
+#using Makie #If this line is uncommented or if Makie is added to this package, github tests will fail
 
 
 function generate_plot_makie(df, margin::Float64 = 0.0)
