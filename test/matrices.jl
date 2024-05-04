@@ -47,7 +47,7 @@ function rgf_main(argsMatrix, testMatrix, diag::Bool=false)
     end
     println("RGF Inverse Correctness: ", correct)
 
-    # Call the timing function - Energy of 3.0
+    # Call the timing function at an energy level - argsMatrix[7]
     @test timeInv(argsMatrix[7])
 
     println()
@@ -96,8 +96,9 @@ This function tests the RGF (Recursive Green's Function) inverse method for corr
 function runMatrixTests()
     # Test the RGF inverse method for correctness only
     # arguments to be changed
-    # Full matrix size, block size, phi, eta term, zeroThreshold term, σ₂
-    
+    # Full matrix size, block size, phi, eta term, zeroThreshold term, σ₂, energy, 
+    # ϕ
+    # η
     for matrixIndex in 0:2
         global argsMatrix = (1000, 2, 0.2001, 1e-10, 1e-10, [0 -im; im 0], 3.0, matrixIndex)
         global testMatrix = setVars(argsMatrix)

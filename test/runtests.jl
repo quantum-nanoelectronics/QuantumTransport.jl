@@ -11,12 +11,6 @@ using Test
         include("testDriver.jl")
     end
 
-    println("\033[1m---------------RUNNING SAMPLE TESTS---------------\033[0m")
-    @testset "Sample Test" begin
-        include("hello_world.jl")
-        include("column_major.jl")
-    end
-
     println("\033[1m----------RUNNING MATRIX INVERSION TESTS----------\033[0m")
     @testset "Matrix Inversion Test" begin
         include("matrices.jl")
