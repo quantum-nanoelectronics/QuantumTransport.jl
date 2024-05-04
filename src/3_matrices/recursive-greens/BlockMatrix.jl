@@ -25,7 +25,7 @@ function CreateBlockMatrix(n::Int, blockSize::Int, phi::Float64, zeroThreshold::
     numBlocks = n ÷ blockSize  # Calculate number of blocks
 
     if matrix !== nothing
-        return BlockMatrix(matrix, n, blockSize, numBlocks, zeroThreshold)
+        return BlockMatrix(sparse(matrix), n, blockSize, numBlocks, zeroThreshold)
     end
 
     # Preallocate vectors for SparseMatrixCSC construction

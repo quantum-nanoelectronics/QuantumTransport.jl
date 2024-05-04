@@ -33,34 +33,43 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     end
     function genGʳ(k::Vector{Float64})
         # define the inverse function here, depending on the size of H, and the number of threads. 
+        function inv(matrix, topAndBottomRows::Bool=false, juliaInv::Function=LinearAlgebra.inv) 
+            blockSize = p["ny"]*p["nz"]*p["nsite"]*p["norb"]*p["nspin"]
+            if p["n"] == blockSize # if matrix size is block size, RGF doesn't work
+                return juliaInv(Array(matrix))
+            elseif p["inv"] == "RGF"
+                blockMatrixObject = CreateBlockMatrix(p["n"], blockSize, p["ϕ"], p["errorThreshold"], matrix)
+                if topAndBottomRows
+                    return getInvRGF(blockMatrixObject).matrix
+                else
+                    return getInvRGFDiagonal(blockMatrixObject).matrix
+                end
+            elseif p["inv"] == "julia"
+                return juliaInv(Array(matrix))
+            else
+                return juliaInv(Array(matrix))
+            end
+        end
 
-        blocksize = p["ny"]*p["nz"]*p["nsite"]*p["norb"]*p["nspin"]
-        # inv(A, topandbottomrows::Bool=false) = RGFinv(A,blocksize) # TODO 
         function Gʳ(E::Float64)
             Σ_contacts = totΣk(E, k)
-            H_eff = H(k) + Σ_contacts # TODO Vivian this was adding + Σ, changed to Σ_contacts (just check if this is ok)
-            #G = grInv(effH)
-            #G = pGrInv(effH,4,"transport")
+            H_eff = H(k) + Σ_contacts
             if haskey(p, "scattering")
-                G = pGrInv((E + im * p["η"]) * I(p["n"])- H_eff, blocksize, false) # TODO get top, bottom, diag
+                # The code in this if statement has been changed to implement the new matrix inversion methods, 
+                # but not tested due to scattering not implemented in p["scattering"]
+                G = inv((E + im * p["η"]) * I(p["n"]) - H_eff, true) # gets top, bottom, diag
                 error = 1
                 mixing = 0.5
                 Dₘ = p["scattering"]["Dₘ"] * I(p["nx"]*p["ny"]*p["nz"])⊗(ones(p["norb"]*p["nspin"], p["norb"]*p["nspin"]))
                 while (error > 10^-6)
                     Gprev = copy(G)
                     H_eff =  H(k) + Σ_contacts + Dₘ .* G
-                    G = mixing * pGrInv((E + im * p["η"]) * I(p["n"]) - H_eff, blocksize, false) .+ (1 - mixing) * G #TODO get diag only
-                    #G = grInv(effH)
+                    G = mixing * inv((E + im * p["η"]) * I(p["n"]) - H_eff, false) .+ (1 - mixing) * G # gets diagonal only
                     error = norm((G .- Gprev), 1) / norm(G, 1)
                     println("Error = $error")
                 end
             end
-            if true
-            # TODO also check for inversion = true / type of inversion
-                G = inv(Array(H_eff)) # TODO Vivian changed from effH to H_eff (just check if this is ok)
-            else
-                G = pGrInv((E + im * p["η"]) * I(p["n"]) - H_eff, blocksize, false) # TODO get diag, top, bottom
-            end
+            G = inv((E + im * p["η"]) * I(p["n"]) - H_eff, true) #gets diag, top, and bottom
             return G
         end
         return Gʳ
@@ -217,8 +226,7 @@ function siteDOS(p::NamedTuple, genGᴿ::Function, E::Float64=0.1 * eV)
     return DOS
 end
 
-# TODO Vivian - had to remove Qs type check due to removing the γ⁵ term, typecheck needs to be added back correctly (just check if this is ok)
-function totalT(genT::Function, kindices::Vector{Vector{Int}}, kgrid::Vector{Vector{Float64}}, kweights::Vector{Float64}, Evals::Vector{Float64}, Eslice::Float64, parallel::Bool, Qs)
+function totalT(genT::Function, kindices::Vector{Vector{Int}}, kgrid::Vector{Vector{Float64}}, kweights::Vector{Float64}, Evals::Vector{Float64}, Eslice::Float64, parallel::Bool, Qs::Vector{LinearAlgebra.Diagonal{Bool, Vector{Bool}}})
     nE = size(Evals)
     nOps = size(Qs)
     nkz = maximum([kindex[2] for kindex in kindices])

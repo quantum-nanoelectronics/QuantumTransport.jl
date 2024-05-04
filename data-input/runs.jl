@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.19.40
+# v0.17.3
 
 using Markdown
 using InteractiveUtils
@@ -19,6 +19,9 @@ runparams = Dict(
 	"path" => OUTPUT_DIR,
 	"material_hamiltonian" => material_hamiltonians,
 	"material_params" => Dict("t" => 1.0, "ε₀" => 1.0, "site_positions"=>site_positions),
+    # Order of matrix_params: full matrix size, block size, phi, eta term, zeroThreshold term, σ₂, energy, 
+	# (1000, 2, 0.2001, 1e-10, 1e-10, [0 -im; im 0], 3.0, matrixIndex)
+	"matrix_params" => Dict("inv" => "RGF", "ϕ" => 0.2001, "errorThreshold" => 1e-10),
 
 	# define the routines to run. The three main ones are unitcell, transport, and supercell. 
 	# Comment out a routine to not run it.
@@ -66,6 +69,9 @@ function add_more_params!(runparams)
 
 	if haskey(runparams,"transport")
 		runparams["transport"]["n"] = n_device
+
+		# runparams["transport"]["scattering"] = true
+		merge!(runparams["transport"], runparams["matrix_params"])
 		
 		# now we will add in the H(k) subspace, and then overwrite the nx, ny, nz with the device geometry
 		merge!(runparams["transport"],geometry_params)

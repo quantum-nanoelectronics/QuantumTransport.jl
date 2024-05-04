@@ -3,8 +3,7 @@ module NEGFModule
 export NEGF_prep, totalT, DOS, siteDOS, sitePDOS
 
 using ..CommonModule
-
-include("../hoppings/createHoppings.jl")
+using ..RecursiveGreensModule
 
 using LinearAlgebra
 using SparseArrays
