@@ -44,7 +44,7 @@ function NEGF_Transport_1D(p::Dict, A::Function)
     
 
     # TODO Vivian - if p["kspace"] is true, nk isnt set to an int, instead a bool, breaks future code
-    nk = 1
+    nk = 0
     S = 1
     # if p["kspace"]
     #     nk = p["kspace"]

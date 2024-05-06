@@ -44,7 +44,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
                 else
                     return getInvRGFDiagonal(blockMatrixObject).matrix
                 end
-            elseif p["inv"] == "julia"
+            elseif p["inv"] == "LU"
                 return juliaInv(Array(matrix))
             else
                 return juliaInv(Array(matrix))
