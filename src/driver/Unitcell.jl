@@ -6,12 +6,11 @@ function unitcell(p::Dict, A::Function)
             "A" => B*[1/2; 1/2; 1/2],
             "M" => B*[1/2; 1/2; 0],
             "Z" => B*[0; 0; 1/2],
-            "-Z" => B*[0; 0; -1/2],
-            "X₂" => B*[0; 1/2; 0],
-            "-X₂" => B*[0; -1/2; 0],
-            "X₁" => B*[1/2; 0; 0],
-            "-X₁" => B*[-1/2; 0; 0],
-            "X₃" => B*[0; 0; 1/2]
+            #"-Z" => B*[0; 0; -1/2],
+            "Y" => B*[0; 1/2; 0],
+            "-Y" => B*[0; -1/2; 0],
+            "X" => B*[1/2; 0; 0],
+            "-X" => B*[-1/2; 0; 0],
         )
         return kdict
     end
@@ -28,11 +27,22 @@ function unitcell(p::Dict, A::Function)
 
     
     if haskey(p, "save")
-        for f in p["save"]
+        if :DOS ∈ p["save"]
+            if DOS_method == :Gᴿ
+            Gᴿ(E,k) = inv((E+im*p["η"])*I(p["n"]) - H(k))
+            DOS = genDOS
+            elseif DOS_method == :integrate_BZ
+                println("Test")
+            end
+        end
+        if :bandstructure ∈ p["save"]
+            println("Test")
+        end
+        #=for f in p["save"]
             if haskey(observables, f)
                 observables[f]()
             end
-        end
+        end=#
     end
     
     

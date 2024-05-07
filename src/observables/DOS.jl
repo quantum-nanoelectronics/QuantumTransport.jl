@@ -20,6 +20,7 @@ function genDOS(p::Dict, F::Function, type::Symbol, η::Float64)
         return DOS_A
     elseif type == :H
         H = F # we've got the hamiltonian as a function of K
+        #BZ = 
         # implement later
         function DOS_H(E::Float64)
             # implementation for DOS using H
@@ -53,25 +54,25 @@ end
 
 function genDOS(p::Dict, H::SparseMatrixCSC, η::Float64, neigs::Int, centerE::Float64)
     eigvals = eigs(H, nev = neigs, sigma=centerE)
-    function DOS(E::Float64)
+    function DOS_fullH(E::Float64)
         return (-1/π)*sum(imag.((eigvals.+(η-E)).^-1))
     end
-    return DOS
+    return DOS_fullH
 end
 
 function genDOS(p::Dict, H::Matrix{ComplexF64}, η::Float64)
     eigvals = eigvals(H)
-    function DOS(E::Float64)
+    function DOS_denseH(E::Float64)
         return (-1/π)*sum(imag.((eigvals.+(η-E)).^-1))
     end
-    return DOS
+    return DOS_denseH
 end
 
 
 
 
 
-function DOS(genA::Function,kgrid::Vector{Vector{Float64}},kweights::Vector{Float64},Evals::Vector{Float64},parallelk::Bool=true)
+#=function DOS(genA::Function,kgrid::Vector{Vector{Float64}},kweights::Vector{Float64},Evals::Vector{Float64},parallelk::Bool=true)
 	nE = size(Evals)
 	#nkz = maximum([kindex[2] for kindex in kindices])
 	#nky = maximum([kindex[1] for kindex in kindices])
@@ -153,3 +154,4 @@ end
 function DOS(E::Float64,A::Function,Q::Vector = I(size(A(0))[1]))
 	return (1/(2*π))*tr(Q*A)
 end
+=#
