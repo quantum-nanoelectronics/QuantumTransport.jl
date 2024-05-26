@@ -26,4 +26,14 @@ using Test
         include("visualization.jl")
     end
 
+    println("\033[1m------------RUNNING SELF-ENERGY TESTS------------\033[0m")
+    @testset "Self-Energy Test" begin
+        include("selfEnergies.jl")
+    end
+
+    println("\033[1m--------------RUNNING HOPPING TESTS--------------\033[0m")
+    @testset "Hopping Test" begin
+        include("testHoppings.jl")
+    end
+
 end
