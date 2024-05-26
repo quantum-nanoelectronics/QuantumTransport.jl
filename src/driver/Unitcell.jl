@@ -1,4 +1,4 @@
-function unitcell(p::Dict, A::Function)
+function unitcell(p::Dict)
     function kdictGen(A)
         B = transpose(2*π*inv(A))
         kdict = Dict(
@@ -18,7 +18,7 @@ function unitcell(p::Dict, A::Function)
     NNs = genNNs(p)
     NNs = pruneHoppings(NNs, p["prune"])
     H₀, edge_NNs = nnHoppingMat(NNs, p)
-    H = genH(p, A, H₀, edge_NNs)
+    H = genH(p, p["A_field"], H₀, edge_NNs)
 
     observables = Dict(
         :bandstructure => () -> getbands(p, p["klist"], kdictGen(p["A"]), p["numInterpolations"], H),

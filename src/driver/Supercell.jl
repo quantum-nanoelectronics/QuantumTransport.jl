@@ -1,3 +1,3 @@
-function supercell(p::Dict, A::Function)
+function supercell(p::Dict)
     # TODO
 end

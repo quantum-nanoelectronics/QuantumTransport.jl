@@ -15,6 +15,7 @@ using InteractiveUtils
 
 # this is the top level definition of the run parameters
 
+
 runparams = Dict(
 	"path" => OUTPUT_DIR,
 	"material_hamiltonian" => material_hamiltonians,
@@ -23,8 +24,11 @@ runparams = Dict(
 	# (1000, 2, 0.2001, 1e-10, 1e-10, [0 -im; im 0], 3.0, matrixIndex)
 	"matrix_params" => Dict("inv" => "RGF", "ϕ" => 0.2001, "errorThreshold" => 1e-10),
 
+	# A field
+	"A_field" => A_Function(R::Vector{Float64}) = [0.0, 0.0, 0.0],
+
 	# define the routines to run. The three main ones are unitcell, transport, and supercell. 
-	# Comment out a routine to not run it.
+	# Comment out one of the dictionary entries below to not run the assocuated routine.
 
 	# so, for runs looking at the electronic properties of just one unit cell
 	"unitcell" => Dict("geometry" => devicegeometry, "material"=> "metal", "bands" => true, "bands_project" => [σ[1]], "save"=>[:bandstructure], "poisson" => false, "DOS" => false, "klist" => ["Γ","X₁","M","X₂","Γ","X₃"], "numInterpolations" => 64),
@@ -53,6 +57,10 @@ function add_more_params!(runparams)
 		runparams[key]["material_hamiltonian"] = runparams["material_hamiltonian"]
 		merge!(runparams[key], subspace_sizes)
 		runparams[key]["path"] = runparams["path"]
+
+		# Adding the A field function
+		runparams[key]["A_field"] = runparams["A_field"]
+
 	end
 	
 	if haskey(runparams,"unitcell")

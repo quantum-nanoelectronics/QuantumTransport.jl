@@ -8,20 +8,18 @@ include("Transport.jl")
 include("Unitcell.jl")
 include("Supercell.jl")
 
-A_Function(R::Vector{Float64}) = [0.0, 0.0, 0.0]
-
-function main(p::Dict, A::Function = A_Function)
+function main(p::Dict)
     if haskey(p, "transport")
         println("=============== Running transport ===============")
-        NEGF_Transport_1D(p["transport"], A)
+        NEGF_Transport_1D(p["transport"])
     end
     if haskey(p, "unitcell")
         println("=============== Running unitcell ===============")
-        unitcell(p["unitcell"], A)
+        unitcell(p["unitcell"])
     end
     if haskey(p, "supercell")
         println("=============== Running supercell ===============")
-        supercell(p["supercell"], A)
+        supercell(p["supercell"])
     end
 
 end

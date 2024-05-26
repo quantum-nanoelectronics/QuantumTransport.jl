@@ -4,28 +4,24 @@ using QuantumTransport
 using Test
 using LinearAlgebra
 
-# Sample A function
-A(R::Vector{Float64}) = [0.0, 0.0, 0.0]
-
 include(joinpath(INPUT_DIR, "AllInputs.jl"))
 
 """
-    testElectrodes(p, A)
+    testElectrodes(p)
 
 This function tests the electrodes for the quantum transport simulation.
 
 # Arguments
 - `p`: The parameters for the simulation.
-- `A`: The input data for the electrodes.
 
 # Returns
 - None
 
 """
-function testElectrodes(p, A)
+function testElectrodes(p)
     Electrodes = [
-            Electrode([-1,0],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"-x",p["electrodeMaterial"],A);
-            Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
+            Electrode([-1,0],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"-x",p["electrodeMaterial"], p["A_field"]);
+            Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"], p["A_field"])
     ]
 
     p["nelectrodes"] = size(Electrodes)[1]
@@ -43,6 +39,6 @@ function testElectrodes(p, A)
     end
 
 # runparams defined in QuantumTransport
-testElectrodes(runparams["transport"], A)
+testElectrodes(runparams["transport"])
 
 end # module
