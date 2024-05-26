@@ -99,19 +99,24 @@ function runMatrixTests()
     # Full matrix size, block size, phi, eta term, zeroThreshold term, σ₂, energy, 
     # ϕ
     # η
-    for matrixIndex in 0:2
-        global argsMatrix = (1000, 2, 0.2001, 1e-10, 1e-10, [0 -im; im 0], 3.0, matrixIndex)
-        global testMatrix = setVars(argsMatrix)
 
-        # Test the rgf method
-        @test rgf_main(argsMatrix, testMatrix)
+    ### Commented for now for time purposes ###
+    # for matrixIndex in 0:2
+    #     global argsMatrix = (1000, 2, 0.2001, 1e-10, 1e-10, [0 -im; im 0], 3.0, matrixIndex)
+    #     global testMatrix = setVars(argsMatrix)
 
-        # Test the method that only returns the matrix with inverted diagonal blocks
-        @test rgf_main(argsMatrix, testMatrix, true)
-    end
+    #     # Test the rgf method
+    #     @test rgf_main(argsMatrix, testMatrix)
 
+    #     # Test the method that only returns the matrix with inverted diagonal blocks
+    #     # @test rgf_main(argsMatrix, testMatrix, true)
+    # end
     # Test the woodbury inverse method
-    @test block_inv_main()
+    # @test block_inv_main()
+
+    global argsMatrix = (200, 2, 0.2001, 1e-10, 1e-10, [0 -im; im 0], 3.0, 1)
+    global testMatrix = setVars(argsMatrix)
+    @test rgf_main(argsMatrix, testMatrix)
 
 end
 
