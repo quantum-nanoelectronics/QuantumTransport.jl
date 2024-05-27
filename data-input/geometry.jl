@@ -25,7 +25,7 @@ function devicegeometry(R::Vector{Float64})
 end
 
 geometry_params = Dict("A" => 2.866*nm*I(3), # this is the matrix of unit cell lattice vectors
-		   "nx" => 1, "ny" => 8, "nz" => 8, # number of times to tile this cell over space in each direction to make whole device
+		   "nx" => 2, "ny" => 8, "nz" => 8, # number of times to tile this cell over space in each direction to make whole device
 		 	"prune" =>[]  
 		   #"prune" => ["z","y"], # by default, system will set up periodic boundary conditions. This clips those hoppings
 		   )

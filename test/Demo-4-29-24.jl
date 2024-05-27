@@ -275,10 +275,10 @@ Pkg.update()
 GLMakie.activate!()
 
 # ╔═╡ 631d1bd6-be1e-49d6-9d7f-656a0d8e87ce
-fig1 = call_function_based_on_header(OUTPUT_DIR, "transmission.csv")
+fig1 = plot(OUTPUT_DIR, "transmission.csv")
 
 # ╔═╡ f32522f2-5cc9-4cae-b182-57a71b01599f
-fig2 = call_function_based_on_header(OUTPUT_DIR, "CNTpositions.csv")
+fig2 = plot(OUTPUT_DIR, "CNTpositions.csv")
 
 # ╔═╡ a67082be-d618-4ac0-8bdb-beacb9aed4d9
 

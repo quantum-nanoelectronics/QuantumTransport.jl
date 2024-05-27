@@ -45,9 +45,9 @@ function NEGF_Transport_1D(p::Dict)
     nk = 0
     S = 1
     # if p["kspace"]
-    #     nk = p["kspace"]
-    # else
     #     nk = 1
+    # else
+    #     nk = 0
     # end
 
 

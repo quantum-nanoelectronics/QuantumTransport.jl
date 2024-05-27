@@ -7,7 +7,6 @@ mutable struct BlockMatrix
     matrixSize::Int  # Total size of the matrix
     blockSize::Int  # Size of each square block within the matrix
     numBlocks::Int  # Number of blocks along one dimension
-    zeroThreshold::Float64  # Absolute threshold below which a value is considered zero
 end
 
 mutable struct SparseBuilder
@@ -16,17 +15,40 @@ mutable struct SparseBuilder
     values::Vector{ComplexF64}
 end
 
-# Constructor for a symmetric, block tridiagonal matrix
-function CreateBlockMatrix(n::Int, blockSize::Int, phi::Float64, zeroThreshold::Float64, matrix = nothing)
+function +(a::BlockMatrix, b::AbstractMatrix)
+    a.matrix = a.matrix + b
+    return a
+end
+
+function -(a::BlockMatrix, b::AbstractMatrix)
+    a.matrix = a.matrix - b
+    return a
+end
+
+function -(b::AbstractMatrix, a::BlockMatrix)
+    a.matrix = b - a.matrix
+    return a
+end
+
+# Converts to BlockMatrix
+function ToBlockMatrix(matrix::SparseMatrixCSC{Complex{Float64},Int}, n::Int, blockSize::Int)
+    if n % blockSize != 0
+        error("Matrix size n must be a multiple of block size.")
+    end
+    numBlocks = n ÷ blockSize  # Calculate number of blocks
+
+    return BlockMatrix(matrix, n, blockSize, numBlocks)
+end
+
+# Constructor for a symmetric, block tridiagonal matrix. Returns a new BlockMatrix.
+function CreateBlockMatrix(n::Int, blockSize::Int, phi::Float64, zeroThreshold::Float64)
     # Ensure the matrix size is a multiple of the block size
     if n % blockSize != 0
         error("Matrix size n must be a multiple of block size.")
     end
     numBlocks = n ÷ blockSize  # Calculate number of blocks
 
-    if matrix !== nothing
-        return BlockMatrix(sparse(matrix), n, blockSize, numBlocks, zeroThreshold)
-    end
+    ### The code below creates a block tridiagonal Matrix
 
     # Preallocate vectors for SparseMatrixCSC construction
     vals = Complex{Float64}[]

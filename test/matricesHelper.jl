@@ -43,10 +43,10 @@ function setVars(args)
         retVal = CreateBlockMatrix(args[1], args[2], args[3], args[5])  
     elseif args[8] == 1
         # effective mass test matrix.
-        retVal = CreateBlockMatrix(args[1], args[2], args[3], args[5], sparse(effectiveMass(args[1] ÷ args[2], args[2])))
+        retVal = ToBlockMatrix(sparse(effectiveMass(args[1] ÷ args[2], args[2])), args[1], args[2])
     else
         # spin orbit hamiltonian test matrix - Block sizes of 2s only
-        retVal = CreateBlockMatrix(args[1], args[2], args[3], args[5], sparse(spinOrbitHamiltonian(args[1] ÷ args[2], args[6])))
+        retVal = ToBlockMatrix(sparse(spinOrbitHamiltonian(args[1] ÷ args[2], args[6])), args[1], args[2])
     end 
 
     return retVal
@@ -56,19 +56,23 @@ end
 function diagApproximatedGʳ(Energy::Float64)
     matrixCopy = deepcopy(testMatrix)
     matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
-    return getInvRGFDiagonal(matrixCopy).matrix
+    getInvRGFDiagonal!(matrixCopy)
+    return matrixCopy.matrix
 end
 
 function approximatedGʳ(Energy::Float64)
     matrixCopy = deepcopy(testMatrix)
     matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
-    return getInvRGF(matrixCopy).matrix
+    getInvRGF!(matrixCopy)
+    return matrixCopy.matrix
+
 end
 
 function fullGʳ(Energy::Float64)
     matrixCopy = deepcopy(testMatrix)
     matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
-    return getInvJulia(matrixCopy).matrix
+    getInvJulia!(matrixCopy)
+    return matrixCopy.matrix
 end
 
 
@@ -78,10 +82,10 @@ function timeInv(Energy::Float64)
     matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
 
     # Benchmark the computation of the inverse of the dense matrix using built-in inversion
-    juliaInvBenchmark = @benchmark getInvJulia($matrixCopy)
+    juliaInvBenchmark = @benchmark getInvJulia!($matrixCopy)
 
     # Benchmark the computation of the inverse of the block matrix using RGF method
-    rgfInvBenchmark = @benchmark getInvRGF($matrixCopy)
+    rgfInvBenchmark = @benchmark getInvRGF!($matrixCopy)
 
     # Extract median times for a fair comparison
     juliaInvTime = median(juliaInvBenchmark.times)  # Median time in nanoseconds

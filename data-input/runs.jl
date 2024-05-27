@@ -31,66 +31,76 @@ runparams = Dict(
 	# Comment out one of the dictionary entries below to not run the assocuated routine.
 
 	# so, for runs looking at the electronic properties of just one unit cell
-	"unitcell" => Dict("geometry" => devicegeometry, "material"=> "metal", "bands" => true, "bands_project" => [σ[1]], "save"=>[:bandstructure], "poisson" => false, "DOS" => false, "klist" => ["Γ","X₁","M","X₂","Γ","X₃"], "numInterpolations" => 64),
+	"unitcell" => Dict("runtype" => "unitcell", "geometry" => devicegeometry, "material"=> "metal", "bands" => true, "bands_project" => [σ[1]], "save"=>[:bandstructure], "poisson" => false, "DOS" => false, "klist" => ["Γ","X₁","M","X₂","Γ","X₃"], "numInterpolations" => 64),
 	
 	# and for runs looking at the conductance of a large supercell
-	"transport" => Dict("geometry" => devicegeometry, "ΔV" => 0.001, "μ" => 0.0*eV, "T" => 300, "η" => 1E-2*eV, "save" => [:transmission, :conductance], "electrodeMagnetization" => false, "deviceMagnetization" => false, "Gʳinv_method" => :RGF, "D_spin" => 0.000001*eV, "D_momentum" => 0.000005*eV, "kspace"=>false, "E_samples" => [E for E = -0.2:0.025:1.4], "electrodeMaterial" => "metal"),
+	"transport" => Dict("runtype" => "transport", "geometry" => devicegeometry, "ΔV" => 0.001, "μ" => 0.0*eV, "T" => 300, "η" => 1E-2*eV, "save" => [:transmission, :conductance], "electrodeMagnetization" => false, "deviceMagnetization" => false, "Gʳinv_method" => :RGF, "D_spin" => 0.000001*eV, "D_momentum" => 0.000005*eV, "kspace"=>false, "E_samples" => [E for E = -0.2:0.025:1.4], "electrodeMaterial" => "metal"),
 	
 	# and for runs where we want to slap a bunch of unit cells together and get the scattering-corrected electronic properties
-	"supercell" => Dict("geometry" => devicegeometry, "bands_project" => [σ[1],σ[2]], "poisson"=>false, "μ" => 0.0*eV, "T" => 300, "η" => 1E-3*eV, "save" => [:unfoldedbands], "density_project" => [I(2),[σ[1],σ[2],σ[3]]], "Gʳinv_method" => :RGF, "D_dephasing" => 0.001*eV, "D_spin" => 0.0001*eV, "D_momentum" => 0.001*eV)
+	"supercell" => Dict("runtype" => "supercell", "geometry" => devicegeometry, "bands_project" => [σ[1],σ[2]], "poisson"=>false, "μ" => 0.0*eV, "T" => 300, "η" => 1E-3*eV, "save" => [:unfoldedbands], "density_project" => [I(2),[σ[1],σ[2],σ[3]]], "Gʳinv_method" => :RGF, "D_dephasing" => 0.001*eV, "D_spin" => 0.0001*eV, "D_momentum" => 0.001*eV)
 )
 
 # all parameters of the simulation must be passed in through the runparams, and now we will ensure they are added
 # or calculated in the beginning. 
-function add_more_params!(runparams)
-	# size of the H(k) hamiltonian for one unit cell
-	n_unitcell = subspace_sizes["nsite"]*subspace_sizes["norb"]*subspace_sizes["nspin"]
-	# size of the H(k) hamiltonian for the entire device
-	n_device = geometry_params["nx"]*geometry_params["ny"]*geometry_params["nz"]*subspace_sizes["nsite"]*subspace_sizes["norb"]*subspace_sizes["nspin"]
 
 
+function addCommonParams!(runparams)
 	# this is a loop that will add keys to all routines
 	for key in ["unitcell", "supercell", "transport"]
-		if !haskey(runparams,key)
-			continue
+		if haskey(runparams,key)
+			runparams[key]["material_hamiltonian"] = runparams["material_hamiltonian"]
+			merge!(runparams[key], subspace_sizes)
+			runparams[key]["path"] = runparams["path"]
+			# Adding the A field function
+			runparams[key]["A_field"] = runparams["A_field"]
 		end
-		runparams[key]["material_hamiltonian"] = runparams["material_hamiltonian"]
-		merge!(runparams[key], subspace_sizes)
-		runparams[key]["path"] = runparams["path"]
-
-		# Adding the A field function
-		runparams[key]["A_field"] = runparams["A_field"]
-
-	end
-	
-	if haskey(runparams,"unitcell")
-		runparams["unitcell"]["n"] = n_unitcell
-		merge!(runparams["unitcell"], Dict("A"=>geometry_params["A"])) # added this line for now
-		merge!(runparams["unitcell"], Dict("nx" => 1, "ny" => 1, "nz" => 1, "prune"=> [])) # added this line for now
-		merge!(runparams["unitcell"], runparams["material_params"])
-	end
-
-	if haskey(runparams,"supercell")
-		runparams["supercell"]["n"] = n_device
-		merge!(runparams["supercell"],geometry_params)
-		merge!(runparams["supercell"], runparams["material_params"])
-	end
-
-	if haskey(runparams,"transport")
-		runparams["transport"]["n"] = n_device
-
-		# runparams["transport"]["scattering"] = true
-		merge!(runparams["transport"], runparams["matrix_params"])
-		
-		# now we will add in the H(k) subspace, and then overwrite the nx, ny, nz with the device geometry
-		merge!(runparams["transport"],geometry_params)
-		push!(runparams["transport"]["prune"],"x")
-		merge!(runparams["transport"], runparams["material_params"])
-		runparams["transport"]["G"] = 2*π*pinv(runparams["transport"]["A"])
 	end
 end
 
-add_more_params!(runparams)
+function addTransportParams!(runparams)
+	if haskey(runparams,"transport")
+		params = runparams["transport"]
+		# size of the H(k) hamiltonian for the entire device
+		n_device = geometry_params["nx"]*geometry_params["ny"]*geometry_params["nz"]*subspace_sizes["nsite"]*subspace_sizes["norb"]*subspace_sizes["nspin"]
+	
+		# now we will add in the H(k) subspace, and then overwrite the nx, ny, nz with the device geometry
+		merge!(params, runparams["matrix_params"], geometry_params, runparams["material_params"])
+
+		params["n"] = n_device
+		push!(params["prune"],"x")
+		params["G"] = 2*π*pinv(params["A"])
+		# runparams["transport"]["scattering"] = true
+	end
+end
+
+function addUnitcellParams!(runparams)
+	if haskey(runparams,"unitcell")
+		# size of the H(k) hamiltonian for one unit cell
+		n_unitcell = subspace_sizes["nsite"]*subspace_sizes["norb"]*subspace_sizes["nspin"]
+		params = runparams["unitcell"]
+
+		# added this line for now
+		merge!(params, Dict("A"=>geometry_params["A"]), Dict("nx" => 1, "ny" => 1, "nz" => 1, "prune"=> []), runparams["material_params"]) 
+
+		params["n"] = n_unitcell
+	end
+end
+
+function addSupercellParams!(runparams)
+	if haskey(runparams,"supercell")
+		n_device = geometry_params["nx"]*geometry_params["ny"]*geometry_params["nz"]*subspace_sizes["nsite"]*subspace_sizes["norb"]*subspace_sizes["nspin"]
+		params = runparams["supercell"]
+
+		merge!(params, geometry_params, runparams["material_params"])
+		
+		params["n"] = n_device
+	end
+end
+
+addCommonParams!(runparams)
+addTransportParams!(runparams)
+addUnitcellParams!(runparams)
+addSupercellParams!(runparams)
 
 # ╔═╡ Cell order:
 # ╠═5c17c605-8bee-436a-8e9d-220e92c82e7e

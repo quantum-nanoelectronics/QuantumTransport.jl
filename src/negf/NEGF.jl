@@ -33,22 +33,20 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     end
     function genGʳ(k::Vector{Float64})
         # define the inverse function here, depending on the size of H, and the number of threads. 
-        # TODO: make the block matrix get defined outside of the inv loop; no need to do this on each call. f
-        function inv(matrix, topAndBottomRows::Bool=false, juliaInv::Function=LinearAlgebra.inv) 
-            blockSize = p["ny"]*p["nz"]*p["nsite"]*p["norb"]*p["nspin"]
-            if p["n"] == blockSize # if matrix size is block size, RGF doesn't work
-                return juliaInv(Array(matrix))
-            elseif p["inv"] == "RGF"
-                blockMatrixObject = CreateBlockMatrix(p["n"], blockSize, 0.0, p["errorThreshold"], matrix)
+        function inv(matrix, topAndBottomRows::Bool=false) 
+            if p["inv"] == "RGF"
                 if topAndBottomRows
-                    return getInvRGF(blockMatrixObject).matrix
+                    getInvRGF!(matrix)
+                    return matrix.matrix
                 else
-                    return getInvRGFDiagonal(blockMatrixObject).matrix
+                    getInvRGFDiagonal!(matrix)
+                    return matrix.matrix
+
                 end
             elseif p["inv"] == "LU"
-                return juliaInv(Array(matrix))
+                return LinearAlgebra.inv(Array(matrix))
             else
-                return juliaInv(Array(matrix))
+                return LinearAlgebra.inv(Array(matrix))
             end
         end
 
