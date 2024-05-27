@@ -14,7 +14,7 @@ using InteractiveUtils
 
 
 # this is the top level definition of the run parameters
-
+A_field(R::Vector{Float64}) = [0.0, 0.0, 0.0]
 
 runparams = Dict(
 	"path" => OUTPUT_DIR,
@@ -25,7 +25,7 @@ runparams = Dict(
 	"matrix_params" => Dict("inv" => "RGF", "ϕ" => 0.2001, "errorThreshold" => 1e-10),
 
 	# A field
-	"A_field" => A_Function(R::Vector{Float64}) = [0.0, 0.0, 0.0],
+	"A_field" => A_field,
 
 	# define the routines to run. The three main ones are unitcell, transport, and supercell. 
 	# Comment out one of the dictionary entries below to not run the assocuated routine.
