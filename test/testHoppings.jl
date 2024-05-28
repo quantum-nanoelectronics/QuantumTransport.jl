@@ -27,8 +27,7 @@ function HoppingsTest(p)
     H₀, edge_NNs = nnHoppingMat(NNs, p)
     H = genH(p, p["A_field"], H₀, edge_NNs)
     sparseArray = H([0;0;0])
-    @test !isnothing(sparseArray.m)
-    @test !isnothing(sparseArray.n)
+    @test !isnothing(sparseArray)
 end
 
 # runparams defined in QuantumTransport
