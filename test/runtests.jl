@@ -32,7 +32,7 @@ using Test
     end
 
     println("\033[1m--------------RUNNING HOPPING TESTS--------------\033[0m")
-    @testset "Hopping Test" begin
+    @testset "Hopping Test" begin 
         include("TestHoppings.jl")
     end
 
