@@ -33,6 +33,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     end
     function genGʳ(k::Vector{Float64})
         # define the inverse function here, depending on the size of H, and the number of threads. 
+        # matrix may also now be of type BlockMatrix, based on input params and ConstructHamiltonian 
         function inv(matrix, topAndBottomRows::Bool=false) 
             if p["inv"] == "RGF"
                 if topAndBottomRows
@@ -104,7 +105,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
         fR = fermi(p["ΔV"] / 2, p["T"])
         function linearConductance(E::Float64)
             Σ = totΣk(E, k)
-            Gʳ = inv(Array((E + im * p["η"]) * I(p["n"]) .- H(k) .- Σ))
+            Gʳ = inv(Array((E + im * p["η"]) * I(p["n"]) .- H(k) .- Σ)) # this may not work with BlockMatrix
             Γ₁E = sparse(Γks[1](k)(E))
             ΓᵢE = sparse(Γks[contact](k)(E))
             # loop to converge Gʳ

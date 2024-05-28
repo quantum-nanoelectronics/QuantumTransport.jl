@@ -1,4 +1,4 @@
-# This file is included in matrix.jl
+# This file is included in testMatrix.jl
 
 # Functions
 
