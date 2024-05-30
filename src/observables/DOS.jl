@@ -20,11 +20,15 @@ function genDOS(p::Dict, F::Function, type::Symbol, η::Float64)
         return DOS_A
     elseif type == :H
         H = F # we've got the hamiltonian as a function of K
-        #BZ = 
+        kpoints, dk = genBZ(p["G"],p["nkvec"])
+        energies = Real[]
+        for k ∈ kpoints
+            append!(energies, real.(eigvals(H(k))))
+        end
         # implement later
         function DOS_H(E::Float64)
             # implementation for DOS using H
-            return trace(H(E)) / (2*π) # This is a placeholder
+            return -(dk/π)*imag(sum((-energies.+(E-im*η)).^(-1)))
         end
         return DOS_H
     end
@@ -70,7 +74,20 @@ end
 
 
 
-
+function genBZ(G::Matrix, nkvec::Vector{Int})
+    kpoints = Vector{Float64}[]
+    nG1 = nkvec[1]; nG2 = nkvec2[2]; nG3 = nkvec3[3];
+    dk = det(G)/(nG1*nG2*nG3)
+    for ix ∈ 1:nG1
+        for iy ∈ 1:nG2
+            for iz in 1:nG3
+                k = G*[ix/nG1; iy/nG2; iz/nG3]
+                push!(kpoints,k)
+            end
+        end
+    end
+    return kpoints, weight
+end
 
 #=function DOS(genA::Function,kgrid::Vector{Vector{Float64}},kweights::Vector{Float64},Evals::Vector{Float64},parallelk::Bool=true)
 	nE = size(Evals)
