@@ -2,6 +2,6 @@ module RecursiveGreensModule
 
 import Base: +, -
 include("RGF.jl") 
-export CreateBlockMatrix, ToBlockMatrix, BlockMatrix, getInvRGF!, getInvJulia!, getInvRGFDiagonal!, +, -
+export CreateSparseBlockMatrix, ToSparseBlockMatrix, SparseBlockMatrix, getInvRGF!, getInvJulia!, getInvRGFDiagonal!, +, -
 
 end

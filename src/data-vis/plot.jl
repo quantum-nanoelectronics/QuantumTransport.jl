@@ -5,7 +5,7 @@
 
 # Function to call the appropriate function based on header value
 function plot(readDir::String, filename::String)
-    println("Plotting to: ", filename)
+    println("Plotting data from ", filename)
 
     # Read the CSV file header
     df, metadata = get_data(readDir, filename)

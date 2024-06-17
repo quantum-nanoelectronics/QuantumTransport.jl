@@ -63,7 +63,7 @@ function genH(p, A, H₀ = nothing, edge_NNs = nothing)
 
         if p["runtype"] == "transport" && p["inv"] == "RGF"
             blockSize = p["ny"]*p["nz"]*p["nsite"]*p["norb"]*p["nspin"]
-            return ToBlockMatrix(Htot, p["n"], blockSize)
+            return ToSparseBlockMatrix(Htot, p["n"], blockSize)
         else 
             return Htot
         end

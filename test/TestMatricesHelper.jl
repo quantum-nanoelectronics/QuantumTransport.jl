@@ -40,13 +40,13 @@ end
 function setVars(args)
     if args[8] == 0
         # This is the initially created test matrix
-        retVal = CreateBlockMatrix(args[1], args[2], args[3], args[5])  
+        retVal = CreateSparseBlockMatrix(args[1], args[2], args[3], args[5])  
     elseif args[8] == 1
         # effective mass test matrix.
-        retVal = ToBlockMatrix(sparse(effectiveMass(args[1] ÷ args[2], args[2])), args[1], args[2])
+        retVal = ToSparseBlockMatrix(sparse(effectiveMass(args[1] ÷ args[2], args[2])), args[1], args[2])
     else
         # spin orbit hamiltonian test matrix - Block sizes of 2s only
-        retVal = ToBlockMatrix(sparse(spinOrbitHamiltonian(args[1] ÷ args[2], args[6])), args[1], args[2])
+        retVal = ToSparseBlockMatrix(sparse(spinOrbitHamiltonian(args[1] ÷ args[2], args[6])), args[1], args[2])
     end 
 
     return retVal

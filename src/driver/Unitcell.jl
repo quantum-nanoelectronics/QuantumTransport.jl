@@ -1,5 +1,4 @@
 function unitcell(p::Dict)
-    G = transpose(2*π*inv(A))
     function kdictGen(A)
         G = transpose(2*π*inv(A))
         kdict = Dict(
@@ -62,17 +61,3 @@ function unitcell(p::Dict)
     
 end
 
-function genBZ(G::Matrix, nkvec::Vector{Int})
-    kpoints = Vector{Float64}[]
-    nG1 = nkvec[1]; nG2 = nkvec2[2]; nG3 = nkvec3[3];
-    dk = det(G)/(nG1*nG2*nG3)
-    for ix ∈ 1:nG1
-        for iy ∈ 1:nG2
-            for iz in 1:nG3
-                k = G*[ix/nG1; iy/nG2; iz/nG3]
-                push!(kpoints,k)
-            end
-        end
-    end
-    return kpoints, weight
-end

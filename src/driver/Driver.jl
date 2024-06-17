@@ -11,7 +11,7 @@ include("Supercell.jl")
 function main(p::Dict)
     if haskey(p, "transport")
         println("=============== Running transport ===============")
-        NEGF_Transport_1D(p["transport"])
+        @time NEGF_Transport_1D(p["transport"])
     end
     if haskey(p, "unitcell")
         println("=============== Running unitcell ===============")

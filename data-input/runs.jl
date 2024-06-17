@@ -22,7 +22,7 @@ runparams = Dict(
 	"material_params" => Dict("t" => 1.0, "ε₀" => 1.0, "site_positions"=>site_positions),
     # Order of matrix_params: full matrix size, block size, phi, eta term, zeroThreshold term, σ₂, energy, 
 	# (1000, 2, 0.2001, 1e-10, 1e-10, [0 -im; im 0], 3.0, matrixIndex)
-	"matrix_params" => Dict("inv" => "RGF", "ϕ" => 0.2001, "errorThreshold" => 1e-10),
+	"matrix_params" => Dict("inv" => "LU", "ϕ" => 0.2001, "errorThreshold" => 1e-10),
 
 	# A field
 	"A_field" => A_field,
