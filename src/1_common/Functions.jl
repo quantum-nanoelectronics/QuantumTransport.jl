@@ -37,6 +37,21 @@ end
 
 rot(θ) = [cos(θ) -sin(θ); sin(θ) cos(θ)]
 
+function genBZ(G::Matrix, nkvec::Vector{Int})
+    kpoints = Vector{Float64}[]
+    nG1 = nkvec[1]; nG2 = nkvec2[2]; nG3 = nkvec3[3];
+    dk = det(G)/(nG1*nG2*nG3)
+    for ix ∈ 1:nG1
+        for iy ∈ 1:nG2
+            for iz in 1:nG3
+                k = G*[ix/nG1; iy/nG2; iz/nG3]
+                push!(kpoints,k)
+            end
+        end
+    end
+    return kpoints, weight
+end
+
 function genBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cubic lattice
     # nx, ny, and nz specifically refer to # of points in IBZ
     kpoints = Vector{Float64}[]

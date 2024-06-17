@@ -33,21 +33,21 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     end
     function genGʳ(k::Vector{Float64})
         # define the inverse function here, depending on the size of H, and the number of threads. 
-        function inv(matrix, topAndBottomRows::Bool=false, juliaInv::Function=LinearAlgebra.inv) 
-            blockSize = p["ny"]*p["nz"]*p["nsite"]*p["norb"]*p["nspin"]
-            if p["n"] == blockSize # if matrix size is block size, RGF doesn't work
-                return juliaInv(Array(matrix))
-            elseif p["inv"] == "RGF"
-                blockMatrixObject = CreateBlockMatrix(p["n"], blockSize, p["ϕ"], p["errorThreshold"], matrix)
+        # matrix may also now be of type SparseBlockMatrix, based on input params and ConstructHamiltonian 
+        function inv(matrix, topAndBottomRows::Bool=false) 
+            if p["inv"] == "RGF"
                 if topAndBottomRows
-                    return getInvRGF(blockMatrixObject).matrix
+                    getInvRGF!(matrix)
+                    return matrix.matrix
                 else
-                    return getInvRGFDiagonal(blockMatrixObject).matrix
+                    getInvRGFDiagonal!(matrix)
+                    return matrix.matrix
+
                 end
-            elseif p["inv"] == "julia"
-                return juliaInv(Array(matrix))
+            elseif p["inv"] == "LU"
+                return LinearAlgebra.inv(Array(matrix))
             else
-                return juliaInv(Array(matrix))
+                return LinearAlgebra.inv(Array(matrix))
             end
         end
 
@@ -105,7 +105,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
         fR = fermi(p["ΔV"] / 2, p["T"])
         function linearConductance(E::Float64)
             Σ = totΣk(E, k)
-            Gʳ = inv(Array((E + im * p["η"]) * I(p["n"]) .- H(k) .- Σ))
+            Gʳ = inv(Array((E + im * p["η"]) * I(p["n"]) .- H(k) .- Σ)) # this may not work with SparseBlockMatrix
             Γ₁E = sparse(Γks[1](k)(E))
             ΓᵢE = sparse(Γks[contact](k)(E))
             # loop to converge Gʳ

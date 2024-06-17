@@ -20,10 +20,15 @@ function genDOS(p::Dict, F::Function, type::Symbol, η::Float64)
         return DOS_A
     elseif type == :H
         H = F # we've got the hamiltonian as a function of K
+        kpoints, dk = genBZ(p["G"],p["nkvec"])
+        energies = Real[]
+        for k ∈ kpoints
+            append!(energies, real.(eigvals(H(k))))
+        end
         # implement later
         function DOS_H(E::Float64)
             # implementation for DOS using H
-            return trace(H(E)) / (2*π) # This is a placeholder
+            return -(dk/π)*imag(sum((-energies.+(E-im*η)).^(-1)))
         end
         return DOS_H
     end
@@ -53,25 +58,38 @@ end
 
 function genDOS(p::Dict, H::SparseMatrixCSC, η::Float64, neigs::Int, centerE::Float64)
     eigvals = eigs(H, nev = neigs, sigma=centerE)
-    function DOS(E::Float64)
+    function DOS_fullH(E::Float64)
         return (-1/π)*sum(imag.((eigvals.+(η-E)).^-1))
     end
-    return DOS
+    return DOS_fullH
 end
 
 function genDOS(p::Dict, H::Matrix{ComplexF64}, η::Float64)
     eigvals = eigvals(H)
-    function DOS(E::Float64)
+    function DOS_denseH(E::Float64)
         return (-1/π)*sum(imag.((eigvals.+(η-E)).^-1))
     end
-    return DOS
+    return DOS_denseH
 end
 
 
 
+function genBZ(G::Matrix, nkvec::Vector{Int})
+    kpoints = Vector{Float64}[]
+    nG1 = nkvec[1]; nG2 = nkvec2[2]; nG3 = nkvec3[3];
+    dk = det(G)/(nG1*nG2*nG3)
+    for ix ∈ 1:nG1
+        for iy ∈ 1:nG2
+            for iz in 1:nG3
+                k = G*[ix/nG1; iy/nG2; iz/nG3]
+                push!(kpoints,k)
+            end
+        end
+    end
+    return kpoints, weight
+end
 
-
-function DOS(genA::Function,kgrid::Vector{Vector{Float64}},kweights::Vector{Float64},Evals::Vector{Float64},parallelk::Bool=true)
+#=function DOS(genA::Function,kgrid::Vector{Vector{Float64}},kweights::Vector{Float64},Evals::Vector{Float64},parallelk::Bool=true)
 	nE = size(Evals)
 	#nkz = maximum([kindex[2] for kindex in kindices])
 	#nky = maximum([kindex[1] for kindex in kindices])
@@ -153,3 +171,4 @@ end
 function DOS(E::Float64,A::Function,Q::Vector = I(size(A(0))[1]))
 	return (1/(2*π))*tr(Q*A)
 end
+=#

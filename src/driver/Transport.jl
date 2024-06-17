@@ -1,9 +1,7 @@
-function NEGF_Transport_1D(p::Dict, A::Function)
-    emptyElectrode = Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
-
+function NEGF_Transport_1D(p::Dict)
     Electrodes = [
-            Electrode([-1,0],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"-x",p["electrodeMaterial"],A);
-            Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
+            Electrode([-1,0],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"-x",p["electrodeMaterial"],p["A_field"]);
+            Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],p["A_field"])
     ]
 
     p["nelectrodes"] = size(Electrodes)[1]
@@ -12,7 +10,7 @@ function NEGF_Transport_1D(p::Dict, A::Function)
     NNs = genNNs(p)
     NNs = pruneHoppings(NNs, p["prune"])
     H₀, edge_NNs = nnHoppingMat(NNs, p)
-    H = genH(p, A, H₀, edge_NNs)
+    H = genH(p, p["A_field"], H₀, edge_NNs)
 
     Σₖs = genΣₖs(p, Electrodes)
     genGᴿ, genT, genA, genscatteredT = NEGF_prep(p, H, Σₖs)
@@ -44,12 +42,12 @@ function NEGF_Transport_1D(p::Dict, A::Function)
     
 
     # TODO Vivian - if p["kspace"] is true, nk isnt set to an int, instead a bool, breaks future code
-    nk = 1
+    nk = 0
     S = 1
     # if p["kspace"]
-    #     nk = p["kspace"]
-    # else
     #     nk = 1
+    # else
+    #     nk = 0
     # end
 
 

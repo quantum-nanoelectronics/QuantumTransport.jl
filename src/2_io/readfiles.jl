@@ -19,7 +19,6 @@ The data read from the file.
 
 """
 function get_data(readDir::String, filename::String)
-    println("Reading from: ", readDir)
     csv_file_path = joinpath(readDir, filename)
     
     # Open the original CSV file to read the metadata line

@@ -8,9 +8,9 @@ function runVisualizationTests()
     filename = "transmission.csv"  # specify the CSV file name
 
     file_path = joinpath(readDir, filename)
-    fig = call_function_based_on_header(readDir, filename)
+    fig = plot(readDir, filename)
     # filename = "CNTpositions.csv"
-    # call_function_based_on_header(readDir, filename)
+    # plot(readDir, filename)
     # Save the figure
     @test isfile(file_path)
     return fig
@@ -21,9 +21,9 @@ function runVisualizationTestsGLMakie()
     filename = "transmission.csv"  # specify the CSV file name
 
     file_path = joinpath(readDir, filename)
-    call_function_based_on_header(readDir, filename) # pass in true to display with GLMakie backend
+    plot(readDir, filename) # pass in true to display with GLMakie backend
     filename = "CNTpositions.csv"
-    call_function_based_on_header(readDir, filename)
+    plot(readDir, filename)
     # Save the figure
     @test isfile(file_path)
 end
@@ -32,7 +32,7 @@ end
 function recordVisualization()
     readDir = OUTPUT_DIR
     filename = "CNTpositions.csv"
-    fig, ax, plt = call_function_based_on_header(readDir, filename)
+    fig, ax, plt = plot(readDir, filename)
     
     record(fig, "visualization.mp4", 1:120) do frame
         ax.azimuth[] = 1.7pi + 0.3 * sin(2pi * frame / 120) # Camera tilt effect
