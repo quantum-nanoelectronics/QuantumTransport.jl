@@ -36,6 +36,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
         # matrix may also now be of type SparseBlockMatrix, based on input params and ConstructHamiltonian 
         function inv(matrix, topAndBottomRows::Bool=false) 
             if p["inv"] == "RGF"
+                println(size(matrix.matrix))
                 if topAndBottomRows
                     getInvRGF!(matrix)
                     return matrix.matrix
@@ -45,6 +46,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
 
                 end
             elseif p["inv"] == "LU"
+                println(size(matrix))
                 return LinearAlgebra.inv(Array(matrix))
             else
                 return LinearAlgebra.inv(Array(matrix))
