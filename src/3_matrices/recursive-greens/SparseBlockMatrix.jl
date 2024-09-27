@@ -41,7 +41,7 @@ function ToSparseBlockMatrix(matrix::SparseMatrixCSC{Complex{Float64},Int}, n::I
 end
 
 # Constructor for a symmetric, block tridiagonal matrix. Returns a new SparseBlockMatrix.
-function CreateSparseBlockMatrix(n::Int, blockSize::Int, phi::Float64, zeroThreshold::Float64)
+function CreateSparseBlockMatrix(n::Int, blockSize::Int, phi::Float64)
     # Ensure the matrix size is a multiple of the block size
     if n % blockSize != 0
         error("Matrix size n must be a multiple of block size.")
@@ -89,7 +89,7 @@ function CreateSparseBlockMatrix(n::Int, blockSize::Int, phi::Float64, zeroThres
 
     # Construct the sparse matrix from the populated vectors
     S = sparse(rows, cols, vals, n, n)
-    return SparseBlockMatrix(S, n, blockSize, numBlocks, zeroThreshold)
+    return SparseBlockMatrix(S, n, blockSize, numBlocks)
 end
 
 # Decomposes a matrix into its diagonal, top, and bottom blocks

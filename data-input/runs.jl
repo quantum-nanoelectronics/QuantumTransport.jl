@@ -34,8 +34,9 @@ runparams = Dict(
 	"unitcell" => Dict("runtype" => "unitcell", "geometry" => devicegeometry, "material"=> "metal", "bands" => true, "bands_project" => [σ[1]], "save"=>[:bandstructure], "poisson" => false, "DOS" => false, "klist" => ["Γ","X₁","M","X₂","Γ","X₃"], "numInterpolations" => 64),
 	
 	# and for runs looking at the conductance of a large supercell
-	"transport" => Dict("runtype" => "transport", "geometry" => devicegeometry, "ΔV" => 0.001, "μ" => 0.0*eV, "T" => 300, "η" => 1E-2*eV, "save" => [:transmission, :conductance], "electrodeMagnetization" => false, "deviceMagnetization" => false, "Gʳinv_method" => :RGF, "D_spin" => 0.000001*eV, "D_momentum" => 0.000005*eV, "kspace"=>false, "E_samples" => [E for E = -1.5:0.025:1.5], "electrodeMaterial" => "metal"),
-	
+	"transport" => Dict("runtype" => "transport", "geometry" => devicegeometry, "ΔV" => 0.001, "μ" => 0.0*eV, "T" => 300, "η" => 1e-10, "save" => [:transmission, :conductance], "electrodeMagnetization" => false, "deviceMagnetization" => false, "Gʳinv_method" => :RGF, "D_spin" => 0.000001*eV, "D_momentum" => 0.000005*eV, "kspace"=>false, "E_samples" => [E for E = -1.5:0.025:1.5], "electrodeMaterial" => "metal"),
+	# original - [E for E = -0.2:0.025:1.4] 
+	# [E for E = -1.5:0.025:1.5]
 	# and for runs where we want to slap a bunch of unit cells together and get the scattering-corrected electronic properties
 	"supercell" => Dict("runtype" => "supercell", "geometry" => devicegeometry, "bands_project" => [σ[1],σ[2]], "poisson"=>false, "μ" => 0.0*eV, "T" => 300, "η" => 1E-3*eV, "save" => [:unfoldedbands], "density_project" => [I(2),[σ[1],σ[2],σ[3]]], "Gʳinv_method" => :RGF, "D_dephasing" => 0.001*eV, "D_spin" => 0.0001*eV, "D_momentum" => 0.001*eV)
 )

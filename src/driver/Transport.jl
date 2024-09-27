@@ -80,5 +80,6 @@ function NEGF_Transport_1D(p::Dict)
     #print(Tmap)
     #figh = pyplotHeatmap(S*kys/(π/p["a"]),S*kzs/(π/p["a"]),Tmap',"ky (π/a)","kz (π/a)","T(ky,kz)",:nipy_spectral, p["savedata"], p["path"])
 
+    println("Testing matrices.")
     println("NEGF Transport 1D complete.")
 end
