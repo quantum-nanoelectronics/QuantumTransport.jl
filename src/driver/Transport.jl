@@ -73,7 +73,7 @@ function NEGF_Transport_1D(p::Dict)
     # TODO this is used for a test to pass
     save_data_formatted("ℝ→ℝ", p["path"], "transmission.csv", ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission")
     
-    filename = "transmission" * "_" * string(Dates.format(current_time, "yyyy-mm-dd_HH.MM.SS")) * ".csv"
+    filename = "transmission" * "_" * string(Dates.format(Dates.now(), "yyyy-mm-dd_HH.MM.SS")) * ".csv"
     save_data_formatted("ℝ→ℝ", p["path"], filename, ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission")
     println("TofE: ", TofE)
 
