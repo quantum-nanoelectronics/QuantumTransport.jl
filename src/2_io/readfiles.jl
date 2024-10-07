@@ -1,5 +1,7 @@
 using CSV
 using DataFrames
+using Serialization
+using Base64
 using Base.Filesystem: mktemp
 
 """
@@ -25,8 +27,13 @@ function get_data(readDir::String, filename::String)
     metadata_line = open(csv_file_path, "r") do file
         readline(file)  # This reads the first line, which is the metadata
     end
+
+    # Decode the Base64 string back to bytes and deserialize
+    decoded_bytes = base64decode(metadata_line)
+    metadata_array = deserialize(IOBuffer(decoded_bytes))
+
     # Split the metadata into an array
-    metadata_array = split(metadata_line, ",")
+    # metadata_array = split(metadata_line, ",")
 
     # Create a temporary file to write the CSV content excluding the first metadata line
     temp_csv_path, temp_file = mktemp()

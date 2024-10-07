@@ -1,7 +1,18 @@
-#New plotting file
+# New plotting file
 
 # Adding Makie, etc. to the dependencies will not work on github
 #using Makie #If this line is uncommented or if Makie is added to this package, github tests will fail
+
+const GENERIC_KWARGS = Set([
+    :cycle, :dim_conversions, :label, :model, :rasterize, :transformation, :xautolimits, :yautolimits, :zautolimits]
+)
+
+const MAKIE_LINES_KWARGS = union(Set([
+    :alpha, :colorscale, :highclip, :inspector_label, :linewidth, :nan_color, :transformation, :color, :cycle, :inspectable,
+    :joinstyle, :lowclip, :overdraw, :transparency, :colormap, :depth_shift, :inspector_clear, :linecap, :miter_limit,
+    :space, :visible, :colorrange, :fxaa, :inspector_hover, :linestyle, :model, :ssao]
+) , GENERIC_KWARGS)
+
 
 # Function to call the appropriate function based on header value
 function plot(readDir::String, filename::String)
@@ -10,49 +21,55 @@ function plot(readDir::String, filename::String)
     # Read the CSV file header
     df, metadata = get_data(readDir, filename)
 
-    # Get the header of the DataFrame
-    if metadata[1] == "ℝ→ℝ"
-        fig = ℝtoℝ(df, parse(Int, metadata[3]), parse(Bool, metadata[5]), String(metadata[4]::SubString))
-    elseif metadata[1] == "ℝ³→ℝ"
-        fig = ℝ³toℝ(df, parse(Int, metadata[3]), parse(Bool, metadata[5]), String(metadata[4]::SubString))
-    else
-        print("no match")
+    # metadata is in the format ["type of plot", n_entries, n_codomain (dimensionality of codomain), ...], where the ... are kwargs
+    # f is the type_of_plot, stored as a symbol so that the function can be called directly
+    type_of_plot, n_entries, dims_codomain, kwargs = metadata
+    
+    println("Type of plot: ", type_of_plot)
+    println("Number of entries: ", n_entries)
+    println("Dimensionality of codomain: ", dims_codomain)
+
+    # Print key and value of additional keyword arguments
+    println("All Keyword Arguments:")
+    for (key, value) in kwargs
+        println("  - $key: $value")
     end
 
+    # Get the appropriate plotting function based on the type of plot
+    f = getfield(@__MODULE__, type_of_plot)
+    fig = f(df, dims_codomain; kwargs...)
     return fig
 end
 
 
-function ℝtoℝ(df::DataFrame, n::Int, axisflag::Bool, title::String, plot_size=(600, 400), line_scale=2)
-    # Read the CSV file
-      
+function ℝ_to_ℝ(df::DataFrame, n::Int; kwargs...)
+    println("Plotting ℝ_to_ℝ data")
+    filtered_kwargs = Dict(k => v for (k, v) in kwargs if k in MAKIE_LINES_KWARGS)
+    println("Filtered Kwargs for lines!(): ", filtered_kwargs)
 
-    # Extract the domain and codomains
-    domain = df[!, 1]  # first column for the domain R
-
-    # Create the plot with the specified size
-    fig = Figure(size = plot_size)
+    domain = df[!, 1]
+    fig = Figure(size = get(kwargs, :plot_size, (600, 400)))
     colors = distinguishable_colors(100)
-    if axisflag
-        ax = Axis(fig[1, 1], title = title, xlabel = string(names(df)[2]), ylabel = string(names(df)[1])) 
+    if get(kwargs, :flip_axis, false)
+        ax = Axis(fig[1, 1]; xlabel = string(names(df)[2]), ylabel = string(names(df)[1]), title = get(kwargs, :title, "untitled")) 
     else
-        ax = Axis(fig[1, 1], title = title, xlabel = string(names(df)[1]), ylabel = string(names(df)[2])) 
+        ax = Axis(fig[1, 1]; xlabel = string(names(df)[1]), ylabel = string(names(df)[2]), title = get(kwargs, :title, "untitled")) 
     end
      
     for i in 1:n
         codomain = df[!, i+1]  # get the (i+1)th column as the codomain
         color_index = (i - 1) % length(colors) + 8  # cycle through colors list
-        if axisflag
-            lines!(ax, codomain, domain, color = colors[color_index], linewidth = 1.5 * line_scale)
+        if get(kwargs, :flip_axis, false)
+            lines!(ax, codomain, domain; color = colors[color_index], filtered_kwargs...)
         else
-            lines!(ax, domain, codomain, color = colors[color_index], linewidth = 1.5 * line_scale)
+            lines!(ax, domain, codomain; color = colors[color_index], filtered_kwargs...)
         end
     end
 
     # Display the figure
     #display(fig)
 
-    filename = "R_to_R" * "_" * string(Dates.format(Dates.now(), "yyyy-mm-dd_HH.MM.SS")) * ".png"
+    filename = "R_to_R" * "_" * string(Dates.format(Dates.now(), "mm-dd_HH.MM.SS")) * ".png"
     output_file_path = string(joinpath(OUTPUT_DIR, filename))
 
     save(output_file_path, fig)
@@ -137,10 +154,8 @@ function R3_to_Rplus(csv_file, plot_size=(600, 400), marker_scale=1)
     return fig
 end
 
-function ℝ³toℝ(df::DataFrame, n::Int, axisflag::Bool, title::String, plot_size=(1400, 800), marker_scale=20)
-    # Read the CSV file
-      
-
+function ℝ³_to_ℝ(df::DataFrame, n::Int; axisflag::Bool, title::String, plot_size=(1400, 800), marker_scale=20, kwargs...)
+    println("Plotting ℝ³_to_ℝ data")
     # Extract the coordinates and complex number values
     x = df[!, 1]  # First column for the x coordinate
     y = df[!, 2]  # Second column for the y coordinate
@@ -155,11 +170,11 @@ function ℝ³toℝ(df::DataFrame, n::Int, axisflag::Bool, title::String, plot_s
 
     # Create the 3D scatter plot with the specified size
     fig = Figure(size = plot_size)
-    ax = fig[1, 1] = Axis3(fig, title=title, xlabel=string(names(df)[1]), ylabel=string(names(df)[2]), zlabel=string(names(df)[3]))
+    ax = fig[1, 1] = Axis3(fig, title=title, xlabel=string(names(df)[1]), ylabel=string(names(df)[2]), zlabel=string(names(df)[3]), kwargs...)
 
 
     # Add the scatter points to the plot, using the seismic colormap for colors based on the normalized real part values
-    scatter_plot = scatter!(ax, x, y, z, markersize=normalized_sizes, color=normalized_sizes, colormap=:viridis, strokewidth = 0)
+    scatter_plot = scatter!(ax, x, y, z, markersize=normalized_sizes, color=normalized_sizes, colormap=:viridis, strokewidth = 0, kwargs...)
     cb = Colorbar(fig[1, 2], limits = (0, maximum(marker_sizes)), label=string(names(df)[4]), )
     output_file_path = joinpath(OUTPUT_DIR, "R3_to_R.png")
     save(output_file_path, fig)

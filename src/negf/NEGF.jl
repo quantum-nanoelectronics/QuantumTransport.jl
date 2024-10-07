@@ -59,7 +59,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
         end
 
         function Gʳ(E::Float64)
-            println("Running Gʳ", p["η"], p["n"])
+            println("Running Gʳ", p["η"], " ", p["n"])
             Σ_contacts = totΣk(E, k)
             H_eff = H(k) + Σ_contacts
             if haskey(p, "scattering")

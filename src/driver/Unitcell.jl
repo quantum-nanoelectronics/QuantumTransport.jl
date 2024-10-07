@@ -45,7 +45,7 @@ function unitcell(p::Dict)
                 @warn "Other Hamiltonian types not implemented for DOS"
             end
             DOS_vals = DOS.(p["E_samples"])
-            save_data_formatted("ℝ→ℝ", p["path"], "DOS.csv", ["DOS (1/eV⋅nm³)","E (eV)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission")
+            save_data(:ℝ_to_ℝ, p["path"], "DOS.csv", ["DOS (1/eV⋅nm³)","E (eV)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission")
             println("DOS: ", DOS_vals)
         end
         if :bandstructure ∈ p["save"]

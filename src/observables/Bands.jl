@@ -47,7 +47,7 @@ function getbands(p::Dict, klist::Vector{String}, kdict::Dict, n::Int, Hofk::Fun
     println("size of Estates: ", size(Estates))
 
     # TODO broken
-    # save_data_formatted("bandstructure", p["path"], "bandstructure.csv", ["X", "Y"], [[0,0,0], [0,0,0], [0,0,0]]; flip_axes=true, title="Bands")
-    # save_data_formatted("bandstructure", p["path"], "bandstructure.csv", ["X", "Y"], [kpts, Evals, Estates]; flip_axes=true, title="Bands")
+    # save_data("bandstructure", p["path"], "bandstructure.csv", ["X", "Y"], [[0,0,0], [0,0,0], [0,0,0]]; flip_axes=true, title="Bands")
+    # save_data("bandstructure", p["path"], "bandstructure.csv", ["X", "Y"], [kpts, Evals, Estates]; flip_axes=true, title="Bands")
 
 end

@@ -63,7 +63,7 @@ function genH(p, A, H₀ = nothing, edge_NNs = nothing)
 
         if p["runtype"] == "transport" && p["inv"] == "RGF"
             blockSize = p["ny"]*p["nz"]*p["nsite"]*p["norb"]*p["nspin"]
-            println("Matrix Size = ", p["n"], "blockSize = $blockSize")
+            println("Matrix Size = ", " ", p["n"], "blockSize = $blockSize")
             return ToSparseBlockMatrix(Htot, p["n"], blockSize)
             # return ToSparseBlockMatrix(Htot + (I * (1e-3 - 1e-3*im)), p["n"], blockSize)
         else 
