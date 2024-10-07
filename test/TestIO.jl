@@ -55,7 +55,7 @@ function test_formatted_save(ioDir, filename)
     # saving data
     xvals = LinRange(0,1.0,10)
     yvals = rand(10)
-    @test save_data_formatted("ℝ→ℝ", ioDir, filename, ["X (nm)", "Y (nm)"], [xvals,yvals], true)
+    @test save_data(:ℝ_to_ℝ, ioDir, filename, ["X (nm)", "Y (nm)"], [xvals,yvals], true)
     @test isfile(joinpath(ioDir, filename))
 
 
@@ -190,11 +190,11 @@ function runIOTests()
     xvals = LinRange(0,1,12)
     yvals = rand(12)
 
-    @test save_data_formatted("ℝ→ℝ", OUTPUT_DIR, "testvals.csv", ["X (nm)", "Y (nm)"], [xvals,yvals])
+    @test save_data(:ℝ_to_ℝ, OUTPUT_DIR, "testvals.csv", ["X (nm)", "Y (nm)"], [xvals,yvals])
     @test isfile(joinpath(OUTPUT_DIR, "testvals.csv"))
 
 
-    @test save_data_formatted("ℝ³→ℝ", OUTPUT_DIR, "CNTpositions.csv", 
+    @test save_data(:ℝ³_to_ℝ, OUTPUT_DIR, "CNTpositions.csv", 
     ["X (nm)", "Y (nm)", "Z (nm)", "n (# electrons)"], [CNT_positions[1],CNT_positions[2],CNT_positions[3], rand(size(CNT_positions[1])[1])])
     @test isfile(joinpath(OUTPUT_DIR, "CNTpositions.csv"))
     #test_formatted_save(ioDir, "testvals.csv", [xvals, yvals])
