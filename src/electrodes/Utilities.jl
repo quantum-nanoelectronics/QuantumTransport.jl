@@ -29,7 +29,7 @@ function electrodeSiteToDeviceIndex(p::Dict, ElectrodeInfo::Electrode, ivecConta
     end
     iy = ivecContact[2] + ElectrodeInfo.yrange[1]
     iz = ivecContact[3] + ElectrodeInfo.zrange[1]
-    return ix + p["nx"] * (iy + p["ny"] * iz) + 1
+    return iy + p["ny"] * (iz + p["nz"] * ix) + 1
 end
 
 function changeBasis(p::Dict, ElectrodeInfo::Electrode)
@@ -58,7 +58,7 @@ function changeBasis(p::Dict, ElectrodeInfo::Electrode)
             Psite[deviceSiteIndex, contactSiteIndex] = 1
         end
     end
-    return dropzeros(Psite ⊗ I(p["nsite"] * p["norb"] * 2))
+    return dropzeros(Psite ⊗ I(p["nsite"] * p["norb"] * p["nspin"]))
     #return sparse(Psite⊗ones(p.nsite,p.nsite)⊗I(p.norb*2))
 end
 
