@@ -40,7 +40,7 @@ jobs:
       - uses: julia-actions/cache@v1
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact
         with:
           name: Save data-output folder as an artifact
           path: ./data-output
