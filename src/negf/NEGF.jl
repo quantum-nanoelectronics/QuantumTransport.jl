@@ -36,22 +36,22 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
         # matrix may also now be of type SparseBlockMatrix, based on input params and ConstructHamiltonian 
         function inv(matrix, topAndBottomRows::Bool=false) 
             if p["inv"] == "RGF"
-                # CSV.write("matrix-rgf.csv", DataFrame(matrix.matrix, :auto))
+                CSV.write("matrix-rgf.csv", DataFrame(matrix.matrix, :auto))
                 if topAndBottomRows
                     # matrix = getInvRGF(matrix)
                     getInvRGF!(matrix)
-                    # CSV.write("matrix-rgf-tb-out.csv", DataFrame(matrix.matrix, :auto))
+                    CSV.write("matrix-rgf-tb-out.csv", DataFrame(matrix.matrix, :auto))
                     return matrix.matrix
                 else
                     # matrix = getInvRGFDiagonal(matrix)
                     getInvRGFDiagonal!(matrix)
-                    # CSV.write("matrix-rgf-out.csv", DataFrame(matrix.matrix, :auto))
+                    CSV.write("matrix-rgf-out.csv", DataFrame(matrix.matrix, :auto))
                     return matrix.matrix
                 end
             elseif p["inv"] == "LU"
-                # CSV.write("matrix-lu.csv", DataFrame(matrix, :auto))
+                CSV.write("matrix-lu.csv", DataFrame(matrix, :auto))
                 temp = LinearAlgebra.inv(Array(matrix))
-                # CSV.write("matrix-lu-out.csv", DataFrame(temp, :auto))
+                CSV.write("matrix-lu-out.csv", DataFrame(temp, :auto))
                 return temp
             else
                 return LinearAlgebra.inv(Array(matrix))

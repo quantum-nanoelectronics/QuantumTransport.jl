@@ -6,7 +6,7 @@ function xyzElectrodeSiteToI(ElectrodeInfo::Electrode, ivec::Vector{Int})
     ix = 0 * ivec[1]
     iy = ivec[2]
     iz = ivec[3]
-    return iy + ny * (iz + nz * (ix)) + 1
+    return ix + nx * (iy + ny * (iz)) + 1
 end
 
 function xyzElectrodeToI(p::NamedTuple, ElectrodeInfo::Electrode, ivec::Vector{Int})
@@ -17,7 +17,7 @@ function xyzElectrodeToI(p::NamedTuple, ElectrodeInfo::Electrode, ivec::Vector{I
     iy = ivec[2]
     iz = ivec[3]
     iorb = ivec[4]
-    return iorb + p.norb * (iy + ny * (iz + nz * (ix))) + 1
+    return iorb + p.norb * (ix + nx * (iy + ny * (iz))) + 1
 end
 
 function electrodeSiteToDeviceIndex(p::Dict, ElectrodeInfo::Electrode, ivecContact::Vector{Int})
@@ -29,7 +29,7 @@ function electrodeSiteToDeviceIndex(p::Dict, ElectrodeInfo::Electrode, ivecConta
     end
     iy = ivecContact[2] + ElectrodeInfo.yrange[1]
     iz = ivecContact[3] + ElectrodeInfo.zrange[1]
-    return iy + p["ny"] * (iz + p["nz"] * ix) + 1
+    return ix + p["nx"] * (iy + p["ny"] * iz) + 1
 end
 
 function changeBasis(p::Dict, ElectrodeInfo::Electrode)
@@ -58,7 +58,7 @@ function changeBasis(p::Dict, ElectrodeInfo::Electrode)
             Psite[deviceSiteIndex, contactSiteIndex] = 1
         end
     end
-    return dropzeros(Psite ⊗ I(p["nsite"] * p["norb"] * p["nspin"]))
+    return dropzeros(Psite ⊗ I(p["nsite"] * p["norb"] * 2))
     #return sparse(Psite⊗ones(p.nsite,p.nsite)⊗I(p.norb*2))
 end
 
