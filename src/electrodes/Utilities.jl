@@ -6,7 +6,7 @@ function xyzElectrodeSiteToI(ElectrodeInfo::Electrode, ivec::Vector{Int})
     ix = 0 * ivec[1]
     iy = ivec[2]
     iz = ivec[3]
-    return ix + nx * (iy + ny * (iz)) + 1
+    return iy + ny * (iz + nz * (ix)) + 1
 end
 
 function xyzElectrodeToI(p::NamedTuple, ElectrodeInfo::Electrode, ivec::Vector{Int})
@@ -17,7 +17,7 @@ function xyzElectrodeToI(p::NamedTuple, ElectrodeInfo::Electrode, ivec::Vector{I
     iy = ivec[2]
     iz = ivec[3]
     iorb = ivec[4]
-    return iorb + p.norb * (ix + nx * (iy + ny * (iz))) + 1
+    return iorb + p.norb * (iy + ny * (iz + nz * (ix))) + 1
 end
 
 function electrodeSiteToDeviceIndex(p::Dict, ElectrodeInfo::Electrode, ivecContact::Vector{Int})
