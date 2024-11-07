@@ -18,7 +18,9 @@ function xyztoi(p, ivec, N::Vector{Int}=[0; 0; 0])
     iz = mod(ivec[3], p["nz"])
     isite = ivec[4]
     iorb = ivec[5]
-    return iorb + p["norb"] * isite + p["nsite"] * p["norb"] * ix + p["nsite"] * p["norb"] * p["nx"] * iy + p["nsite"] * p["norb"] * p["nx"] * p["ny"] * iz + 1
+    return iorb + p["norb"] * (isite + p["nsite"] * (iy +  p["ny"] * ( iz + * p["nz"] * ix))) + 1
+    #legacy indexing, rewritten for tridiagonalization. d(index)/d(ix) should have the largest prefactor of all sub-indices. 
+    #return iorb + p["norb"] * isite + p["nsite"] * p["norb"] * ix + p["nsite"] * p["norb"] * p["nx"] * iy + p["nsite"] * p["norb"] * p["nx"] * p["ny"] * iz + 1
 end
 
 # Same as above, except returns the corresponding atomic position of each index vector 
