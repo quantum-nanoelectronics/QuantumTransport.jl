@@ -71,15 +71,12 @@ function NEGF_Transport_1D(p::Dict)
     save_data(:ℝ_to_ℝ, p["path"], filename, ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=5, xticksvisible=false, yticksvisible=false)
     println("TofE: ", TofE)
 
-    #TODO remove the line below - used for testing only
-    plot(OUTPUT_DIR, filename)
-    # TODO this is used to get the current github tests to pass, remove later
-    save_data(:ℝ_to_ℝ, p["path"], "transmission.csv", ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=10)
-    
-
     #print(Tmap)
     #figh = pyplotHeatmap(S*kys/(π/p["a"]),S*kzs/(π/p["a"]),Tmap',"ky (π/a)","kz (π/a)","T(ky,kz)",:nipy_spectral, p["savedata"], p["path"])
 
     println("Testing matrices.")
     println("NEGF Transport 1D complete.")
+
+    # TODO this is used to get the current github tests to pass, remove later
+    save_data(:ℝ_to_ℝ, p["path"], "transmission.csv", ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=10)
 end
