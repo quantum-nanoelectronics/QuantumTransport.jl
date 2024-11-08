@@ -39,9 +39,7 @@ function NEGF_Transport_1D(p::Dict)
     #     end
     # end
 
-    
-
-    # TODO Vivian - if p["kspace"] is true, nk isnt set to an int, instead a bool, breaks future code
+    # TODO William - if p["kspace"] is true, nk isnt set to an int, instead a bool, breaks future code
     nk = 0
     S = 1
     # if p["kspace"]
@@ -49,7 +47,6 @@ function NEGF_Transport_1D(p::Dict)
     # else
     #     nk = 0
     # end
-
 
     if haskey(p,"scattering")
         println("Running 1D NEGF transport with incoherent scattering.")
@@ -70,15 +67,15 @@ function NEGF_Transport_1D(p::Dict)
         TofE, Tmap = totalT(genT, kindices, S .* kgrid, kweights, p["E_samples"], p["E_samples"][1], parallelk, Operators)
     end
 
-    # TODO this is used to get the current github tests to pass, remove later
-    save_data(:ℝ_to_ℝ, p["path"], "transmission.csv", ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=10)
-    
     filename = "transmission" * "_" * string(Dates.format(Dates.now(), "mm-dd_HH.MM.SS")) * ".csv"
-    save_data(:ℝ_to_ℝ, p["path"], filename, ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=3)
+    save_data(:ℝ_to_ℝ, p["path"], filename, ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=5, xticksvisible=false, yticksvisible=false)
     println("TofE: ", TofE)
 
     #TODO remove the line below - used for testing only
     plot(OUTPUT_DIR, filename)
+    # TODO this is used to get the current github tests to pass, remove later
+    save_data(:ℝ_to_ℝ, p["path"], "transmission.csv", ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=10)
+    
 
     #print(Tmap)
     #figh = pyplotHeatmap(S*kys/(π/p["a"]),S*kzs/(π/p["a"]),Tmap',"ky (π/a)","kz (π/a)","T(ky,kz)",:nipy_spectral, p["savedata"], p["path"])

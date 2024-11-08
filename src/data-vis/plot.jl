@@ -3,15 +3,24 @@
 # Adding Makie, etc. to the dependencies will not work on github
 #using Makie #If this line is uncommented or if Makie is added to this package, github tests will fail
 
-const GENERIC_KWARGS = Set([
-    :cycle, :dim_conversions, :label, :model, :rasterize, :transformation, :xautolimits, :yautolimits, :zautolimits]
+# DPI, resolution?
+const MAKIE_FIGURE_KWARGS = Dict(
+    :size => (600, 400),
 )
 
-const MAKIE_LINES_KWARGS = union(Set([
-    :alpha, :colorscale, :highclip, :inspector_label, :linewidth, :nan_color, :transformation, :color, :cycle, :inspectable,
-    :joinstyle, :lowclip, :overdraw, :transparency, :colormap, :depth_shift, :inspector_clear, :linecap, :miter_limit,
-    :space, :visible, :colorrange, :fxaa, :inspector_hover, :linestyle, :model, :ssao]
-) , GENERIC_KWARGS)
+# font size, font, margin size?
+const MAKIE_LINES_KWARGS = Dict([
+    :linewidth => 1,
+])
+
+# colormap, color?
+const MAKIE_AXIS_KWARGS = Dict([
+    :xticksvisible => true, 
+    :yticksvisible => true, 
+    :xgridvisible => true, 
+    :ygridvisible => true,
+    :title => "(insert title here)",
+])
 
 
 # Function to call the appropriate function based on header value
@@ -44,28 +53,35 @@ end
 
 function ℝ_to_ℝ(df::DataFrame, n::Int; kwargs...)
     println("Plotting ℝ_to_ℝ data")
-    filtered_kwargs = Dict(k => v for (k, v) in kwargs if k in MAKIE_LINES_KWARGS)
-    println("Filtered Kwargs for lines!(): ", filtered_kwargs)
+    filtered_figure_kwargs = merge(MAKIE_FIGURE_KWARGS, Dict(k => kwargs[k] for k in keys(MAKIE_FIGURE_KWARGS) if haskey(kwargs, k)))
+    println("Filtered Kwargs for Figure(): ", filtered_figure_kwargs)
+    filtered_lines_kwargs = merge(MAKIE_LINES_KWARGS, Dict(k => kwargs[k] for k in keys(MAKIE_LINES_KWARGS) if haskey(kwargs, k)))
+    println("Filtered Kwargs for lines!(): ", filtered_lines_kwargs)
+    filtered_axis_kwargs = merge(MAKIE_AXIS_KWARGS, Dict(k => kwargs[k] for k in keys(MAKIE_AXIS_KWARGS) if haskey(kwargs, k)))
+    println("Filtered Kwargs for Axis(): ", filtered_axis_kwargs)
 
     domain = df[!, 1]
-    fig = Figure(size = get(kwargs, :plot_size, (600, 400)))
+    fig = Figure(; filtered_figure_kwargs...)
     colors = distinguishable_colors(100)
+    xlabel = string(names(df)[1])
+    ylabel = string(names(df)[2])
+
     if get(kwargs, :flip_axis, false)
-        ax = Axis(fig[1, 1]; xlabel = string(names(df)[2]), ylabel = string(names(df)[1]), title = get(kwargs, :title, "untitled")) 
-    else
-        ax = Axis(fig[1, 1]; xlabel = string(names(df)[1]), ylabel = string(names(df)[2]), title = get(kwargs, :title, "untitled")) 
+        xlabel, ylabel = ylabel, xlabel
     end
-     
+    println(methods(lines!))
+    println(methods(Axis))
+    ax = Axis(fig[1, 1]; xlabel = xlabel, ylabel = ylabel, filtered_axis_kwargs...) 
+    
+    # not sure why we need a color_index here
     for i in 1:n
         codomain = df[!, i+1]  # get the (i+1)th column as the codomain
         color_index = (i - 1) % length(colors) + 8  # cycle through colors list
-        if get(kwargs, :flip_axis, false)
-            lines!(ax, codomain, domain; color = colors[color_index], filtered_kwargs...)
-        else
-            lines!(ax, domain, codomain; color = colors[color_index], filtered_kwargs...)
+        if get(kwargs, :flip_axis, true)
+            domain, codomain = codomain, domain
         end
+        lines!(ax, domain, codomain; color = colors[color_index], filtered_lines_kwargs...)
     end
-
     # Display the figure
     #display(fig)
 
