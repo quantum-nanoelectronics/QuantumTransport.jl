@@ -1,10 +1,10 @@
 module HamiltonianModule
 
 using ..CommonModule
+using ..RecursiveGreensModule
 
 include("ConstructHamiltonian.jl")
-# Changed from Hgen to genH
-# export Hgen
+
 export genH
 
 

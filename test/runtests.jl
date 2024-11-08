@@ -8,22 +8,32 @@ using Test
 @testset "QuantumTransport.jl Tests" begin
     println("\033[1m---------------RUNNING DRIVER TESTS---------------\033[0m")
     @testset "Driver Test" begin
-        include("testDriver.jl")
+        include("TestDriver.jl")
     end
 
     println("\033[1m----------RUNNING MATRIX INVERSION TESTS----------\033[0m")
     @testset "Matrix Inversion Test" begin
-        include("matrices.jl")
+        include("TestMatrices.jl")
     end
 
     println("\033[1m------------RUNNING INPUT OUTPUT TESTS------------\033[0m")
     @testset "Input Output Test" begin
-        include("io.jl")
+        include("TestIO.jl")
     end
 
     println("\033[1m---------RUNNING DATA VISUALIZATION TESTS----------\033[0m")
     @testset "Data Visualization Test" begin
-        include("visualization.jl")
+        include("TestVisualization.jl")
+    end
+
+    println("\033[1m------------RUNNING SELF-ENERGY TESTS------------\033[0m")
+    @testset "Self-Energy Test" begin
+        include("TestSelfEnergies.jl")
+    end
+
+    println("\033[1m--------------RUNNING HOPPING TESTS--------------\033[0m")
+    @testset "Hopping Test" begin 
+        include("TestHoppings.jl")
     end
 
 end

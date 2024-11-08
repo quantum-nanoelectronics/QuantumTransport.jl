@@ -3,10 +3,13 @@ using SparseArrays
 using Arpack
 using Distributions
 
-# Takes in the parameter list and the vector potential
-function genH(p, A)
-    NNs = genNNs(p)
-    H₀, edge_NNs = nnHoppingMat(NNs, p)
+# Takes in the parameter list, the vector potential
+function genH(p, A, H₀ = nothing, edge_NNs = nothing)
+    if isnothing(H₀) && isnothing(edge_NNs)
+        NNs = genNNs(p)
+        H₀, edge_NNs = nnHoppingMat(NNs, p)
+    end
+
     if haskey(p, "μ_disorder")
         NormalDist = Normal(0, p["μ_disorder"])
         H₀ += Diagonal(rand(NormalDist, p["nx"] * p["ny"] * p["nz"] * p["nsite"])) ⊗ I(p["norb"] * p["nspin"]) + p["μ"] * I(p["n"])
@@ -56,69 +59,24 @@ function genH(p, A)
         end
         #println("Hedges = $(size(Hₑ)), H₀ = $(size(H₀))")
         Htot = H₀ .+ Hₑ
-        return dropzeros(Htot)
+        dropzeros!(Htot)
+
+        if p["runtype"] == "transport" && p["inv"] == "RGF"
+            blockSize = p["ny"]*p["nz"]*p["nsite"]*p["norb"]*p["nspin"]
+            # println("Matrix Size = ", p["n"], "blockSize = $blockSize")
+            return ToSparseBlockMatrix(Htot, p["n"], blockSize)
+            # return ToSparseBlockMatrix(Htot + (I * (1e-3 - 1e-3*im)), p["n"], blockSize)
+        else 
+            return Htot
+        end
+
     end
     println("Great, SCF converged. Returning H(k).\n")
     return H
 end
 
 
-function genH(p, A, H₀, edge_NNs)
-    #H₀ = 0I(p["n"])
-    if haskey(p, "μ_disorder")
-        NormalDist = Normal(0, p["μ_disorder"])
-        H₀ += Diagonal(rand(NormalDist, p["nx"] * p["ny"] * p["nz"] * p["nsite"])) ⊗ I(p["norb"] * p["nspin"]) + p["μ"] * I(p["n"])
-    elseif haskey(p, "μ")
-        H₀ += p["μ"] * I(p["n"])
-    end
-    #Hᵦ = 0I(p["n"])
-    H₀ = sparse(H₀)
-    Rvals = RvalsGen(p)
-    Rsurf = Vector{Float64}[]
-    if haskey(p, "A")
-        # check if p["deviceMagnetization"] exists and is true
-        if (haskey(p, ["deviceMagnetization"]) && p["deviceMagnetization"] == true)
-            (Bfield, Bsurf, avgB) = fieldUtils(p, A, Rsurf, Rvals)
-            Hᵦ = zeeman(map(B -> Float64.(B), Bfield), p)
-        else
-            Hᵦ = 0I(p["n"])
-        end
-    end
-    if haskey(p, "M")
-        # TODO: add in the thing for if the magnetization field is nonzero
-    end
 
-    function H(k)
-        if (any(isnan, k) == true)
-            throw(DomainError(k, "Something broken in k vector definition! Returning NaN"))
-            return
-        end
-        # hamiltonian describing the edges
-        #build sparse as Hₑ = sparse(rows, cols, elements)
-        rows = Int[]
-        cols = Int[]
-        elements = ComplexF64[]
-        for NN in edge_NNs
-            Δϕ = exp(im * k ⋅ (p["A"] * NN.N))
-            for i = 1:2
-                for j = 1:2
-                    push!(rows, 2 * NN.b + i - 2)
-                    push!(cols, 2 * NN.a + j - 2)
-                    push!(elements, copy(NN.t[i, j] * Δϕ))
-                end
-            end
-        end
-        Hₑ = sparse(rows, cols, elements)
-        if (size(Hₑ) == (0, 0))
-            Hₑ = spzeros(ComplexF64, p["n"], p["n"])
-        end
-        #println("Hedges = $(size(Hₑ)), H₀ = $(size(H₀))")
-        Htot = H₀ .+ Hₑ
-        return dropzeros(Htot)
-    end
-    println("Great, SCF converged. Returning H(k).\n")
-    return H
-end
 
 function zeeman(Bvals::Vector{Vector{Float64}}, p::Dict)
     # redeclared consts (need a better way)

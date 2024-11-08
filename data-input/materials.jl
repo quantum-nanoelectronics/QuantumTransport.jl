@@ -29,18 +29,17 @@ end
 
 function metalHopping(p::Dict, NNs::Vector{Hopping}, ia::Vector{Int})
     iorb = ia[5]
-    t = 0I(2)
+    #t = 0I(2)
     #t = (3 * p["t"] - 1 * eV) * (I(2))
-    pushHopping!(NNs, t, ia, ia, p)
+    #pushHopping!(NNs, t, ia, ia, p)
     for ax = 1:3
+        t = (2 * p["t"]) * (I(2))
+        pushHopping!(NNs, t, ia, ia, p)
         for dir = [-1, 1]
-            # for weyl term in hamiltonian
+            #
             di = zeros(5)
             di[ax] = dir
             ib = Int.(ia + di)
-            #Ra = xyztor(p,ia); Rb = xyztor(p,ib); 
-            #δ = Rb - Ra
-            # implement H = +vf*𝐩⋅𝛔 = -vf𝑖ħ ∇ᵣ⋅σ on finite grid
             t = -1 * p["t"] * I(2)
             pushHopping!(NNs, t, ia, ib, p)
             #t = (p.ϵ₁ + 2*p.t)*(I(2))

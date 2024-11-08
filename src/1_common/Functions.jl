@@ -18,7 +18,9 @@ function xyztoi(p, ivec, N::Vector{Int}=[0; 0; 0])
     iz = mod(ivec[3], p["nz"])
     isite = ivec[4]
     iorb = ivec[5]
-    return iorb + p["norb"] * isite + p["nsite"] * p["norb"] * ix + p["nsite"] * p["norb"] * p["nx"] * iy + p["nsite"] * p["norb"] * p["nx"] * p["ny"] * iz + 1
+    return iorb + p["norb"] * (isite + p["nsite"] * (iy +  p["ny"] * ( iz + p["nz"] * ix))) + 1
+    #legacy indexing, rewritten for tridiagonalization. d(index)/d(ix) should have the largest prefactor of all sub-indices. 
+    #return iorb + p["norb"] * isite + p["nsite"] * p["norb"] * ix + p["nsite"] * p["norb"] * p["nx"] * iy + p["nsite"] * p["norb"] * p["nx"] * p["ny"] * iz + 1
 end
 
 # Same as above, except returns the corresponding atomic position of each index vector 
@@ -36,6 +38,21 @@ end
 ×(u, v) = cross(u, v)
 
 rot(θ) = [cos(θ) -sin(θ); sin(θ) cos(θ)]
+
+function genBZ(G::Matrix, nkvec::Vector{Int})
+    kpoints = Vector{Float64}[]
+    nG1 = nkvec[1]; nG2 = nkvec2[2]; nG3 = nkvec3[3];
+    dk = det(G)/(nG1*nG2*nG3)
+    for ix ∈ 1:nG1
+        for iy ∈ 1:nG2
+            for iz in 1:nG3
+                k = G*[ix/nG1; iy/nG2; iz/nG3]
+                push!(kpoints,k)
+            end
+        end
+    end
+    return kpoints, weight
+end
 
 function genBZ(p::Dict,nx::Int=0, ny::Int=100, nz::Int=100) # only works for cubic lattice
     # nx, ny, and nz specifically refer to # of points in IBZ

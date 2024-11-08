@@ -1,9 +1,7 @@
-function NEGF_Transport_1D(p::Dict, A::Function)
-    emptyElectrode = Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
-
+function NEGF_Transport_1D(p::Dict)
     Electrodes = [
-            Electrode([-1,0],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"-x",p["electrodeMaterial"],A);
-            Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],A)
+            Electrode([-1,0],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"-x",p["electrodeMaterial"],p["A_field"]);
+            Electrode([p["nx"],p["nx"]+1],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"+x",p["electrodeMaterial"],p["A_field"])
     ]
 
     p["nelectrodes"] = size(Electrodes)[1]
@@ -12,7 +10,7 @@ function NEGF_Transport_1D(p::Dict, A::Function)
     NNs = genNNs(p)
     NNs = pruneHoppings(NNs, p["prune"])
     H₀, edge_NNs = nnHoppingMat(NNs, p)
-    H = genH(p, A, H₀, edge_NNs)
+    H = genH(p, p["A_field"], H₀, edge_NNs)
 
     Σₖs = genΣₖs(p, Electrodes)
     genGᴿ, genT, genA, genscatteredT = NEGF_prep(p, H, Σₖs)
@@ -41,17 +39,14 @@ function NEGF_Transport_1D(p::Dict, A::Function)
     #     end
     # end
 
-    
-
-    # TODO Vivian - if p["kspace"] is true, nk isnt set to an int, instead a bool, breaks future code
-    nk = 1
+    # TODO William - if p["kspace"] is true, nk isnt set to an int, instead a bool, breaks future code
+    nk = 0
     S = 1
     # if p["kspace"]
-    #     nk = p["kspace"]
-    # else
     #     nk = 1
+    # else
+    #     nk = 0
     # end
-
 
     if haskey(p,"scattering")
         println("Running 1D NEGF transport with incoherent scattering.")
@@ -71,10 +66,20 @@ function NEGF_Transport_1D(p::Dict, A::Function)
 
         TofE, Tmap = totalT(genT, kindices, S .* kgrid, kweights, p["E_samples"], p["E_samples"][1], parallelk, Operators)
     end
-    save_data_formatted("ℝ→ℝ", p["path"], "transmission.csv", ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission")
+
+    filename = "transmission" * "_" * string(Dates.format(Dates.now(), "mm-dd_HH.MM.SS")) * ".csv"
+    save_data(:ℝ_to_ℝ, p["path"], filename, ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=5, xticksvisible=false, yticksvisible=false)
     println("TofE: ", TofE)
+
+    #TODO remove the line below - used for testing only
+    plot(OUTPUT_DIR, filename)
+    # TODO this is used to get the current github tests to pass, remove later
+    save_data(:ℝ_to_ℝ, p["path"], "transmission.csv", ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=10)
+    
 
     #print(Tmap)
     #figh = pyplotHeatmap(S*kys/(π/p["a"]),S*kzs/(π/p["a"]),Tmap',"ky (π/a)","kz (π/a)","T(ky,kz)",:nipy_spectral, p["savedata"], p["path"])
 
+    println("Testing matrices.")
+    println("NEGF Transport 1D complete.")
 end
