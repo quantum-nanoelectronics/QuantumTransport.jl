@@ -42,7 +42,7 @@ jobs:
       - uses: julia-actions/julia-runtest@v1
       - uses: actions/upload-artifact@v3
         with:
-          name: Save data-output folder as an artifact
+          name: data-output
           path: ./data-output
 
 
