@@ -48,7 +48,7 @@ function rgf_main(argsMatrix, testMatrix, diag::Bool=false)
     println("Eigenvalue Correctness: ", correct)
     # println("Eigenvalue Correctness: ", correct)
     # println("Eigenvalue Correctness: ", correct)
-    debugAllValues()
+    # debugAllValues()
     # debugDiagonalValues()
 
 
