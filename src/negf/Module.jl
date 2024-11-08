@@ -10,6 +10,10 @@ using SparseArrays
 using Distributed
 using Random
 
+# testing things
+using CSV
+using DataFrames
+
 include("NEGF.jl")
 
 end

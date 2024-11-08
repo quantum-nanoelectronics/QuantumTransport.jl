@@ -11,6 +11,7 @@ end
 function getInvRGF!(matrixObject::SparseBlockMatrix)
     # does not work if there is only one block
     if matrixObject.numBlocks == 1
+        println("Only one block, calling Julia inverse")
         getInvJulia!(matrixObject)
         return
     end
@@ -34,6 +35,7 @@ end
 function getInvRGFDiagonal!(matrixObject::SparseBlockMatrix)
     # does not work if there is only one block
     if matrixObject.numBlocks == 1
+        println("Only one block, calling Julia inverse")
         getInvJulia!(matrixObject)
         return
     end

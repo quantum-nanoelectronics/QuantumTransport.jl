@@ -69,10 +69,20 @@ function NEGF_Transport_1D(p::Dict)
 
         TofE, Tmap = totalT(genT, kindices, S .* kgrid, kweights, p["E_samples"], p["E_samples"][1], parallelk, Operators)
     end
+
+    # TODO this is used for a test to pass
     save_data_formatted("ℝ→ℝ", p["path"], "transmission.csv", ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission")
+    
+    filename = "transmission" * "_" * string(Dates.format(Dates.now(), "yyyy-mm-dd_HH.MM.SS")) * ".csv"
+    save_data_formatted("ℝ→ℝ", p["path"], filename, ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission")
     println("TofE: ", TofE)
+
+    #TODO remove the line below - used for testing only
+    plot(OUTPUT_DIR, filename)
 
     #print(Tmap)
     #figh = pyplotHeatmap(S*kys/(π/p["a"]),S*kzs/(π/p["a"]),Tmap',"ky (π/a)","kz (π/a)","T(ky,kz)",:nipy_spectral, p["savedata"], p["path"])
 
+    println("Testing matrices.")
+    println("NEGF Transport 1D complete.")
 end

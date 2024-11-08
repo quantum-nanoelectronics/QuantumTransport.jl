@@ -51,7 +51,10 @@ function ℝtoℝ(df::DataFrame, n::Int, axisflag::Bool, title::String, plot_siz
 
     # Display the figure
     #display(fig)
-    output_file_path = joinpath(OUTPUT_DIR, "R_to_R.png")
+
+    filename = "R_to_R" * "_" * string(Dates.format(Dates.now(), "yyyy-mm-dd_HH.MM.SS")) * ".png"
+    output_file_path = string(joinpath(OUTPUT_DIR, filename))
+
     save(output_file_path, fig)
 
     return fig

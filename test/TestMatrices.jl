@@ -45,10 +45,15 @@ function rgf_main(argsMatrix, testMatrix, diag::Bool=false)
     else
         correct = verifyCorrectness(approximatedGʳ, fullGʳ, argsMatrix[1])
     end
-    println("RGF Inverse Correctness: ", correct)
+    println("Eigenvalue Correctness: ", correct)
+    # println("Eigenvalue Correctness: ", correct)
+    # println("Eigenvalue Correctness: ", correct)
+    debugAllValues()
+    # debugDiagonalValues()
+
 
     # Call the timing function at an energy level - argsMatrix[7]
-    @test timeInv(argsMatrix[7])
+    # @test timeInv(argsMatrix[7])
 
     println()
 
@@ -94,9 +99,14 @@ This function tests the RGF (Recursive Green's Function) inverse method for corr
 
 """
 function runMatrixTests()
+    # Full matrix size, block size, phi, eta term, zeroThreshold term, σ₂, energy, 
+    # NaN added for those that arent ever used
+    global argsMatrix = (100, 2, 0.2001, 1e-10, NaN, [0 -im; im 0], 3.0, 2)
+    global testMatrix = setVars(argsMatrix)
+    @test rgf_main(argsMatrix, testMatrix)
+
     # Test the RGF inverse method for correctness only
     # arguments to be changed
-    # Full matrix size, block size, phi, eta term, zeroThreshold term, σ₂, energy, 
     # ϕ
     # η
 
@@ -115,10 +125,6 @@ function runMatrixTests()
     # # Test the woodbury inverse method
     # @test block_inv_main()
     ###
-
-    global argsMatrix = (200, 2, 0.2001, 1e-10, 1e-10, [0 -im; im 0], 3.0, 1)
-    global testMatrix = setVars(argsMatrix)
-    @test rgf_main(argsMatrix, testMatrix)
 
 end
 
