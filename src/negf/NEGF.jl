@@ -38,12 +38,10 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
             if p["inv"] == "RGF"
                 # CSV.write("matrix-rgf.csv", DataFrame(matrix.matrix, :auto))
                 if topAndBottomRows
-                    # matrix = getInvRGF(matrix)
                     getInvRGF!(matrix)
                     # CSV.write("matrix-rgf-tb-out.csv", DataFrame(matrix.matrix, :auto))
                     return matrix.matrix
                 else
-                    # matrix = getInvRGFDiagonal(matrix)
                     getInvRGFDiagonal!(matrix)
                     # CSV.write("matrix-rgf-out.csv", DataFrame(matrix.matrix, :auto))
                     return matrix.matrix
