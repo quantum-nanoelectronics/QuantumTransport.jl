@@ -19,11 +19,7 @@ function driverTest(params)
     return true
 end
 
-if Base.active_project() != joinpath(BASE_DIR, "Project.toml")
-    error("Error: The currently active Julia environment ($(Base.active_project())) is incorrect. Please activate the QuantumTransport environment.")
-else
-    println("Using the correct environment: $(Base.active_project())")
-end
+println("Currently active Julia environment: $(Base.active_project())")
 
 printDict(runparams["transport"], "Transport Parameters")
 printDict(runparams["unitcell"], "Unitcell Parameters")

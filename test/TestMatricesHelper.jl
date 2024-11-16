@@ -67,10 +67,8 @@ end
 function approximatedGʳ(Energy::Float64)
     matrixCopy = deepcopy(testMatrix)
     matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
-
-    return getInvRGF!(matrixCopy).matrix
-    # getInvRGF!(matrixCopy)
-    # return matrixCopy.matrix
+    getInvRGF!(matrixCopy)
+    return matrixCopy.matrix
 
 end
 
