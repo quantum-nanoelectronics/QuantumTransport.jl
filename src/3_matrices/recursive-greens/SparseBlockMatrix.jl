@@ -1,5 +1,4 @@
-using SparseArrays
-using LinearAlgebra
+# SparseBlockMatrix.jl
 
 # Definition of a mutable structure to represent a block matrix
 mutable struct SparseBlockMatrix
@@ -92,43 +91,6 @@ function CreateSparseBlockMatrix(n::Int, blockSize::Int, phi::Float64)
     return SparseBlockMatrix(S, n, blockSize, numBlocks)
 end
 
-# Decomposes a matrix into its diagonal, top, and bottom blocks
-function decomposeMatrixOld(matrixObject::SparseBlockMatrix, str::String, i::Int, matrix::Matrix{ComplexF64}, sparseBuild::SparseBuilder)
-    threshold = 1e-10  # Define a small threshold
-    rowIndices = Vector{Int}()
-    colIndices = Vector{Int}()
-    values = Vector{ComplexF64}()
-
-    for col in 1:size(matrix, 2)
-        for row in 1:size(matrix, 1)
-            value = matrix[col, row] # this is done on purpose for the transpose
-            if abs(value) > threshold  # Check if the magnitude of the value is above the threshold
-                push!(rowIndices, row)
-                push!(colIndices, col)
-                push!(values, value)
-            end
-        end
-    end
-
-    offset = (i - 1) * matrixObject.blockSize
-    colIndices .+= offset
-    if str == "diagonal"
-        rowIndices .+= offset
-    elseif str == "top"
-        # No change to rowIndices
-        nothing
-    elseif str == "bottom"
-        rowIndices .+= matrixObject.matrixSize - matrixObject.blockSize
-    else
-        error("Invalid string")
-    end
-
-    append!(sparseBuild.rowIndices, rowIndices)
-    append!(sparseBuild.columnIndices, colIndices)
-    append!(sparseBuild.values, values)
-end
-
-# TESTING - better performance than original
 # Decomposes a matrix into its diagonal, top, and bottom blocks
 function decomposeMatrix(matrixObject::SparseBlockMatrix, str::String, n::Int, matrix::Matrix{ComplexF64}, sparseBuild::SparseBuilder)
     threshold = 1e-10
