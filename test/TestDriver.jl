@@ -19,6 +19,8 @@ function driverTest(params)
     return true
 end
 
+println("Currently active Julia environment: $(Base.active_project())")
+
 printDict(runparams["transport"], "Transport Parameters")
 printDict(runparams["unitcell"], "Unitcell Parameters")
 printDict(runparams["supercell"], "Supercell Parameters")

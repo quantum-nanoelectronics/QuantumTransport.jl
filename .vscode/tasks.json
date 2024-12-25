@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run Quantum Transport",  
+            "type": "shell",        
+            "command": "julia",     
+            "args": [
+                "--project=${workspaceFolder}",    
+                "${workspaceFolder}/test/TestDriver.jl"  
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+            },
+            "detail": "Run the Julia Driver script using the launch configuration"
+        }
+    ]
+}
