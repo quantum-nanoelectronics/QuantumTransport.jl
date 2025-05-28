@@ -50,7 +50,7 @@ function rgf_main(argsMatrix, testMatrix, diag::Bool=false)
     # debugDiagonalValues()
 
 
-    # Call the timing function at an energy level - argsMatrix[7]
+    # Call the timing function at an energy level: argsMatrix[7]
     # @test timeInv(argsMatrix[7])
     timeInv(argsMatrix[7])
 

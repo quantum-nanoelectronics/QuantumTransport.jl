@@ -71,7 +71,6 @@ function approximatedGʳ(Energy::Float64)
     matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
     getInvRGF!(matrixCopy)
     return matrixCopy.matrix
-
 end
 
 function fullGʳ(Energy::Float64)
@@ -85,22 +84,27 @@ end
 
 # Function to time the two methods of computing the inverse of a block matrix.
 function timeInv(Energy::Float64)
-    matrixCopy = deepcopy(testMatrix)
-    # matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
+    println("Running timeInv for Energy: ", Energy)
+    matrixCopy1 = deepcopy(testMatrix)
+    matrixCopy1.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
+    matrixCopy2 = deepcopy(testMatrix)
+    matrixCopy2.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
 
     # Benchmark the computation of the inverse of the dense matrix using built-in inversion
-    juliaInvBenchmark = @benchmark getInvJulia!($matrixCopy)
+    juliaInvBenchmark = @benchmark getInvJulia!($matrixCopy1)
 
     # Benchmark the computation of the inverse of the block matrix using RGF method
-    rgfInvBenchmark = @benchmark getInvRGF!($matrixCopy)
+    rgfInvBenchmark = @benchmark getInvRGF!($matrixCopy2)
 
     # Extract median times for a fair comparison
     juliaInvTime = median(juliaInvBenchmark.times)  # Median time in nanoseconds
     rgfInvTime = median(rgfInvBenchmark.times)      # Median time in nanoseconds
 
-    println("Julia Inverse Median Time: $(juliaInvTime / 1e6) ms")
+    println("Julia Inverse")
+    println("Median Time: $(juliaInvTime / 1e6) ms")
     display(juliaInvBenchmark)
-    println("RGF Inverse Median Time: $(rgfInvTime / 1e6) ms")
+    println("RGF Inverse")
+    println("Median Time: $(rgfInvTime / 1e6) ms")
     display(rgfInvBenchmark)
 
     #This timing doesnt always pass for smaller matrices
