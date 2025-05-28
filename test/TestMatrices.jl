@@ -46,17 +46,15 @@ function rgf_main(argsMatrix, testMatrix, diag::Bool=false)
         correct = verifyCorrectness(approximatedGʳ, fullGʳ, argsMatrix[1])
     end
     println("Eigenvalue Correctness: ", correct)
-    # println("Eigenvalue Correctness: ", correct)
-    # println("Eigenvalue Correctness: ", correct)
     # debugAllValues()
     # debugDiagonalValues()
 
 
     # Call the timing function at an energy level - argsMatrix[7]
     # @test timeInv(argsMatrix[7])
+    timeInv(argsMatrix[7])
 
     println()
-
     return correct
 end
 

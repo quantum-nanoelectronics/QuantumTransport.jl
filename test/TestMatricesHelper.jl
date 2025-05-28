@@ -69,7 +69,7 @@ function approximatedGʳ(Energy::Float64)
     println("Running approximatedGʳ for Energy: ", Energy)
     matrixCopy = deepcopy(testMatrix)
     matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
-    getInvRGF!($matrixCopy)
+    getInvRGF!(matrixCopy)
     return matrixCopy.matrix
 
 end
@@ -78,7 +78,7 @@ function fullGʳ(Energy::Float64)
     println("Running fullGʳ for Energy: ", Energy)
     matrixCopy = deepcopy(testMatrix)
     matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
-    getInvJulia!($matrixCopy)
+    getInvJulia!(matrixCopy)
     return matrixCopy.matrix
 end
 
@@ -99,11 +99,12 @@ function timeInv(Energy::Float64)
     rgfInvTime = median(rgfInvBenchmark.times)      # Median time in nanoseconds
 
     println("Julia Inverse Median Time: $(juliaInvTime / 1e6) ms")
+    display(juliaInvBenchmark)
     println("RGF Inverse Median Time: $(rgfInvTime / 1e6) ms")
+    display(rgfInvBenchmark)
 
     #This timing doesnt always pass for smaller matrices
-    # return juliaInvTime > rgfInvTime
-    return true
+    return juliaInvTime > rgfInvTime
 end
 
 
