@@ -42,7 +42,7 @@ jobs:
       - uses: julia-actions/julia-runtest@v1
       - uses: actions/upload-artifact@v4
         with:
-          name: data-output
+          name: data-output-${{ matrix.os }}
           path: ./data-output
 
 
