@@ -58,24 +58,27 @@ end
 
 
 function diagApproximatedGʳ(Energy::Float64)
+    println("Running diagApproximatedGʳ for Energy: ", Energy)
     matrixCopy = deepcopy(testMatrix)
     matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
-    getInvRGFDiagonal!(matrixCopy)
+    display(@benchmark getInvRGFDiagonal!($matrixCopy))
     return matrixCopy.matrix
 end
 
 function approximatedGʳ(Energy::Float64)
+    println("Running approximatedGʳ for Energy: ", Energy)
     matrixCopy = deepcopy(testMatrix)
     matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
-    getInvRGF!(matrixCopy)
+    display(@benchmark getInvRGF!($matrixCopy))
     return matrixCopy.matrix
 
 end
 
 function fullGʳ(Energy::Float64)
+    println("Running fullGʳ for Energy: ", Energy)
     matrixCopy = deepcopy(testMatrix)
     matrixCopy.matrix = (Energy + argsMatrix[4]) * I - testMatrix.matrix
-    getInvJulia!(matrixCopy)
+    display(@benchmark getInvJulia!($matrixCopy))
     return matrixCopy.matrix
 end
 
