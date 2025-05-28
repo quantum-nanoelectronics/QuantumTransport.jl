@@ -49,12 +49,6 @@ function rgf_main(argsMatrix, testMatrix, diag::Bool=false)
     # debugAllValues()
     # debugDiagonalValues()
 
-
-    # Call the timing function at an energy level: argsMatrix[7]
-    # @test timeInv(argsMatrix[7])
-    timeInv(argsMatrix[7])
-
-    println()
     return correct
 end
 
@@ -124,6 +118,12 @@ function runMatrixTests()
     # @test block_inv_main()
     ###
 
+    global argsMatrix = (1000, 10, 0.2001, 1e-10, NaN, [0 -im; im 0], 3.0, 1)
+    global testMatrix = setVars(argsMatrix)
+
+    # Call the timing function at an energy level: argsMatrix[7]
+    # @test timeInv(argsMatrix[7])
+    timeInv(argsMatrix[7])
 end
 
 runMatrixTests()
