@@ -43,7 +43,7 @@ function setVars(args)
         # block size of 2 only?
         println("Creating first tested test matrix")
         retVal = CreateSparseBlockMatrix(args[1], args[2], args[3])
-    elseif args[8] == 1
+    elseif args[8] == 1 
         # effective mass test matrix.
         println("Creating effective mass test matrix")
         retVal = ToSparseBlockMatrix(sparse(effectiveMass(args[1] ÷ args[2], args[2])), args[1], args[2])
