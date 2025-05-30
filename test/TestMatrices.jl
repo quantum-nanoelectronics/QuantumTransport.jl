@@ -91,10 +91,12 @@ This function tests the RGF (Recursive Green's Function) inverse method for corr
 
 """
 function runMatrixTests()
-    # Full matrix size, block size, phi, eta term, zeroThreshold term, σ₂, energy, 
     # NaN added for those that arent ever used
+
+    # Full matrix size, block size, phi, eta term, zeroThreshold term, σ₂, energy, type of matrix
     global argsMatrix = (100, 2, 0.2001, 1e-10, NaN, [0 -im; im 0], 3.0, 2)
     global testMatrix = setVars(argsMatrix)
+    
     @test rgf_main(argsMatrix, testMatrix)
 
     # Test the RGF inverse method for correctness only
@@ -102,27 +104,27 @@ function runMatrixTests()
     # ϕ
     # η
 
-    ### 
-    # Commented for now for time purposes
+    ### Commented out for now for time purposes
+    # 
     # for matrixIndex in 0:2
-    #     global argsMatrix = (1000, 2, 0.2001, 1e-10, 1e-10, [0 -im; im 0], 3.0, matrixIndex)
+    #     global argsMatrix = (100, 2, 0.2001, 1e-10, 1e-10, [0 -im; im 0], 3.0, matrixIndex)
     #     global testMatrix = setVars(argsMatrix)
 
     #     # Test the rgf method
     #     @test rgf_main(argsMatrix, testMatrix)
 
     #     # Test the method that only returns the matrix with inverted diagonal blocks
-    #     # @test rgf_main(argsMatrix, testMatrix, true)
+    #     @test rgf_main(argsMatrix, testMatrix, true)
     # end
-    # # Test the woodbury inverse method
+    # Test the woodbury inverse method
     # @test block_inv_main()
-    ###
+    #
+    ### End of commented out section
 
     global argsMatrix = (1000, 10, 0.2001, 1e-10, NaN, [0 -im; im 0], 3.0, 1)
     global testMatrix = setVars(argsMatrix)
 
     # Call the timing function at an energy level: argsMatrix[7]
-    # @test timeInv(argsMatrix[7])
     timeInv(argsMatrix[7])
 end
 

@@ -200,7 +200,6 @@ end
 # Function to compute forward and backward generators for a block matrix.
 function computeGenerators(matrixObject::SparseBlockMatrix)
     @memoize Dict function inv(A)
-        println("Not memoized, running!")
         return LinearAlgebra.inv(A)
     end
     # Initialize forward and backward generators as arrays of zero matrices.
