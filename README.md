@@ -1,25 +1,23 @@
 # QuantumTransport.jl
 
-QuantumTransport.jl is a Julia package designed for simulating quantum transport in nano-electronic devices.
+QuantumTransport.jl is a Julia package designed for simulating quantum transport phenomena in nanoscale electronic devices.
 
 ## Status
 
-CI Status: 
+[![CI Status](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions)
 
-[![Build Status](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
-View [more](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions) CI on GitHub Actions
-
+This package supports Julia 1.9.3 and above on Linux, MacOS, and Windows.
 
 ## Installation
 
-To install QuantumTransport from the Julia's REPL, type `]` to enter the Pkg REPL and run:
+To install QuantumTransport.jl, open the Julia REPL, type `]` to enter package mode, and run:
 
 ```julia
 pkg> add QuantumTransport
 ```
 
-Or, equivalently:
+Alternatively, using the `Pkg` API:
 
 ```julia
 julia> import Pkg
@@ -29,7 +27,7 @@ julia> Pkg.add("QuantumTransport")
 
 ## Usage
 
-After installing QuantumTransport, you can start using the package by:
+After [installing](#installation) QuantumTransport, you can start using the package with:
 
 ```julia
 using QuantumTransport
@@ -37,22 +35,23 @@ using QuantumTransport
 # Your simulation code goes here
 ```
 
-For detailed examples and usage instructions, please refer to the `examples` directory.
+See the `examples/` directory for real-world simulations and usage patterns.
 
-## Questions and Contributions
+## Contributing and Support
 
-Contributions are welcome, as are feature requests! If you'd like to contribute, please open a pull request and use a feature branch. Please open an [issue](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/issues) if you encounter any problems with the package. 
+We welcome contributions! Please open a new [pull request](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/pulls) from a feature branch. 
 
-### Running Tests for Developers
+If you have a bug report, feature request, or general question, please open an [issue](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/issues).
 
-To test QuantumTransport from the Julia's REPL after cloning this repository, type `]` to enter the Pkg REPL and run:
+### Running Tests
+
+If you're developing the package locally, you can run the test suite from the Julia Pkg REPL:
+
 
 ```julia
-pkg> activate /path/to/your/QuantumTransport.jl/
+pkg> activate /your/path/to/the/cloned/QuantumTransport.jl/.
 
 pkg> instantiate
 
 pkg> test
 ```
-
-This package was built on Julia 1.9.3. 
