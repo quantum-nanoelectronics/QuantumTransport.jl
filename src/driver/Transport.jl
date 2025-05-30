@@ -77,6 +77,4 @@ function NEGF_Transport_1D(p::Dict)
     println("Testing matrices.")
     println("NEGF Transport 1D complete.")
 
-    # TODO this is used to get the current github tests to pass, remove later
-    save_data(:ℝ_to_ℝ, p["path"], "transmission.csv", ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=10)
 end

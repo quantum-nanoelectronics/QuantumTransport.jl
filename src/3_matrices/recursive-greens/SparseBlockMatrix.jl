@@ -199,7 +199,9 @@ end
 
 # Function to compute forward and backward generators for a block matrix.
 function computeGenerators(matrixObject::SparseBlockMatrix)
-    @memoize inv(A::Matrix{Complex{Float64}}) = (LinearAlgebra.inv(A))
+    @memoize Dict function inv(A)
+        return LinearAlgebra.inv(A)
+    end
     # Initialize forward and backward generators as arrays of zero matrices.
     forwardGen = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]
     backwardGen = [zeros(Complex{Float64}, matrixObject.blockSize, matrixObject.blockSize) for i in 1:matrixObject.numBlocks]

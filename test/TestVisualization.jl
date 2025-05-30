@@ -5,8 +5,8 @@ using Test
 
 function runVisualizationTests()
     readDir = OUTPUT_DIR 
-    filename = "transmission.csv"  # specify the CSV file name
-
+    filename = first(filter(f -> startswith(f, "transmission"), readdir(readDir)))
+    println("filename= ", filename)
     file_path = joinpath(readDir, filename)
     fig = plot(readDir, filename)
     # filename = "CNTpositions.csv"
