@@ -4,11 +4,11 @@ This documentation describes the input file used to define device geometry, simu
 
 ---
 
-## 📦 Module: `geometry.jl`
+## Module: `geometry.jl`
 
 Provides functions to determine material type based on position coordinates.
 
-### 🧪 Tutorial: Material Determination
+### Tutorial: Material Determination
 
 To determine the material type at a given point:
 
@@ -24,14 +24,14 @@ To determine the material type at a given point:
 
 3. The result is a `String`: either `"insulator"` or `"GaAs"`.
 
-### ⚙️ Constants
+### Constants
 
 - `geometry_params`: Named tuple of device geometry settings:
   - `A`: Unit cell lattice vector matrix
   - `nx`, `ny`, `nz`: Number of tiled unit cells in each dimension
   - `prune`: Dimensions to prune
 
-### 🔧 Example Code
+### Example Code
 
 ```julia
 module geometry
@@ -61,7 +61,7 @@ end  # module
 
 ---
 
-## 📦 Module: `runs.jl`
+## Module: `runs.jl`
 
 Defines parameters for different types of simulations.
 
@@ -136,11 +136,11 @@ run_simulation(runparams)
 
 ---
 
-## 📦 Module: `materials.jl`
+## Module: `materials.jl`
 
 Provides functionality to compute material-specific hopping terms.
 
-### 🧪 Example Usage
+### Example Usage
 
 1. Define material parameters:
    ```julia
