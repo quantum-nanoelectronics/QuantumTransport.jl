@@ -8,6 +8,8 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "API" => "api.md",
+        "geometry.jl" => "geometry.md",
+        "materials.jl" => "materials.md",
     ],
 )
 
