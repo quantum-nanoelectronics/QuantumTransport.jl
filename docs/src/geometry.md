@@ -2,6 +2,8 @@
 
 This file provides functions for determining the material type based on position coordinates.
 
+---
+
 ## Tutorial
 
 ### Example: Material Determination

@@ -1,7 +1,8 @@
-
 # runs.jl
 
 This file contains parameters for configuring different types of simulations.
+
+---
 
 ## Tutorial
 
@@ -90,5 +91,3 @@ To run simulations with different configurations, follow these steps:
 ## Constants
 
 - `path`: Path to the directory where simulation data will be stored.
-
----

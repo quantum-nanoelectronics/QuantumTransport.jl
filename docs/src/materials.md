@@ -2,6 +2,8 @@
 
 This file contains functions for computing hopping terms and other material-specific properties.
 
+---
+
 ## Tutorial
 
 1. **Define the parameters for the material using a named tuple `p`:**
@@ -22,10 +24,9 @@ This file contains functions for computing hopping terms and other material-spec
     - `NNs`: Vector of Hopping objects representing nearest neighbor hoppings.
     - `ia`: Vector representing the indices of the initial lattice site.
 
+---
 
 ## Functions
-
----
 
 ### Metal Hopping
 
