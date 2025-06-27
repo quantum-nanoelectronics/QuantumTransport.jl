@@ -10,6 +10,7 @@ makedocs(
         "API" => "api.md",
         "geometry.jl" => "geometry.md",
         "materials.jl" => "materials.md",
+        "runs.jl" => "runs.md",
     ],
 )
 

@@ -1,6 +1,29 @@
-# Materials Documentation
+# materials.jl
 
 ## Materials
+
+Provides functionality to compute material-specific hopping terms.
+
+### Example Usage
+
+1. Define material parameters:
+   ```julia
+   p = ( ... )  # Named tuple
+   ```
+
+2. Create a container for hopping terms:
+   ```julia
+   NNs = Vector{Hopping}()
+   ```
+
+3. Call the material-specific hopping function:
+   ```julia
+   metalHopping(p, NNs, ia)
+   ```
+
+- `p`: Named tuple of material parameters
+- `NNs`: Vector of `Hopping` objects
+- `ia`: Indices of the initial lattice site
 
 ### Metal Hopping
 
