@@ -8,7 +8,7 @@ using InteractiveUtils
 using Pkg
 
 # ╔═╡ e628282c-e5a5-4efe-bf59-7db4c30e0f49
-Pkg.add(url="https://github.com/quantum-nanoelectronics/QuantumTransport.jl", rev="main")
+Pkg.add(url="https://github.com/quantum-nanoelectronics/QuantumTransport.jl", rev="dev")
 
 # ╔═╡ 9bb45983-9b5a-4215-8e91-72617e570815
 Pkg.add("WGLMakie")
