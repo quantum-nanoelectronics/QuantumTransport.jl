@@ -1,6 +1,6 @@
 # geometry.jl
 
-This module provides functions for determining the material type based on position coordinates.
+This file provides functions for determining the material type based on position coordinates.
 
 ## Tutorial
 
@@ -24,11 +24,11 @@ To determine the material type based on position coordinates, follow these steps
 ## Constants
 
 - `geometry_params`: Named tuple containing parameters for defining the geometry of the device.
-    - `A`: Matrix of unit cell lattice vectors.
-    - `nx`: Number of times to tile the cell over space in the x-direction.
-    - `ny`: Number of times to tile the cell over space in the y-direction.
-    - `nz`: Number of times to tile the cell over space in the z-direction.
-    - `prune`: List of dimensions to prune.
+- `A`: Matrix of unit cell lattice vectors.
+- `nx`: Number of times to tile the cell over space in the x-direction.
+- `ny`: Number of times to tile the cell over space in the y-direction.
+- `nz`: Number of times to tile the cell over space in the z-direction.
+- `prune`: List of dimensions to prune.
 
 ### Example Implementation
 

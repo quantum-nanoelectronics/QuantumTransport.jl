@@ -1,6 +1,6 @@
 # materials.jl
 
-This module contains functions for computing hopping terms and other material-specific properties.
+This file contains functions for computing hopping terms and other material-specific properties.
 
 ## Tutorial
 
