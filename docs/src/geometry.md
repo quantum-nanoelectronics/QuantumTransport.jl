@@ -1,47 +1,41 @@
 # geometry.jl
 
-This documentation describes the input file used to define device geometry, simulation parameters, and material properties in a quantum transport simulation framework.
+This module provides functions for determining the material type based on position coordinates.
+
+## Tutorial
+
+### Example: Material Determination
+
+To determine the material type based on position coordinates, follow these steps:
+
+1. **Define the position coordinates using a `Vector{Float64}`:**
+    ```julia
+    R = [x, y, z]
+    ```
+
+2. **Call the `geometry` function to determine the material type:**
+    ```julia
+    material_type = geometry(R)
+    ```
+    The `geometry` function returns a string indicating the material type (`"insulator"` or `"GaAs"`).
 
 ---
 
-## Input File: `geometry.jl`
+## Constants
 
-Provides functions to determine material type based on position coordinates.
+- `geometry_params`: Named tuple containing parameters for defining the geometry of the device.
+    - `A`: Matrix of unit cell lattice vectors.
+    - `nx`: Number of times to tile the cell over space in the x-direction.
+    - `ny`: Number of times to tile the cell over space in the y-direction.
+    - `nz`: Number of times to tile the cell over space in the z-direction.
+    - `prune`: List of dimensions to prune.
 
-### Tutorial: Material Determination
-
-To determine the material type at a given point:
-
-1. Define position coordinates:
-   ```julia
-   R = [x, y, z]  # Vector{Float64}
-   ```
-
-2. Call the geometry function:
-   ```julia
-   material_type = geometry(R)
-   ```
-
-3. The result is a `String`: either `"insulator"` or `"GaAs"`.
-
-### Constants
-
-- `geometry_params`: Named tuple of device geometry settings:
-- `A`: Unit cell lattice vector matrix
-- `nx`, `ny`, `nz`: Number of tiled unit cells in each dimension
-- `prune`: Dimensions to prune
-
-### Example Code
+### Example Implementation
 
 ```julia
-module geometry
-
-using QuantumTransport
-export geometry, geometry_params
-
 function geometry(R::Vector{Float64})
-    x, y, z = R
-    if (x < 10 * nm || x > 50 * nm)
+    x = R[1]; y = R[2]; z = R[3];
+    if (x < 10*nm || x > 50*nm)
         return "insulator"
     else
         return "GaAs"
@@ -49,12 +43,10 @@ function geometry(R::Vector{Float64})
 end
 
 geometry_params = (
-    A = 2.866 * nm * I(3),
-    nx = 50,
-    ny = 5,
-    nz = 1,
-    prune = ["x", "y", "z"],
+    A = 2.866 * nm * I(3),   # Matrix of unit cell lattice vectors
+    nx = 50,                 # Number of times to tile the cell over space in the x-direction
+    ny = 5,                  # Number of times to tile the cell over space in the y-direction
+    nz = 1,                  # Number of times to tile the cell over space in the z-direction
+    prune = ["x", "y", "z"], # List of dimensions to prune
 )
-
-end  # module
 ```

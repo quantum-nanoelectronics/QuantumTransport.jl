@@ -1,6 +1,8 @@
 using Documenter
 using QuantumTransport
 
+Documenter.DocMeta.setdocmeta!(QuantumTransport, :DocTestSetup, :(using QuantumTransport); recursive=true)
+
 makedocs(
     sitename = "QuantumTransport.jl",
     modules = [QuantumTransport],

@@ -1,7 +1,13 @@
 # API
+```@meta
+CurrentModule = QuantumTransport
+```
 
-```@docs
-QuantumTransport.InputOutputModule.get_data
-QuantumTransport.WoodburyModule.block_inversion
-QuantumTransport.WoodburyModule.generate_matrix
+```@index
+```
+
+<!-- Add more modules here once additional docstrings are added. -->
+
+```@autodocs
+Modules = [QuantumTransport.InputOutputModule, QuantumTransport.WoodburyModule, QuantumTransport]
 ```

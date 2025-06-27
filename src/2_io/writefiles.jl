@@ -5,7 +5,38 @@ using Serialization
 using Base64
 using Base.Filesystem: mktemp  # For creating a temporary file
 
+"""
+    save_data(typeofdata::Symbol, path::String, filename::String, axis_labels::Vector{String}, data::Vector{V}; kwargs...) where V <: AbstractVector
 
+Saves data to a CSV file with metadata and headers. The first line of the CSV contains serialized metadata, the second line contains column headers, and subsequent lines contain the data.
+
+# Arguments
+- `typeofdata::Symbol`: Specifies the type of data (e.g., `:ℝ_to_ℝ`, `:ℝ³_to_ℝ`, or `"bandstructure"`).
+- `path::String`: Directory path where the file will be saved.
+- `filename::String`: Name of the CSV file.
+- `axis_labels::Vector{String}`: Labels for the data columns (e.g., axis names).
+- `data::Vector{V}`: Data to be saved, where each element is a vector corresponding to a column.
+- `kwargs...`: Optional keyword arguments. Supported:
+    - `row_input`: If `true`, preprocesses data as row input.
+
+# Metadata Format
+The metadata (first line of the CSV) is a serialized and base64-encoded Julia object containing:
+- Type of plot/data
+- Number of entries
+- Codomain dimensionality
+- Additional keyword arguments
+
+# Data Format
+- Second line: Column headers (from `axis_labels`)
+- Third line onwards: Data rows
+
+# Supported `typeofdata` Values
+- `:ℝ_to_ℝ`: 1D to 1D data (e.g., x and y columns)
+- `:ℝ³_to_ℝ`: 3D to 1D data (e.g., x, y, z, and C columns)
+- `"bandstructure"`: Special handling for band structure data
+
+# Example
+"""
 function save_data(typeofdata::Symbol, path::String, filename::String, axis_labels::Vector{String}, data::Vector{V}; kwargs...) where V <: AbstractVector
     # this code will save data in the following format, where the first line of a CSV is the metadata
     # the second line would be the headers for the data
