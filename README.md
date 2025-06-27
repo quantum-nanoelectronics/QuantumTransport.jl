@@ -1,79 +1,57 @@
 # QuantumTransport.jl
 
-QuantumTransport.jl is a Julia package designed for simulating quantum transport in nano-electronic devices. 
-
-## Table of Contents
-- [Installation](#installation)
-- [Usage](#usage)
-- [For Developers](#for-developers)
-- [Running Tests](#running-tests)
-- [Contributing](#contributing)
-- [License](#license)
-- [Citations](#citations)
-- [Status](#status)
+QuantumTransport.jl is a Julia package designed for simulating quantum transport phenomena in nanoscale electronic devices.
 
 ## Status
 
-The current build status of the main branch is:
+[![CI Status](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions)
 
-[![Build Status](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/actions/workflows/CI.yml?query=branch%3Amain)
+
+This package supports Julia 1.9.3 and above on Linux, MacOS, and Windows.
 
 ## Installation
 
-To install QuantumTransport, open Julia's interactive session (REPL) and run the following commands:
+To install QuantumTransport.jl, open the Julia REPL, type `]` to enter package mode, and run:
 
 ```julia
-using Pkg
-Pkg.add("QuantumTransport")
+pkg> add QuantumTransport
+```
+
+Alternatively, using the `Pkg` API:
+
+```julia
+julia> import Pkg
+
+julia> Pkg.add("QuantumTransport")
 ```
 
 ## Usage
 
-After installing QuantumTransport, you can start simulating quantum transport by importing the package:
+After [installing](#installation) QuantumTransport, you can start using the package with:
 
 ```julia
 using QuantumTransport
+
 # Your simulation code goes here
 ```
 
-For detailed examples and usage instructions, please refer to the `examples` directory.
+See the `examples/` directory for real-world simulations and usage patterns.
 
-## For Developers
+## Contributing and Support
 
-If you are interested in contributing to QuantumTransport, follow these steps to set up your development environment.
+We welcome contributions! Please open a new [pull request](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/pulls) from a feature branch. 
 
-### Setting Up Your Development Environment
-
-1. Install Julia version 1.9.3, the last stable release.
-2. Clone this repository and navigate to the package's directory.
+If you have a bug report, feature request, or general question, please open an [issue](https://github.com/quantum-nanoelectronics/QuantumTransport.jl/issues).
 
 ### Running Tests
 
-To ensure QuantumTransport works as expected, you can run tests using the following steps in the cloned directory:
+If you're developing the package locally, you can run the test suite from the Julia Pkg REPL:
 
-1. Open Julia's REPL.
-2. Enter the Package Manager by typing `]`.
-3. Activate the project environment with `activate .`.
-4. Run all tests by executing the `test` command.
-
-Example of running tests in the REPL:
 
 ```julia
-activate .
-test
-```
+pkg> activate /your/path/to/the/cloned/QuantumTransport.jl/.
 
-## Contributing
+pkg> instantiate
 
-Contributions are welcome! If you'd like to contribute, please fork the repository and use a feature branch. Pull requests are warmly welcome.
-
-## License
-
-QuantumTransport.jl is released under the MIT License. See the LICENSE file for more details.
-
-## Citations
-
-If you use QuantumTransport.jl in your research, please cite it as follows:
-```
-# Citation details here
+pkg> test
 ```
