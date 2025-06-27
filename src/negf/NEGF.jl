@@ -74,7 +74,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
                     H_eff =  H(k) + Σ_contacts + Dₘ .* G
                     G = mixing * inv((E + im * p["η"]) * I(p["n"]) - H_eff, true) .+ (1 - mixing) * G # gets diagonal only
                     error = norm((G .- Gprev), 1) / norm(G, 1)
-                    println("Error = $error")
+                    # println("Error = $error")
                 end
             else
                 # H_eff = CreateSparseBlockMatrix(100, 2, 0.2001)

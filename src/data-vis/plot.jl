@@ -69,8 +69,10 @@ function ℝ_to_ℝ(df::DataFrame, n::Int; kwargs...)
     if get(kwargs, :flip_axis, false)
         xlabel, ylabel = ylabel, xlabel
     end
-    println(methods(lines!))
-    println(methods(Axis))
+    # methods available for Axis and lines! 
+    # println(methods(lines!))
+    # println(methods(Axis))
+
     ax = Axis(fig[1, 1]; xlabel = xlabel, ylabel = ylabel, filtered_axis_kwargs...) 
     
     # not sure why we need a color_index here

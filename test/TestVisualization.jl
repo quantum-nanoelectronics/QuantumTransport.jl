@@ -5,7 +5,13 @@ using Test
 
 function runVisualizationTests()
     readDir = OUTPUT_DIR 
-    filename = first(filter(f -> startswith(f, "transmission"), readdir(readDir)))
+    filename = first(
+        sort(
+            filter(f -> startswith(f, "transmission"), readdir(readDir));
+            by = f -> stat(joinpath(readDir, f)).mtime,
+            rev = true
+        )
+    )
     println("filename= ", filename)
     file_path = joinpath(readDir, filename)
     fig = plot(readDir, filename)

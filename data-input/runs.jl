@@ -19,10 +19,18 @@ A_field(R::Vector{Float64}) = [0.0, 0.0, 0.0]
 runparams = Dict(
 	"path" => OUTPUT_DIR,
 	"material_hamiltonian" => material_hamiltonians,
-	"material_params" => Dict("t" => 1.0, "ε₀" => 1.0, "site_positions"=>site_positions),
+	"material_params" => Dict(
+		"t" => 1.0,
+		"ε₀" => 1.0,
+		"site_positions" => site_positions
+	),
     # Order of matrix_params: full matrix size, block size, phi, eta term, zeroThreshold term, σ₂, energy, 
 	# (1000, 2, 0.2001, 1e-10, 1e-10, [0 -im; im 0], 3.0, matrixIndex)
-	"matrix_params" => Dict("inv" => "RGF", "ϕ" => 0.0, "errorThreshold" => 1e-10),
+	"matrix_params" => Dict(
+		"inv" => "RGF",
+		"ϕ" => 0.0,
+		"errorThreshold" => 1e-10
+	),
 
 	# A field
 	"A_field" => A_field,
@@ -31,13 +39,55 @@ runparams = Dict(
 	# Comment out one of the dictionary entries below to not run the assocuated routine.
 
 	# so, for runs looking at the electronic properties of just one unit cell
-	"unitcell" => Dict("runtype" => "unitcell", "geometry" => devicegeometry, "material"=> "metal", "bands" => true, "bands_project" => [σ[1]], "save"=>[:bandstructure], "poisson" => false, "DOS" => false, "klist" => ["Γ","X₁","M","X₂","Γ","X₃"], "numInterpolations" => 64),
+	"unitcell" => Dict(
+		"runtype" => "unitcell",
+		"geometry" => devicegeometry,
+		"material" => "metal",
+		"bands" => true,
+		"bands_project" => [σ[1]],
+		"save" => [:bandstructure],
+		"poisson" => false,
+		"DOS" => false,
+		"klist" => ["Γ", "X₁", "M", "X₂", "Γ", "X₃"],
+		"numInterpolations" => 64
+	),
 	
 	# and for runs looking at the conductance of a large supercell
-	"transport" => Dict("runtype" => "transport", "geometry" => devicegeometry, "ΔV" => 0.001, "μ" => 0.0*eV, "T" => 300, "η" => 1e-4, "save" => [:transmission, :conductance], "electrodeMagnetization" => false, "deviceMagnetization" => false, "Gʳinv_method" => :RGF, "D_spin" => 0.000001*eV, "D_momentum" => 0.000005*eV, "kspace"=>false, "E_samples" => [E for E = 3.0:1.0:7.0], "electrodeMaterial" => "metal"),
+	"transport" => Dict(
+		"runtype" => "transport",
+		"geometry" => devicegeometry,
+		"ΔV" => 0.001,
+		"μ" => 0.0*eV,
+		"T" => 300,
+		"η" => 1e-4,
+		"save" => [:transmission, :conductance],
+		"electrodeMagnetization" => false,
+		"deviceMagnetization" => false,
+		"Gʳinv_method" => :RGF,
+		"D_spin" => 0.000001*eV,
+		"D_momentum" => 0.000005*eV,
+		"kspace" => false,
+		"E_samples" => [E for E = 3:0.01:9],
+		"electrodeMaterial" => "metal",
+		# "ϵ_rand_strength" => 0.2
+	),
 
 	# and for runs where we want to slap a bunch of unit cells together and get the scattering-corrected electronic properties
-	"supercell" => Dict("runtype" => "supercell", "geometry" => devicegeometry, "bands_project" => [σ[1],σ[2]], "poisson"=>false, "μ" => 0.0*eV, "T" => 300, "η" => 1E-3*eV, "save" => [:unfoldedbands], "density_project" => [I(2),[σ[1],σ[2],σ[3]]], "Gʳinv_method" => :RGF, "D_dephasing" => 0.001*eV, "D_spin" => 0.0001*eV, "D_momentum" => 0.001*eV)
+	"supercell" => Dict(
+		"runtype" => "supercell",
+		"geometry" => devicegeometry,
+		"bands_project" => [σ[1], σ[2]],
+		"poisson" => false,
+		"μ" => 0.0*eV,
+		"T" => 300,
+		"η" => 1E-3*eV,
+		"save" => [:unfoldedbands],
+		"density_project" => [I(2), [σ[1], σ[2], σ[3]]],
+		"Gʳinv_method" => :RGF,
+		"D_dephasing" => 0.001*eV,
+		"D_spin" => 0.0001*eV,
+		"D_momentum" => 0.001*eV
+	)
 )
 
 # all parameters of the simulation must be passed in through the runparams, and now we will ensure they are added
@@ -83,7 +133,17 @@ function addUnitcellParams!(runparams)
 		params = runparams["unitcell"]
 
 		# added this line for now
-		merge!(params, Dict("A"=>geometry_params["A"]), Dict("nx" => 1, "ny" => 1, "nz" => 1, "prune"=> []), runparams["material_params"]) 
+		merge!(
+			params,
+			Dict("A" => geometry_params["A"]),
+			Dict(
+				"nx" => 1,
+				"ny" => 1,
+				"nz" => 1,
+				"prune" => []
+			),
+			runparams["material_params"]
+		)
 
 		params["n"] = n_unitcell
 	end
