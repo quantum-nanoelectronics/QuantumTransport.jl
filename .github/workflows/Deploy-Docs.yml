@@ -1,0 +1,26 @@
+name: Deploy Docs
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+
+jobs:
+  docs:
+    name: Build and deploy documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: 1.9.3
+      - name: Develop QuantumTransport
+        run: julia --project=docs -e 'import Pkg; Pkg.develop(path=".")'
+      - name: Install Documenter dependencies
+        run: julia --project=docs -e 'import Pkg; Pkg.instantiate()'
+      - name: Build and deploy docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: julia --project=docs docs/make.jl
