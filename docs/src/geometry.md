@@ -65,7 +65,7 @@ end  # module
 
 Defines parameters for different types of simulations.
 
-### 🧪 Tutorial: Running Simulations
+### Tutorial: Running Simulations
 
 1. Set the output path:
    ```julia
