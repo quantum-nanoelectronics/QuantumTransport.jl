@@ -57,14 +57,12 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
         end
 
         function Gʳ(E::Float64)
-            println("Running Gʳ for ", E)
+            # println("Running Gʳ for ", E)
             # CSV.write("hamiltonian-rgf.csv", DataFrame(H(k).matrix, :auto))
             Σ_contacts = totΣk(E, k)
             H_eff = H(k) + Σ_contacts
             if haskey(p, "scattering")
-                println("Running Gʳ with scattering")
-                # The code in this if statement has been changed to implement the new matrix inversion methods, 
-                # but not tested due to scattering not implemented in p["scattering"]
+                # println("Running Gʳ with scattering")
                 G = inv((E + im * p["η"]) * I(p["n"]) - H_eff, false) # gets top, bottom, diag
                 error = 1
                 mixing = 0.5
