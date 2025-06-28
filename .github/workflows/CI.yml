@@ -29,15 +29,15 @@ jobs:
         arch:
           - x64
     steps:
-      - uses: actions/checkout@latest
-      - uses: julia-actions/setup-julia@latest
+      - uses: actions/checkout@main
+      - uses: julia-actions/setup-julia@master
         with:
           version: ${{ matrix.version }}
           arch: ${{ matrix.arch }}
-      - uses: julia-actions/cache@latest
-      - uses: julia-actions/julia-buildpkg@v1
-      - uses: julia-actions/julia-runtest@v1
-      - uses: actions/upload-artifact@latest
+      - uses: julia-actions/cache@main
+      - uses: julia-actions/julia-buildpkg@main
+      - uses: julia-actions/julia-runtest@main
+      - uses: actions/upload-artifact@main
         with:
           name: data-output-${{ matrix.os }}
           path: ./data-output
