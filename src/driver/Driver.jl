@@ -21,5 +21,4 @@ function main(p::Dict)
         println("=============== Running supercell ===============")
         supercell(p["supercell"])
     end
-
 end

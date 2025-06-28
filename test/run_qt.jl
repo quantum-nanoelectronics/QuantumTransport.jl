@@ -16,4 +16,9 @@ using Test
         include("TestVisualization.jl")
     end
 
+    println("\033[1m---------RUNNING INCOHERENT SCATTERING----------\033[0m")
+    @testset "Incoherent Scattering Test" begin
+        include("TestScattering.jl")
+    end
+
 end
