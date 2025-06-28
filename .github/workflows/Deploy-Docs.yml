@@ -27,3 +27,5 @@ jobs:
           project: docs
       - name: Build and deploy docs
         run: julia --project=docs docs/make.jl
+        env:
+          JULIA_PKG_PRECOMPILE_AUTO: "false"
