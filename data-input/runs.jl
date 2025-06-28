@@ -20,8 +20,8 @@ runparams = Dict(
 	"path" => OUTPUT_DIR,
 	"material_hamiltonian" => material_hamiltonians,
 	"material_params" => Dict(
-		"t" => 0.016,
-		# "t" => 1.0,
+		# "t" => 0.016,
+		"t" => 1.0,
 		"ε₀" => 1.0,
 		"site_positions" => site_positions
 	),
@@ -68,9 +68,10 @@ runparams = Dict(
 		"D_spin" => 0.000001*eV,
 		"D_momentum" => 0.000005*eV,
 		"kspace" => false,
-		# "E_samples" => [E for E = 0:0.01:15],
-		# "E_samples" => [E for E = 0:0.01:0.25],
-		"E_samples" => collect(range(0, stop=0.25, length=1000)),
+		# "E_samples" => collect(range(0, stop=15, length=1000)),
+		"E_samples" => collect(range(0, stop=15, length=100)),
+
+		# "E_samples" => collect(range(0, stop=0.25, length=1000)),
 		"electrodeMaterial" => "metal",
 	),
 
