@@ -8,20 +8,22 @@ on:
       - '*'
   pull_request:
 
+permissions:
+  actions: write
+  contents: read
+
 jobs:
   docs:
     name: Build and deploy documentation
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: julia-actions/setup-julia@v1
+      - uses: actions/checkout@main
+      - uses: julia-actions/setup-julia@master
         with:
           version: 1.9.3
-      - name: Develop QuantumTransport
-        run: julia --project=docs -e 'import Pkg; Pkg.develop(path=".")'
-      - name: Install Documenter dependencies
-        run: julia --project=docs -e 'import Pkg; Pkg.instantiate()'
+      - uses: julia-actions/cache@main
+      - uses: julia-actions/julia-buildpkg@main
+        with:
+          project: docs
       - name: Build and deploy docs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: julia --project=docs docs/make.jl
