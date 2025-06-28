@@ -16,7 +16,7 @@ argsMatrix = nothing
 testMatrix = nothing
 
 # Include the necessary files 
-include("TestMatricesHelper.jl")
+include("TestMatricesFunctions.jl")
 
 
 """
