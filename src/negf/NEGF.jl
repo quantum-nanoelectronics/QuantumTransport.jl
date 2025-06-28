@@ -67,7 +67,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
                 error = 1
                 mixing = 0.5
                 Dₘ = p["Dₘ"] * I(p["nx"]*p["ny"]*p["nz"])⊗(ones(p["norb"]*p["nspin"], p["norb"]*p["nspin"]))
-                while (error > 10^-6)
+                while (error > p["scattering_cutoff"])
                     Gprev = copy(G)
                     H_eff =  H(k) + Σ_contacts + Dₘ .* G
                     G = mixing * inv((E + im * p["η"]) * I(p["n"]) - H_eff, true) .+ (1 - mixing) * G # gets diagonal only

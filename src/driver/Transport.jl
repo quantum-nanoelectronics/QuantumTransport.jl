@@ -1,3 +1,7 @@
+function transport(p::Dict)
+    NEGF_Transport_1D(p)
+end
+
 function NEGF_Transport_1D(p::Dict)
     Electrodes = [
             Electrode([-1,0],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"-x",p["electrodeMaterial"],p["A_field"]);

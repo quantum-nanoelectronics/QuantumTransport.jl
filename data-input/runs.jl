@@ -69,7 +69,6 @@ runparams = Dict(
 		"kspace" => false,
 		"E_samples" => [E for E = 3:0.01:9],
 		"electrodeMaterial" => "metal",
-		# "ϵ_rand_strength" => 0.2
 	),
 
 	# and for runs where we want to slap a bunch of unit cells together and get the scattering-corrected electronic properties
@@ -122,6 +121,8 @@ function addTransportParams!(runparams)
 
 		# scattering parameters
 		params["scattering"] = true
+		params["scattering_cutoff"] = 10^-6
+		params["ϵ_rand_strength"] = 0.0
 		params["Dₘ"] = 1
 	end
 end

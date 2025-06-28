@@ -4,6 +4,6 @@ using ..CommonModule
 using Dates
 
 include("Driver.jl")
-export main
+export main, transport, unitcell, supercell
 
 end
