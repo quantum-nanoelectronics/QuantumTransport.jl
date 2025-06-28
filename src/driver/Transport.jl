@@ -48,28 +48,31 @@ function NEGF_Transport_1D(p::Dict)
     #     nk = 0
     # end
 
+    nkx = nk*!("x" ∈ p["prune"]); nky = nk*!("y" ∈ p["prune"]); nkz = nk*!("z" ∈ p["prune"]);
+    kgrid, kweights, kindices, kxs, kys, kzs = genBZ(p,nkx,nky,nkz) # generate surface BZ points
+    println("Sweeping transmission over kgrid: $(nkx*2+1), $(nky*2+1), $(nkz*2+1) ...")
+    #TofE, Tmap, TmapList = totalT(genT, kindices, 0.3 .* kgrid, kweights, pE_samples, minimum(pE_samples))
+    #TofE, Tmap = totalT(genT, kindices, 0.3 .* kgrid, kweights, pE_samples, minimum(pE_samples))
+
+    parallelk = (nkx+1)*(nky+1)*(nkz+1) > 8
+
+    #println("parallelk = $parallelk, negf_params.prune = $(negf_params.prune)")
+    Operators = [I(p["nx"]*p["ny"]*p["nz"]*p["norb"]*p["nspin"])]
+
     if haskey(p,"scattering")
         println("Running 1D NEGF transport with incoherent scattering.")
-        TofE = genscatteredT.(p["E_samples"])
-        #TofE, Tmap = totalT(genscatteredT, kindices, S .* kgrid, kweights, p["E_samples"], p["E_samples"][1], parallelk, Operators)
+        genTgeneric = genscatteredT
     else
-        nkx = nk*!("x" ∈ p["prune"]); nky = nk*!("y" ∈ p["prune"]); nkz = nk*!("z" ∈ p["prune"]);
-        kgrid, kweights, kindices, kxs, kys, kzs = genBZ(p,nkx,nky,nkz) # generate surface BZ points
-        println("Sweeping transmission over kgrid: $(nkx*2+1), $(nky*2+1), $(nkz*2+1) ...")
-        #TofE, Tmap, TmapList = totalT(genT, kindices, 0.3 .* kgrid, kweights, pE_samples, minimum(pE_samples))
-        #TofE, Tmap = totalT(genT, kindices, 0.3 .* kgrid, kweights, pE_samples, minimum(pE_samples))
-
-        parallelk = (nkx+1)*(nky+1)*(nkz+1) > 8
-
-        #println("parallelk = $parallelk, negf_params.prune = $(negf_params.prune)")
-        Operators = [I(p["nx"]*p["ny"]*p["nz"]*p["norb"]*p["nspin"])]
-
-        TofE, Tmap = totalT(genT, kindices, S .* kgrid, kweights, p["E_samples"], p["E_samples"][1], parallelk, Operators)
+        genTgeneric = genT
+        println("Running 1D NEGF transport without incoherent scattering.")
     end
 
+    TofE, Tmap = totalT(genTgeneric, kindices, S .* kgrid, kweights, p["E_samples"], p["E_samples"][1], parallelk, Operators)
+
+
     filename = "transmission" * "_" * string(Dates.format(Dates.now(), "mm-dd_HH.MM.SS")) * ".csv"
-    save_data(:ℝ_to_ℝ, p["path"], filename, ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=5, xticksvisible=false, yticksvisible=false)
     println("TofE: ", TofE)
+    save_data(:ℝ_to_ℝ, p["path"], filename, ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=5, xticksvisible=false, yticksvisible=false)
 
     #print(Tmap)
     #figh = pyplotHeatmap(S*kys/(π/p["a"]),S*kzs/(π/p["a"]),Tmap',"ky (π/a)","kz (π/a)","T(ky,kz)",:nipy_spectral, p["savedata"], p["path"])

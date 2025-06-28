@@ -7,7 +7,7 @@ function makeElectrodeH(p::Dict, ElectrodeInfo::Electrode, edge_NNs::Vector{Hopp
         cols = Int[]
         elements = ComplexF64[]
         for NN in edge_NNs
-            Δϕ = exp(im * (kfilter .* k) ⋅ (p["A"] * NN.N))
+            Δϕ = exp(im * (kfilter .* k[1:3]) ⋅ (p["A"] * NN.N))
             #Δϕ = exp(im*k⋅(p.SLa₁*NN.N[1] + p.SLa₂*NN.N[2] + p.SLa₃*NN.N[3]))
             for i = 1:2
                 for j = 1:2

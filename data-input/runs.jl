@@ -69,7 +69,10 @@ function addTransportParams!(runparams)
 		params["n"] = n_device
 		push!(params["prune"],"x")
 		params["G"] = 2*π*pinv(params["A"])
-		# runparams["transport"]["scattering"] = true
+
+		# scattering parameters
+		params["scattering"] = true
+		params["Dₘ"] = 1
 	end
 end
 
