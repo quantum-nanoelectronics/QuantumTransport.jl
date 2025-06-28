@@ -66,7 +66,8 @@ runparams = Dict(
 		"deviceMagnetization" => false,
 		"Gʳinv_method" => :RGF,
 		"D_spin" => 0.000001*eV,
-		"D_momentum" => 0.000005*eV,
+		# "D_momentum" => 0.000005*eV,
+		"D_momentum" => 0.0002*eV,
 		"kspace" => false,
 		# "E_samples" => collect(range(0, stop=15, length=1000)),
 		"E_samples" => collect(range(0, stop=15, length=100)),
@@ -87,11 +88,9 @@ runparams = Dict(
 		"save" => [:unfoldedbands],
 		"density_project" => [I(2), [σ[1], σ[2], σ[3]]],
 		"Gʳinv_method" => :RGF,
-		# "D_dephasing" => 0.001*eV,
-		"D_dephasing" => 0.01*eV,
+		"D_dephasing" => 0.001*eV,
 		"D_spin" => 0.0001*eV,
-		# "D_momentum" => 0.001*eV,
-		"D_momentum" => 0.0002*eV,
+		"D_momentum" => 0.001*eV
 	)
 )
 
