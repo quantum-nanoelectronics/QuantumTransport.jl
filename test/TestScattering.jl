@@ -4,13 +4,11 @@ using QuantumTransport
 using Test
 using Dates
 using Colors
-using CairoMakie
 
-# Bypassing Driver for a sweep accross ϵ_rand_strengths
+# Bypassing Driver for a sweep across ϵ_rand_strengths
 
 include(joinpath(INPUT_DIR, "AllInputs.jl"))
 include("TestVisualizationFunctions.jl")
-
 
 function get_latest_filename()
     # Get the latest filename from the directory
@@ -23,13 +21,10 @@ function get_latest_filename()
     )
 end
 
-
-# you would just have to make the emptyy plot here
-# then call the plot function to add to the plot
-
 function fill_plot()
-    figure, axis = nothing, nothing
-    fig, ax = nothing, nothing
+    title = "Scattering Transport with Random Onsite Disorder"
+    get_empty_plot(; size = (600, 400), title = title, xlabel = "E (eV)", ylabel = "T (e²/h)")
+    fig, ax = get_empty_plot(; )
     
     for (i, ϵ) in enumerate(ϵ_values)
         p["ϵ_rand_strength"] = ϵ
@@ -42,22 +37,11 @@ function fill_plot()
         # get the latest file
         filename = get_latest_filename()
 
-        # plot(OUTPUT_DIR, filename)
-        df, metadata = get_data(OUTPUT_DIR, filename)
-        type_of_plot, n_entries, dims_codomain, kwargs = metadata
-
-        if i == 1
-            fig, ax = get_empty_plot(df ; kwargs...)
-            figure, axis = fig, ax
-        end
-
-        kwargs = merge(kwargs, Dict(:color => colors[i], :linewidth => 1)) 
-
-        # TODO make this a plot() call, need plot to accept kwargs and merge
-        add_to_ℝ_to_ℝ(ax, df, dims_codomain; kwargs...)
+        # Plot the transmission data
+        plot(OUTPUT_DIR, filename; axis = ax, color = colors[i], linewidth = 1, scattering = p["scattering"], title = title)
 
     end
-    return figure
+    return fig
 end
 
 p = runparams["transport"]

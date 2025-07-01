@@ -127,7 +127,7 @@ function addTransportParams!(runparams)
 		push!(params["prune"],"x")
 		params["G"] = 2*π*pinv(params["A"])
 
-		# scattering parameters
+		# TODO scattering parameters, find a good place for these
 		params["scattering"] = true
 		params["scattering_cutoff"] = 10^-6
 		params["ϵ_rand_strength"] = 0.0

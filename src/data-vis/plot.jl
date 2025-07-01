@@ -20,12 +20,14 @@ const MAKIE_AXIS_KWARGS = Dict([
     :yticksvisible => true, 
     :xgridvisible => true, 
     :ygridvisible => true,
+    :xlabel => "x-axis",
+    :ylabel => "y-axis",
     :title => "(insert title here)",
 ])
 
 
 # Function to call the appropriate function based on header value
-function plot(readDir::String, filename::String ; kwargs...)
+function plot(readDir::String, filename::String ; override_kwargs...)
     println("Plotting data from ", filename)
 
     # Read the CSV file header
@@ -40,6 +42,7 @@ function plot(readDir::String, filename::String ; kwargs...)
     println("Dimensionality of codomain: ", dims_codomain)
 
     # Print key and value of additional keyword arguments
+    kwargs = merge(kwargs, override_kwargs)
     println("All Keyword Arguments:")
     for (key, value) in kwargs
         println("  - $key: $value")
@@ -60,6 +63,10 @@ function ℝ_to_ℝ(df::DataFrame, n::Int; kwargs...)
     println("Filtered Kwargs for lines!(): ", filtered_lines_kwargs)
     filtered_axis_kwargs = merge(MAKIE_AXIS_KWARGS, Dict(k => kwargs[k] for k in keys(MAKIE_AXIS_KWARGS) if haskey(kwargs, k)))
     println("Filtered Kwargs for Axis(): ", filtered_axis_kwargs)
+
+    if get(kwargs, :scattering, false)
+        return add_to_ℝ_to_ℝ(get(kwargs, :axis, nothing), df, n; kwargs...)
+    end
 
     fig = Figure(; filtered_figure_kwargs...)
     xlabel = string(names(df)[1])
@@ -87,9 +94,8 @@ function ℝ_to_ℝ(df::DataFrame, n::Int; kwargs...)
     return fig
 end
 
-function get_empty_plot(df::DataFrame ; kwargs...)
+function get_empty_plot(; kwargs...)
     # TODO make this into a wrapper
-    println("Plotting ℝ_to_ℝ data")
     filtered_figure_kwargs = merge(MAKIE_FIGURE_KWARGS, Dict(k => kwargs[k] for k in keys(MAKIE_FIGURE_KWARGS) if haskey(kwargs, k)))
     println("Filtered Kwargs for Figure(): ", filtered_figure_kwargs)
     filtered_lines_kwargs = merge(MAKIE_LINES_KWARGS, Dict(k => kwargs[k] for k in keys(MAKIE_LINES_KWARGS) if haskey(kwargs, k)))
@@ -98,15 +104,12 @@ function get_empty_plot(df::DataFrame ; kwargs...)
     println("Filtered Kwargs for Axis(): ", filtered_axis_kwargs)
 
     fig = Figure(; filtered_figure_kwargs...)
-    colors = distinguishable_colors(100)
-    xlabel = string(names(df)[1])
-    ylabel = string(names(df)[2])
 
     if get(kwargs, :flip_axis, false)
-        xlabel, ylabel = ylabel, xlabel
+        filtered_axis_kwargs[:xlabel], filtered_axis_kwargs[:ylabel] = filtered_axis_kwargs[:ylabel], filtered_axis_kwargs[:xlabel]
     end
 
-    axis = Axis(fig[1, 1]; xlabel = xlabel, ylabel = ylabel, filtered_axis_kwargs...) 
+    axis = Axis(fig[1, 1]; filtered_axis_kwargs...) 
 
     return fig, axis
 end
@@ -119,8 +122,9 @@ function save_plot(fig::Figure, filename::String)
 end
 
 function add_to_ℝ_to_ℝ(ax, df::DataFrame, n::Int; kwargs...)
+    println("Adding to ℝ_to_ℝ data")
     # TODO make this into a wrapper
-    println("Plotting ℝ_to_ℝ data")
+    println("Plotting add_to_ℝ_to_ℝ data")
     filtered_figure_kwargs = merge(MAKIE_FIGURE_KWARGS, Dict(k => kwargs[k] for k in keys(MAKIE_FIGURE_KWARGS) if haskey(kwargs, k)))
     println("Filtered Kwargs for Figure(): ", filtered_figure_kwargs)
     filtered_lines_kwargs = merge(MAKIE_LINES_KWARGS, Dict(k => kwargs[k] for k in keys(MAKIE_LINES_KWARGS) if haskey(kwargs, k)))

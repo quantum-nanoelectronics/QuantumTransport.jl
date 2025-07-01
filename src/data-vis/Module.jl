@@ -15,7 +15,6 @@ using Dates
 
 include("plot.jl")
 include("functions.jl")
-export plot, get_empty_plot, add_to_ℝ_to_ℝ, save_plot
-
+export plot, get_empty_plot, save_plot
 
 end
