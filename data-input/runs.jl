@@ -18,6 +18,7 @@ A_field(R::Vector{Float64}) = [0.0, 0.0, 0.0]
 
 runparams = Dict(
 	"path" => OUTPUT_DIR,
+	"filename_prefix" => "transmission",
 	"material_hamiltonian" => material_hamiltonians,
 	"material_params" => Dict(
 		# "t" => 0.016,
@@ -107,6 +108,8 @@ function addCommonParams!(runparams)
 			runparams[key]["path"] = runparams["path"]
 			# Adding the A field function
 			runparams[key]["A_field"] = runparams["A_field"]
+			# Adding the default filename prefix
+			runparams[key]["filename_prefix"] = runparams["filename_prefix"]
 		end
 	end
 end

@@ -16,7 +16,9 @@ function runVisualizationTests()
     # plot(readDir, filename)
     # Save the figure
     @test isfile(file_path)
+
     return fig
+    # return true
 end
 
 function runVisualizationTestsGLMakie()

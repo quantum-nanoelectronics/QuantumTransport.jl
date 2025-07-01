@@ -14,6 +14,8 @@ using Dates
 #using Makie #If this line is uncommented or if Makie is added to this package, github tests will fail
 
 include("plot.jl")
-export plot
+include("functions.jl")
+export plot, get_empty_plot, add_to_ℝ_to_ℝ, save_plot
+
 
 end

@@ -24,7 +24,7 @@ function electrodeSiteToDeviceIndex(p::Dict, ElectrodeInfo::Electrode, ivecConta
     # now construct an ivec for the site in the device
     if (ElectrodeInfo.connectfrom == "-x")
         ix = 0 # the maximal site in x, edge of electrode
-    else # just uhh, presuming that we will only connect in +- x. Can be changed...
+    else # TODO just uhh, presuming that we will only connect in +- x. Can be changed...
         ix = (p["nx"] - 1)
     end
     iy = ivecContact[2] + ElectrodeInfo.yrange[1]
@@ -46,7 +46,7 @@ function changeBasis(p::Dict, ElectrodeInfo::Electrode)
     ix = 0
     if (ElectrodeInfo.connectfrom == "-x")
         ix = p["nx"] - 1 # the maximal site in x, edge of electrode
-    else # just uhh, presuming that we will only connect in +- x. Can be changed...
+    else # TODO just uhh, presuming that we will only connect in +- x. Can be changed...
         ix = 0
     end
     for iy = 0:(ny-1)
