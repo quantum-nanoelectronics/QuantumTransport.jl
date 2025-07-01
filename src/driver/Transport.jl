@@ -1,3 +1,7 @@
+function transport(p::Dict)
+    NEGF_Transport_1D(p)
+end
+
 function NEGF_Transport_1D(p::Dict)
     Electrodes = [
             Electrode([-1,0],[0,p["ny"]],[0,p["nz"]],p["ny"]*p["nz"],"-x",p["electrodeMaterial"],p["A_field"]);
@@ -70,7 +74,7 @@ function NEGF_Transport_1D(p::Dict)
     TofE, Tmap = totalT(genTgeneric, kindices, S .* kgrid, kweights, p["E_samples"], p["E_samples"][1], parallelk, Operators)
 
 
-    filename = "transmission" * "_" * string(Dates.format(Dates.now(), "mm-dd_HH.MM.SS")) * ".csv"
+    filename = p["filename_prefix"] * "_" * string(Dates.format(Dates.now(), "mm-dd_HH.MM.SS")) * ".csv"
     println("TofE: ", TofE)
     save_data(:ℝ_to_ℝ, p["path"], filename, ["E (eV)", "T (e²/h)"], [p["E_samples"],TofE]; flip_axes=true, title="Transmission", linewidth=5, xticksvisible=false, yticksvisible=false)
 

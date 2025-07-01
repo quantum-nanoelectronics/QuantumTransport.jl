@@ -33,7 +33,11 @@ function metalHopping(p::Dict, NNs::Vector{Hopping}, ia::Vector{Int})
     #t = (3 * p["t"] - 1 * eV) * (I(2))
     #pushHopping!(NNs, t, ia, ia, p)
     for ax = 1:3
+        ϵ = get(p, "ϵ_rand_strength", 0.0)
         t = (2 * p["t"]) * (I(2))
+
+        # add the small random onsite potential term
+        t += randn() * ϵ * I(2)
         pushHopping!(NNs, t, ia, ia, p)
         for dir = [-1, 1]
             #
