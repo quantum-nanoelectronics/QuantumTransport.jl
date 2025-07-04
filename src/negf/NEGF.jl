@@ -65,25 +65,25 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
                 println("Running Gʳ with scattering")
                 # The code in this if statement has been changed to implement the new matrix inversion methods, 
                 # but not tested due to scattering not implemented in p["scattering"]
-                G = inv((E + im * p["η"]) * I(p["n"]) - H_eff, true) # gets top, bottom, diag
+                G = inv((E + im * p["η"]) * I(p["n"]) - H_eff, false) # gets top, bottom, diag
                 error = 1
                 mixing = 0.5
-                Dₘ = p["scattering"]["Dₘ"] * I(p["nx"]*p["ny"]*p["nz"])⊗(ones(p["norb"]*p["nspin"], p["norb"]*p["nspin"]))
+                Dₘ = p["Dₘ"] * I(p["nx"]*p["ny"]*p["nz"])⊗(ones(p["norb"]*p["nspin"], p["norb"]*p["nspin"]))
                 while (error > 10^-6)
                     Gprev = copy(G)
                     H_eff =  H(k) + Σ_contacts + Dₘ .* G
-                    G = mixing * inv((E + im * p["η"]) * I(p["n"]) - H_eff, false) .+ (1 - mixing) * G # gets diagonal only
+                    G = mixing * inv((E + im * p["η"]) * I(p["n"]) - H_eff, true) .+ (1 - mixing) * G # gets diagonal only
                     error = norm((G .- Gprev), 1) / norm(G, 1)
                     println("Error = $error")
                 end
+            else
+                # H_eff = CreateSparseBlockMatrix(100, 2, 0.2001)
+                # matrixCopy = deepcopy(H_eff)
+                # matrixCopy.matrix = (E + p["η"]) * I - H_eff.matrix
+                # G = inv(matrixCopy.matrix, true)
+                G = inv((E + im * p["η"]) * I(p["n"]) - H_eff, true) #gets diag, top, and bottom
             end
             
-            # H_eff = CreateSparseBlockMatrix(100, 2, 0.2001)
-            # matrixCopy = deepcopy(H_eff)
-            # matrixCopy.matrix = (E + p["η"]) * I - H_eff.matrix
-            # G = inv(matrixCopy.matrix, true)
-                    
-            G = inv((E + im * p["η"]) * I(p["n"]) - H_eff, true) #gets diag, top, and bottom
             return G
         end
         return Gʳ
@@ -112,7 +112,7 @@ function NEGF_prep(p::Dict, H::Function, Σks::Vector{Function})
     end
     function genScatteredT(k::Vector{Float64}, contact::Int=2)
         println("Running genScatteredT")
-        Dₘ = p["scattering"]["Dₘ"] * I(p["nx"]*p["ny"]*p["nz"])⊗(ones(p["norb"]*p["nspin"], p["norb"]*p["nspin"]))
+        Dₘ = p["Dₘ"] * I(p["nx"]*p["ny"]*p["nz"])⊗(ones(p["norb"]*p["nspin"], p["norb"]*p["nspin"]))
         if haskey(p,"scattering")
             return genT(k)
         end
