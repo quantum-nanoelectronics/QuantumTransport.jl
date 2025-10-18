@@ -52,7 +52,7 @@ end
 #         return DOS
 #     elseif type == :H
 #         H = F # we've got the hamiltonian as a function of K
-#         # implement later
+#         # TODO implement later
 #     end
 # end
 
@@ -95,7 +95,7 @@ end
 	#nky = maximum([kindex[1] for kindex in kindices])
 	#special slice to map BZ
 	nk = size(kweights)[1]
-	#Eslice = findnearest(Evals,Eslice) #make it so that we do not have to do a whole nother k loop
+	#Eslice = findnearest(Evals,Eslice) # TODO make it so that we do not have to do a whole nother k loop
 	#TmapList = zeros(nk)
 	DOS = zeros(nE)
 	if(parallelk)
