@@ -7,7 +7,7 @@ using ..RecursiveGreensModule
 
 using LinearAlgebra
 using SparseArrays
-using Distributed
+# using Distributed
 using Random
 
 # testing things
